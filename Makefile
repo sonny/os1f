@@ -33,7 +33,11 @@ LDFLAGS := -T mem.ld -T sections.ld -T libs.ld -nostartfiles -Xlinker --gc-secti
 vpath %.c $(SRC_DIRS)
 #vpath %.h $(INC_DIRS)
 
-all: $(FINAL).elf;
+all: $(FINAL).siz $(FINAL).disass;
+
+## disassembly
+$(OUT)/%.disass: $(ELF)
+	$(OBJDUMP) -dS $< > $@
 
 ## Print Size
 $(OUT)/%.siz: $(ELF)

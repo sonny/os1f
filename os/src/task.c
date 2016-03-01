@@ -3,13 +3,13 @@
 #include "stm32f746xx.h"
 #include "stm32f7xx_hal.h"
 #include "task.h"
-#include "system.h"
 #include "sched.h"
-//#include "devices.h"
 #include "memory.h"
 #include "registers.h"
 #include "core.h"
 #include "spinlock.h"
+#include "os.h"
+#include <stdatomic.h>
 
 /*
  * How tasks work:
@@ -49,10 +49,11 @@ struct task *current_task_ptr;    // protected by disable irq -- global, but not
 static volatile uint32_t lock;
 
 static int get_next_task_insert(void) {
-  spinlock_lock(&lock);
-  int result = task_insert_index++;
-  spinlock_unlock(&lock);
-  return result;
+  //  spinlock_lock(&lock);
+  //  int result = task_insert_index++;
+  //  spinlock_unlock(&lock);
+  //  return result;
+  return atomic_fetch_add(&task_insert_index, 1);
 }
 
 static void * task_stack_init(uint32_t stack_end,  uint32_t ret, uint32_t param);
@@ -231,15 +232,9 @@ __attribute__ ((always_inline)) inline const struct task * task_current(void)
 // as long as constness of t is preserved, its fine
 void task_sleep(uint32_t ms) {
   task_sleep_until(HAL_GetTick() + ms);
-  /* //struct task * const t = task_current(); */
-  /* struct task * const t = current_task_ptr; */
-  /* t->sleep_until = HAL_GetTick() + ms; */
-  /* t->state = TASK_STATE_SLEEP; */
-  /* yield(); */
 }
 
 void task_sleep_until(uint32_t ms) {
-  //struct task * const t = task_current();
   struct task * const t = current_task_ptr;
   t->sleep_until = ms;
   t->state = TASK_STATE_SLEEP;
@@ -267,15 +262,17 @@ void task_wait(uint32_t on)
 
 inline void task_change_state(uint32_t new)
 {
-  struct task * t = current_task_ptr;
-  t->state = new;
+  //struct task * t = current_task_ptr;
+  //t->state = new;
+  atomic_store(&current_task_ptr->state, new);
 }
 
 // NOTE: cannot nest mutexes with this implementation
 void task_notify(uint32_t id)
 {
-  struct task * const t = TCB[id];
-  t->state = TASK_STATE_READY;
+  //  struct task * const t = TCB[id];
+  //t->state = TASK_STATE_READY;
+  atomic_store(&(TCB[id]->state), TASK_STATE_READY);
 }
 
 const struct task *task_get(uint32_t id)

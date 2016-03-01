@@ -8,24 +8,11 @@
 #include "stm32f7xx_hal.h"
 #include "stm32746g_discovery_lcd.h"
 
-//#include "devices.h"
 #include "task.h"
 #include "os.h"
-
 #include <stdio.h>
 #include "lcd.h"
 #include "fonts.h"
-/*
-static const coord_t label_c[] = {
-  {4,2},  // top left
-  {4,30}, // top right
-  {8,2},  // bottom left
-  {8,30}  // bottom right
-};
-*/
-static const char *labels[] = {
-  "T0 (0s):", "T1 (1s):", "T2 (2s):", "T3 (4s):"
-};
 
 struct task_data {
   uint32_t interval;
@@ -47,8 +34,6 @@ int main()
   osInit();
   LCD_Config();
 
-  //  term_init();
-  
   task_start(task, 0, &td[0]);
   task_start(task, 0, &td[1]);
   task_start(task, 0, &td[2]);
@@ -62,20 +47,6 @@ int main()
   BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
   BSP_LCD_SetFont(&Font16);
   
-/*   while(1) { */
-/*     if(ypos == 0) { */
-/*       yincr = 1; */
-/*       ymax = BSP_LCD_GetYSize(); */
-/*     } else { */
-/*       yincr = -1; */
-/*       ymax = 0; */
-/*     } */
-    
-/*     for(;yincr == 1 ? ypos < BSP_LCD_GetYSize() - Font24.Height : ypos > 0; ypos+=yincr) { */
-/*       BSP_LCD_DisplayStringAt(0, ypos, (uint8_t*)"Collateral Damage", CENTER_MODE); */
-/*     } */
-/*   } */
-
   int count = 0;
   while (1) {
     uint32_t now = HAL_GetTick();

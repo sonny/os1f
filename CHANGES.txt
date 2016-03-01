@@ -1,0 +1,94 @@
+CHANGES
+* NOTE: This file now lists changes with newest at the top,
+        starting with OSf7v01. This is not retroactive, so
+        v1 to v17 are in the original order.
+----------------------------------
+OSf7v01
+* NEW Platform - STM32F7-Discovery
+* Added CMSIS library support
+* Added HAL Support
+* Started new git repo -- old history gone
+* Bugs found/fixed
+  - __HAL_LOCK deadlocks -- removed for now
+  - spinlock get_lock can deadlock -- fixed
+  - PSP not initialized on main task bootstrap -- fixed
+* Features added
+  - lcd_printf_at replaces term_printf_at
+  - use stdatomic in some places
+  - use scan mode for ADC task
+**********************************
+v1
+* Initial version
+
+v2
+* Resolve potential issue with corrupting task stack
+* Demonstrate task with parameters
+
+v3
+* Setup system init with full speed clock
+* Add SysTick ISR and config with 1 MS period
+* Enable full pre-emptability
+
+v4
+* Add sleep
+* Add task states
+
+v5
+* add memory allocator
+* use memory alloc to dynamically allocate threads
+* concatenate task struct and stack into single memory region (per stack)
+
+v6
+* add locks to memory allocator (almost mutex)
+
+v7
+* add spinlocks and mutexs
+* implement mem alloc locks with spinlocks
+
+v8
+* add support for semihosting (printf mostly)
+  -- add __end__ to linker script,
+     update cmd file,
+     update linker options 
+* vt100 support (just 'cause)
+* broken in various ways
+
+v9
+* rewrote context switcher (again)
+* main main function now converted to a task
+* added to git repo  
+
+v10
+* significantly *simplified* operation
+* main task now becomes task without mucking up main stack
+* main task uses normal context switcher to bootstrap; no special case
+* (maybe) fix mutex bug
+
+v11
+* fixes mutexes (probably)
+* works with semi-hosting now (use make semi)
+
+v12
+* add ADC interface
+* implement simple blocking read of internal temp sensor
+
+V13
+* add Vref reading to ADC task and print the ADC readings out
+
+v14
+* implement irq handler for ADC reading
+* add event object to deal with irq handler
+* found (didn't fix) bug related to calling functions from main
+  -- for now, using the stack from main can corrupt the stack pointers
+* add bitfield object for tracking waiting tasks in events and mutexes
+
+v15
+* implement adc init for simple cases
+
+v16
+* copy main stack to its own place and fix bigs related to MSP and PSP
+getting out of sync
+
+v17
+* add USART
+

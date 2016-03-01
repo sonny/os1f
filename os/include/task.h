@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 
-#define TASK_COUNT 8
+#define TASK_COUNT 32
 #define KB         1024
 
 struct task {
@@ -38,22 +38,7 @@ struct stacked_regs {
   uint32_t pc; // r15
   uint32_t xspr;
 #ifdef ENABLE_FP
-  uint32_t s0;
-  uint32_t s1;
-  uint32_t s2;
-  uint32_t s3;
-  uint32_t s4;
-  uint32_t s5;
-  uint32_t s6;
-  uint32_t s7;
-  uint32_t s8;
-  uint32_t s9;
-  uint32_t s10;
-  uint32_t s11;
-  uint32_t s12;
-  uint32_t s13;
-  uint32_t s14;
-  uint32_t s15;
+  uint32_t s[16];
   uint32_t fpscr;
   uint32_t reserved;
 #endif /* ENABLE_FP */
@@ -70,22 +55,7 @@ struct aux_regs {
   uint32_t r11;
   uint32_t lr;
 #ifdef ENABLE_FP
-  uint32_t s16;
-  uint32_t s17;
-  uint32_t s18;
-  uint32_t s19;
-  uint32_t s20;
-  uint32_t s21;
-  uint32_t s22;
-  uint32_t s23;
-  uint32_t s24;
-  uint32_t s25;
-  uint32_t s26;
-  uint32_t s27;
-  uint32_t s28;
-  uint32_t s29;
-  uint32_t s30;
-  uint32_t s31;
+  uint32_t s[16];
 #endif /* ENABLE_FP */
 };
 
