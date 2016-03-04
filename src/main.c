@@ -1,9 +1,6 @@
 /*
-  OSv09
   main.c
  */
-
-#include "stm32f7xx_hal.h"
 
 #include "task.h"
 #include "os.h"
@@ -38,7 +35,7 @@ int main()
   /* Our main starts here */
   int count = 0;
   while (1) {
-    uint32_t now = HAL_GetTick();
+    uint32_t now = osGetTick();
     task_display_line("Task Main: %6d", count++);
     task_sleep_until(now + 1000);
   }
@@ -50,9 +47,11 @@ void task(void *p)
   struct task_data *q = p;
   uint32_t counter = 0;
   
+  int id = task_current()->id;
+  
   while(1)
     {
-      uint32_t now = HAL_GetTick();
+      uint32_t now = osGetTick();
 
       task_display_line("Task   %2d: %6d", id, counter++);
       task_sleep_until(now + q->interval);
@@ -64,6 +63,8 @@ void task_rude(void *p)
   struct task_data *q = p;
   uint32_t counter = 0;
   const int divisor = 2000000; // 2 Million!!!
+
+  int id = task_current()->id;
 
   while(1)
     {

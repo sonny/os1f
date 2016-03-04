@@ -185,7 +185,7 @@ static bool _task_wake_all(void)
   bool wake = false;
   for (i = 0; i < task_insert_index; ++i) {
     if (TCB[i]->state & TASK_STATE_SLEEP &&
-        TCB[i]->sleep_until < HAL_GetTick() ) {
+        TCB[i]->sleep_until < osGetTick() ) {
       TCB[i]->state = TASK_STATE_READY;
       wake = true;
     }
@@ -219,7 +219,7 @@ struct task * task_next(void)
         break;
       }
   } while (nt != last);
-  current_task_ptr->timeout_at = HAL_GetTick() + TIMESLICE;
+  current_task_ptr->timeout_at = osGetTick() + TIMESLICE;
   return current_task_ptr;
 }
 
@@ -231,7 +231,7 @@ __attribute__ ((always_inline)) inline const struct task * task_current(void)
 // this is always executed in the context of the CURRENT_TASK
 // as long as constness of t is preserved, its fine
 void task_sleep(uint32_t ms) {
-  task_sleep_until(HAL_GetTick() + ms);
+  task_sleep_until(osGetTick() + ms);
 }
 
 void task_sleep_until(uint32_t ms) {
