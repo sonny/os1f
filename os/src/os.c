@@ -5,6 +5,7 @@
 #include "memory.h"
 #include "task.h"
 #include "registers.h"
+#include "display.h"
 
 static void SystemClock_Config(void);
 static void Error_Handler(void);
@@ -15,7 +16,8 @@ void osInit()
   CPU_CACHE_Enable();
   HAL_Init();
   SystemClock_Config();
-
+  displayInit();
+  
 #ifdef ENABLE_FP
   set_FPCCR( get_FPCCR() | FPCCR_LSPEN | FPCCR_ASPEN );
   set_CONTROL( get_CONTROL() | CONTROL_FPCA );

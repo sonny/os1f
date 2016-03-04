@@ -1,10 +1,9 @@
-//#include "devices.h"
 #include "stm32f7xx_hal.h"
 #include "stm32f7xx_hal_adc.h"
 #include "sched.h"
 #include "event.h"
 #include "lcd.h"
-//#include "vt100.h"
+#include "display.h"
 
 static struct event adc_event;
 static ADC_HandleTypeDef    AdcHandle;
@@ -15,13 +14,7 @@ void adc_task(void *p)
   int id = task_current()->id;
   int xpos = 10, ypos = (id*20 + 20);
   
-  /*
-  adc_init(ADC1);
-  adc_enable_tsvrefe(ADC1);
-  adc_enable(ADC1);
-  */  
   event_init(&adc_event);
-  
 
   ADC_ChannelConfTypeDef sConfig[2];
 
@@ -75,7 +68,8 @@ void adc_task(void *p)
 
     int v_entier = V / 1000;
     int v_mant   = V % 1000;
-    lcd_printf_at(xpos, ypos, "Temp: %2d C, Vref: %1d.%3d V", T, v_entier, v_mant);
+
+    task_display_line("Temp: %2d C, Vref: %1d.%3d V", T, v_entier, v_mant);
     task_sleep(1000);
   }
   
