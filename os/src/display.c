@@ -1,11 +1,15 @@
 #include "os.h"
 #include "task.h"
+
 #include <stdarg.h>
 
 
 #ifdef DISPLAY_LCD
 #include "lcd.h"
 #include "stm32746g_discovery_lcd.h"
+#elif defined DISPLAY_SERIAL
+#include "serial.h"
+#include "vt100.h"
 #endif
 
 static void __display_line_at(int line, const char* fmt, va_list args)
@@ -15,9 +19,9 @@ static void __display_line_at(int line, const char* fmt, va_list args)
 #ifdef DISPLAY_LCD
   ypos = (line)*(BSP_LCD_GetFont()->Height + 4) + 5;
   lcd_vprintf_at(5, ypos, fmt, args);
-#elif  DISPLAY_SERIAL
-  ypos = line + 1;
-  term_vprintf_at(1, ypos, fmt, args);
+#elif defined  DISPLAY_SERIAL
+  ypos = line + 2;
+  term_vprintf_at_wait(2, ypos, fmt, args);
 #endif
 
 }
@@ -43,7 +47,8 @@ void displayInit(void)
 {
 #ifdef DISPLAY_LCD
   lcdInit();
-#elif  DISPLAY_SERIAL
+#elif defined  DISPLAY_SERIAL
+  term_init();
   serialInit();
 #endif
 }

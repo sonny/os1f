@@ -11,34 +11,36 @@
 #include <stdarg.h>
 #include "vt100.h"
 #include "mutex.h"
+#include "event.h"
+#include "serial.h"
 
 // The screen is a shared resource
 // use a mutex to lock it
 static struct mutex screen_lock;
 
 // Save Cursor	<ESC>[s
-static inline void vt100_save_cursor(void) {
-  printf( ESC "[s");
+static inline int vt100_save_cursor(char * restrict s) {
+  return sprintf(s, ESC "[s");
 }
 
 // Unsave Cursor <ESC>[u
-static inline void vt100_unsave_cursor(void) {
-  printf( ESC "[u" );
+static inline int vt100_unsave_cursor(char * restrict s) {
+  return sprintf(s, ESC "[u" );
 }
 
 // Cursor Down <ESC>[{COUNT}B
-static inline void vt100_cursor_down(int count) {
-  printf( ESC "[%dB", count);
+static inline int vt100_cursor_down(char * restrict s, int count) {
+  return sprintf(s, ESC "[%dB", count);
 }
 
 // Erase Screen <ESC>[2J
-static inline void vt100_erase_screen(void) {
-  printf( ESC "[2J" );
+static inline int  vt100_erase_screen(char * restrict s) {
+  return sprintf(s, ESC "[2J" );
 }
 
 // Home <ESC>[{row};{col}H
-static inline void vt100_cursor_home(coord_t pos) {
-  printf( ESC "[%d;%dH", pos.row, pos.col );
+static inline int vt100_cursor_home(char * restrict s, int col, int row) {
+  return sprintf(s, ESC "[%d;%dH", row, col );
 }
 
 // scroll_screen <ESC>[{start};{end}r
@@ -47,13 +49,13 @@ static inline void vt100_scroll_screen(scroll_t scroll) {
 }
 
 // <ESC>[?25l - hide cursor
-static inline void vt100_hide_cursor(void) {
-  printf( ESC "[?25l" );
+static inline int vt100_hide_cursor(char * restrict s) {
+  return sprintf(s, ESC "[?25l" );
 }
 
 // <ESC>[?25h - display cursor
-static inline void vt100_show_cursor(void) {
-  printf( ESC "[?25h" );
+static inline int vt100_show_cursor(char * restrict s) {
+  return sprintf(s, ESC "[?25h" );
 }
 
 /**
@@ -63,8 +65,10 @@ static inline void vt100_show_cursor(void) {
 void term_init(void) {
   mutex_init(&screen_lock);
   mutex_lock(&screen_lock);
-  vt100_hide_cursor();
-  vt100_erase_screen();
+  char pbuff[32];
+  int offset = vt100_hide_cursor(pbuff);
+  offset += vt100_erase_screen(pbuff+offset);
+  printf(pbuff);
   mutex_unlock(&screen_lock);
 }
 
@@ -72,8 +76,9 @@ void term_init(void) {
  * cleanup terminal
  */
 void term_cleanup(void) {
-  vt100_show_cursor();
-  //vt100_erase_screen();
+  char pbuff[32];
+  vt100_show_cursor(pbuff);
+  printf(pbuff);
 }
 
 /**
@@ -81,9 +86,30 @@ void term_cleanup(void) {
  * @param row starting row
  * @count number of lines to include in scrolling region
  */
-void term_set_scroll(int row, int count) {
-  vt100_scroll_screen((scroll_t){row, row + count});
-  vt100_cursor_home((coord_t){row, 0});
+/* void term_set_scroll(int row, int count) { */
+/*   vt100_scroll_screen((scroll_t){row, row + count}); */
+/*   vt100_cursor_home(0,row); */
+/* } */
+
+
+void term_vprintf_at_wait(int col, int row, const char *fmt, va_list args) {
+  static char pbuff[128];
+
+  struct event ev;
+  event_init(&ev);
+  
+  mutex_lock(&screen_lock);
+
+  int offset = vt100_save_cursor(pbuff);
+  offset += vt100_cursor_home(pbuff + offset, col, row);
+  offset += vsnprintf(pbuff + offset, 128 - offset, fmt, args);
+  offset += vt100_unsave_cursor(pbuff + offset);
+
+  serial_register_event(&ev);
+  printf(pbuff);
+  event_wait(&ev);
+
+  mutex_unlock(&screen_lock);
 }
 
 /**
@@ -92,17 +118,11 @@ void term_set_scroll(int row, int count) {
  * @param fmt printf format string
  * @param ... paramater list to printf
  */
-void term_printf_at(coord_t c, const char *fmt, ...) {
-  va_list arg;
-  mutex_lock(&screen_lock);
-  vt100_save_cursor();
-  vt100_cursor_home(c);
+void term_printf_at(int col, int row, const char *fmt, ...) {
+  va_list args;
 
-  va_start(arg, fmt);	
-  vprintf(fmt, arg);
-  va_end(arg);
+  va_start(args, fmt);	
+  term_vprintf_at_wait(col, row, fmt, args);
+  va_end(args);
 	
-  vt100_unsave_cursor();
-  //fflush(stdout);
-  mutex_unlock(&screen_lock);
 }

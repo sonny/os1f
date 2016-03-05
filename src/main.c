@@ -72,7 +72,6 @@ void task_rude(void *p)
       if ((counter % divisor) == 0) {
         task_display_line("Task   %2d: %6d", id, counter/divisor);
       }
-
     } 
 }
 

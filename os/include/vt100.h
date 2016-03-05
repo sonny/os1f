@@ -12,22 +12,18 @@
 #define VT100_H_
 
 #include <stdint.h>
-
-typedef struct {
-  uint16_t row;
-  uint16_t col;
-} coord_t;
+#include <stdarg.h>
 
 typedef struct {
   uint16_t start;
   uint16_t end;
 } scroll_t;
 
-#define ESC "\x1b"
+#define ESC           "\x1b"
 
 void term_init(void);
 void term_cleanup(void);
 void term_set_scroll(int line, int count);
-void term_printf_at(coord_t c, const char *fmt, ...);
-
+void term_printf_at(int col, int row, const char *fmt, ...);
+void term_vprintf_at_wait(int col, int row, const char *fmt, va_list args);
 #endif /* VT100_H_ */

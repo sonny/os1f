@@ -24,11 +24,12 @@ ELF   := $(FINAL).elf
 
 CFLAGS := -mcpu=cortex-m7 -mthumb -Og -g3 -std=gnu11 -Wextra
 CFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections
-//CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants
-CFLAGS += -fdata-sections -fno-move-loop-invariants
-DEFINES := -DDEBUG -DTRACE -DSTM32F746xx
+CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants 
+
+DEFINES := -DDEBUG -DTRACE -DSTM32F746xx 
 INCLUDES := $(addprefix -I, $(INC_DIRS))
 LDFLAGS := -T mem.ld -T sections.ld -T libs.ld -nostartfiles -Xlinker --gc-sections -Lldscripts  --specs=nano.specs
+
 
 vpath %.c $(SRC_DIRS)
 #vpath %.h $(INC_DIRS)
@@ -59,7 +60,7 @@ $(OUT)/%.o: %.c
 	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c -o $@ $<
 
 JUNK := `find . | grep '\~'`
-clean: 
+clean:
 	@rm -fr $(OUT)
 	@rm -f $(JUNK)
 	@rm -f src/*.lst
