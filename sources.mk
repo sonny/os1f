@@ -24,6 +24,7 @@ SRC_DIRS += system/include/Components/stmpe811
 SRC_DIRS += system/include/Components/ts3510
 SRC_DIRS += system/include/Components/wm8994
 SRC_DIRS += board/STM32F7_$(BOARD)/src/BSP
+SRC_DIRS += board/STM32F7_$(BOARD)/src
 
 SRC_DIRS += system/src/cmsis
 SRC_DIRS += system/src/cortexm
