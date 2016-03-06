@@ -2,10 +2,22 @@
 #define TASK_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
-
+// NOTE: 32 is a Hard Limit for now,
+//       since we are using ints as bitfields
+//       inidicating task ids
 #define TASK_COUNT 32
 #define KB         1024
+
+#define TASK_STATE_ACTIVE      (1<<0)  // The current active task
+#define TASK_STATE_READY       (1<<1)  // Task is waiting to run
+#define TASK_STATE_SLEEP       (1<<2)  // Task is asleep
+#define TASK_STATE_WAIT_MUTEX  (1<<3)  // Task is asleep
+#define TASK_STATE_WAIT_EVENT  (1<<4)  // Task is asleep
+
+#define WAIT_MUTEX 1
+#define WAIT_EVENT 2
 
 struct task {
   void *stack;
@@ -20,13 +32,29 @@ struct task {
 void task_init(void);
 void task_bootstrap_main(uint32_t lr);
 int task_start(void (*)(void*), int, void*);
-const struct task * task_current(void);
+//const struct task * task_current(void);
 void task_sleep(uint32_t ms);
 void task_sleep_until(uint32_t ms);
 void task_wait(uint32_t on);
-void task_notify(uint32_t id);
+void task_notify(uint32_t id, int state);
 const struct task *task_get(uint32_t id);
 void task_change_state(uint32_t new);
+
+static inline const struct task * task_current(void)
+{
+  extern struct task * current_task_ptr;
+  return current_task_ptr;
+}
+
+static inline bool task_state_is_waiting(int tid, int type) {
+  extern struct task *TCB[];
+  bool result = false;
+  if (type == WAIT_EVENT)
+    result = (TCB[tid]->state == TASK_STATE_WAIT_EVENT);
+  else
+    result = (TCB[tid]->state == TASK_STATE_WAIT_MUTEX);
+  return result;
+}
 
 struct stacked_regs {
   uint32_t r0;
@@ -64,13 +92,5 @@ struct regs {
   struct stacked_regs stacked;
 };
 
-#define TASK_STATE_ACTIVE      (1<<0)  // The current active task
-#define TASK_STATE_READY       (1<<1)  // Task is waiting to run
-#define TASK_STATE_SLEEP       (1<<2)  // Task is asleep
-#define TASK_STATE_WAIT_MUTEX  (1<<3)  // Task is asleep
-#define TASK_STATE_WAIT_EVENT  (1<<4)  // Task is asleep
-
-#define WAIT_MUTEX 1
-#define WAIT_EVENT 2
 
 #endif /* TASK_H */

@@ -3,6 +3,8 @@
 #include "event.h"
 
 static UART_HandleTypeDef VCPHandle;
+static struct event _vcp_complete_event;
+struct event * VCPCompleteEvent = &_vcp_complete_event;
 
 void serialInit(void)
 {
@@ -20,6 +22,7 @@ void serialInit(void)
 
   // use unbuffered IO
   setvbuf(stdout,NULL,_IONBF,0);
+  event_init(&_vcp_complete_event);
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
@@ -34,8 +37,13 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   VCP_RX_GPIO_CLK_ENABLE();
   
   /* Select SysClk as source of USART1 clocks */
+#if defined(BOARD_DISCOVERY)
   RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
   RCC_PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_SYSCLK;
+#elif defined(BOARD_NUCLEO)
+  RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART3;
+  RCC_PeriphClkInit.Usart3ClockSelection = RCC_USART3CLKSOURCE_SYSCLK;
+#endif
   HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphClkInit);
 
   /* Enable USARTx clock */
@@ -68,13 +76,14 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
    this register event outside of VT100's lock, the
    whole thing will get hosed.
  */
-static struct event *vcp_event = NULL;
-void serial_register_event(struct event *e)
-{
-  vcp_event = e;
-}
+//static struct event *vcp_event = NULL;
+//void serial_register_event(struct event *e)
+//{
+//  vcp_event = e;
+//}
 
-void USART1_IRQHandler(void)
+//void USART1_IRQHandler(void)
+void VCP_IRQHandler(void)
 {
   HAL_UART_IRQHandler(&VCPHandle);
 }
@@ -88,9 +97,6 @@ int _write(int file, char *ptr, int len)
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-  if (vcp_event) {
-    event_notify(vcp_event);
-    vcp_event = NULL;
-  }
+  event_notify(VCPCompleteEvent);
 }
 

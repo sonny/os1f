@@ -53,9 +53,11 @@ void adc_task(void *p)
   uint16_t value;
   int V, T;
   while(1) {
-    event_add_wait(&adc_event);
+    //event_add_wait(&adc_event);
+    event_subscribe(&adc_event);
     HAL_ADC_Start_IT(&AdcHandle);
-    yield();
+    //yield();
+    event_wait(&adc_event);
     //value = HAL_ADC_GetValue(&AdcHandle);
     // NOTE: T can actually differ up to 45 degrees from one chip to another;
     // it may be useful for relative temp, but not absolute

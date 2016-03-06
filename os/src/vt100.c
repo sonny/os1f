@@ -95,9 +95,6 @@ void term_cleanup(void) {
 void term_vprintf_at_wait(int col, int row, const char *fmt, va_list args) {
   static char pbuff[128];
 
-  struct event ev;
-  event_init(&ev);
-  
   mutex_lock(&screen_lock);
 
   int offset = vt100_save_cursor(pbuff);
@@ -105,9 +102,9 @@ void term_vprintf_at_wait(int col, int row, const char *fmt, va_list args) {
   offset += vsnprintf(pbuff + offset, 128 - offset, fmt, args);
   offset += vt100_unsave_cursor(pbuff + offset);
 
-  serial_register_event(&ev);
+  event_subscribe(VCPCompleteEvent);
   printf(pbuff);
-  event_wait(&ev);
+  event_wait(VCPCompleteEvent);
 
   mutex_unlock(&screen_lock);
 }

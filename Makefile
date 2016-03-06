@@ -1,3 +1,5 @@
+#BOARD := DISCOVERY
+BOARD := NUCLEO
 PROJ := OS-CMSIS
 
 ARM-PATH  := /opt/arm/toolchain
@@ -16,8 +18,11 @@ INC_DIRS :=
 SRC_DIRS :=
 SRCS :=
 OBJS :=
+DEPS := 
 
 -include sources.mk
+
+MKFILES := Makefile sources.mk openocd.mk
 
 FINAL := $(OUT)/$(PROJ)
 ELF   := $(FINAL).elf
@@ -26,7 +31,14 @@ CFLAGS := -mcpu=cortex-m7 -mthumb -Og -g3 -std=gnu11 -Wextra
 CFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections
 CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants 
 
-DEFINES := -DDEBUG -DTRACE -DSTM32F746xx 
+DEFINES := -DDEBUG -DTRACE -DSTM32F746xx
+
+ifeq ($(BOARD),DISCOVERY)
+DEFINES += -DBOARD_DISCOVERY
+else
+DEFINES += -DBOARD_NUCLEO
+endif
+
 INCLUDES := $(addprefix -I, $(INC_DIRS))
 LDFLAGS := -T mem.ld -T sections.ld -T libs.ld -nostartfiles -Xlinker --gc-sections -Lldscripts  --specs=nano.specs
 
@@ -69,5 +81,6 @@ stuff:
 	@echo "$(OBJS)"
 
 -include openocd.mk
+-include $(DEPS)
 
 .SECONDARY:

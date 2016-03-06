@@ -48,8 +48,8 @@ void displayInit(void)
 #ifdef DISPLAY_LCD
   lcdInit();
 #elif defined  DISPLAY_SERIAL
-  term_init();
   serialInit();
+  term_init();
 #endif
 }
 

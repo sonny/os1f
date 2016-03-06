@@ -38,7 +38,7 @@
 #define MIN_STACK_SIZE 1024
 #define MAIN_STACK_SIZE 1024
 
-static struct task *TCB[TASK_COUNT]; // not protected
+struct task *TCB[TASK_COUNT]; // not protected
 static struct task *main_task;       // not protected 
 static struct task *idle_task;       // not protected 
 
@@ -49,10 +49,6 @@ struct task *current_task_ptr;    // protected by disable irq -- global, but not
 static volatile uint32_t lock;
 
 static int get_next_task_insert(void) {
-  //  spinlock_lock(&lock);
-  //  int result = task_insert_index++;
-  //  spinlock_unlock(&lock);
-  //  return result;
   return atomic_fetch_add(&task_insert_index, 1);
 }
 
@@ -186,7 +182,9 @@ static bool _task_wake_all(void)
   for (i = 0; i < task_insert_index; ++i) {
     if (TCB[i]->state & TASK_STATE_SLEEP &&
         TCB[i]->sleep_until < osGetTick() ) {
-      TCB[i]->state = TASK_STATE_READY;
+
+      const int state = TASK_STATE_SLEEP;
+      atomic_compare_exchange_strong(&(TCB[i]->state), &state, TASK_STATE_READY);
       wake = true;
     }
   }
@@ -223,11 +221,6 @@ struct task * task_next(void)
   return current_task_ptr;
 }
 
-__attribute__ ((always_inline)) inline const struct task * task_current(void)
-{
-  return current_task_ptr;
-}
-
 // this is always executed in the context of the CURRENT_TASK
 // as long as constness of t is preserved, its fine
 void task_sleep(uint32_t ms) {
@@ -242,37 +235,22 @@ void task_sleep_until(uint32_t ms) {
 }
 
 
-void task_wait(uint32_t on)
+void task_wait(uint32_t state)
 {
   struct task * const t = current_task_ptr;
-  switch (on) {
-  case WAIT_MUTEX:
-    t->state = TASK_STATE_WAIT_MUTEX;
-    yield();
-    break;
-  case WAIT_EVENT:
-    t->state = TASK_STATE_WAIT_EVENT;
-    yield();
-    break;
-  default:
-    break;
-    /* do nothing */
-  }
+  t->state = state;
+  yield();
 }
 
 inline void task_change_state(uint32_t new)
 {
-  //struct task * t = current_task_ptr;
-  //t->state = new;
   atomic_store(&current_task_ptr->state, new);
 }
 
 // NOTE: cannot nest mutexes with this implementation
-void task_notify(uint32_t id)
+void task_notify(uint32_t id, int state)
 {
-  //  struct task * const t = TCB[id];
-  //t->state = TASK_STATE_READY;
-  atomic_store(&(TCB[id]->state), TASK_STATE_READY);
+  atomic_compare_exchange_strong(&(TCB[id]->state), &state, TASK_STATE_READY);
 }
 
 const struct task *task_get(uint32_t id)

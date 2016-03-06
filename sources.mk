@@ -1,9 +1,12 @@
 INC_DIRS := include 
 INC_DIRS += os/include
+INC_DIRS += board/STM32F7_$(BOARD)/config
+INC_DIRS += board/STM32F7_$(BOARD)/include/BSP
+
 INC_DIRS += system/include 
 INC_DIRS += system/include/cmsis 
 INC_DIRS += system/include/stm32f7xx 
-INC_DIRS += system/include/BSP 
+
 INC_DIRS += system/include/Components
 INC_DIRS += Utilities/Fonts
 
@@ -20,7 +23,8 @@ SRC_DIRS += system/include/Components/s5k5cag
 SRC_DIRS += system/include/Components/stmpe811
 SRC_DIRS += system/include/Components/ts3510
 SRC_DIRS += system/include/Components/wm8994
-SRC_DIRS += system/src/BSP
+SRC_DIRS += board/STM32F7_$(BOARD)/src/BSP
+
 SRC_DIRS += system/src/cmsis
 SRC_DIRS += system/src/cortexm
 SRC_DIRS += system/src/diag
@@ -36,3 +40,6 @@ SRCS := $(ASRCS) $(CSRCS)
 OBJS := $(addprefix $(OUT)/,$(SRCS:%.c=%.o))
 OBJS := $(OBJS:%.s=%.o)
 OBJS := $(OBJS:%.S=%.o)
+
+DEPS := $(OBJS:%.o=%.d)
+

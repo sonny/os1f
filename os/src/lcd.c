@@ -1,3 +1,5 @@
+#if defined(BOARD_DISCOVERY)
+
 #include <stdio.h>
 #include <stdarg.h>
 #include "stm32746g_discovery_lcd.h"
@@ -49,3 +51,5 @@ void lcd_printf_at(int xpos, int ypos, const char *fmt, ...)
   lcd_vprintf_at(xpos, ypos, fmt, args);
   va_end(args);
 }
+
+#endif
