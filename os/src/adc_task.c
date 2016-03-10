@@ -7,13 +7,47 @@
 
 static struct event adc_event;
 static ADC_HandleTypeDef    AdcHandle;
-static uint16_t adc_values[2];
+static uint32_t adc_values[2];
+static void adc_task_init(void);
 
 void adc_task(void *p)
 {
   int id = task_current()->id;
   int xpos = 10, ypos = (id*20 + 20);
+  const uint16_t V25 = 943; // V25 = 0.76V, Vref = 3.3V
+  const uint16_t Avg_Slope = 3; // Avg_Slope = 2.5mV/C
+  int V, T;
+  char rot[] = ".oOo";
+  int rot_idx = 0;
+
+  adc_task_init();
+
+  while(1) {
+    event_subscribe(&adc_event);
+    //HAL_ADC_Start_IT(&AdcHandle);
+    HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)adc_values, 2);
+    event_wait(&adc_event);
+    // NOTE: T can actually differ up to 45 degrees from one chip to another;
+    // it may be useful for relative temp, but not absolute
+    T = ((adc_values[0]-V25)/Avg_Slope) + 25;
+
+    // reference value is related to a 1.2V internal band gap (I don't know what this is)
+    // the relation to the Vref is:
+    V = (1200*4095)/adc_values[1];
+    // NOTE: this should be close to 3.0V for the F4-discovery
+
+    int v_entier = V / 1000;
+    int v_mant   = V % 1000;
+
+    task_display_line("Temp: %2d C, Vref: %1d.%3d V %c", T, v_entier, v_mant, rot[rot_idx]);
+    rot_idx = (rot_idx + 1) % 4;
+    task_sleep(200);
+  }
   
+}
+
+static void adc_task_init(void)
+{
   event_init(&adc_event);
 
   ADC_ChannelConfTypeDef sConfig[2];
@@ -30,8 +64,8 @@ void adc_task(void *p)
   AdcHandle.Init.ExternalTrigConv      = ADC_EXTERNALTRIGCONV_T1_CC1;
   AdcHandle.Init.DataAlign             = ADC_DATAALIGN_RIGHT;
   AdcHandle.Init.NbrOfConversion       = 2;
-  AdcHandle.Init.DMAContinuousRequests = DISABLE;
-  AdcHandle.Init.EOCSelection          = ENABLE;
+  AdcHandle.Init.DMAContinuousRequests = ENABLE;
+  AdcHandle.Init.EOCSelection          = DISABLE;
 
   HAL_ADC_Init(&AdcHandle);
 
@@ -47,59 +81,52 @@ void adc_task(void *p)
 
   HAL_ADC_ConfigChannel(&AdcHandle, &sConfig[0]);
   HAL_ADC_ConfigChannel(&AdcHandle, &sConfig[1]);
-
-  const uint16_t V25 = 943; // V25 = 0.76V, Vref = 3.3V
-  const uint16_t Avg_Slope = 3; // Avg_Slope = 2.5mV/C
-  uint16_t value;
-  int V, T;
-  while(1) {
-    //event_add_wait(&adc_event);
-    event_subscribe(&adc_event);
-    HAL_ADC_Start_IT(&AdcHandle);
-    //yield();
-    event_wait(&adc_event);
-    //value = HAL_ADC_GetValue(&AdcHandle);
-    // NOTE: T can actually differ up to 45 degrees from one chip to another;
-    // it may be useful for relative temp, but not absolute
-    T = ((adc_values[0]-V25)/Avg_Slope) + 25;
-
-    // reference value is related to a 1.2V internal band gap (I don't know what this is)
-    // the relation to the Vref is:
-    V = (1200*4095)/adc_values[1];
-    // NOTE: this should be close to 3.0V for the F4-discovery
-
-    int v_entier = V / 1000;
-    int v_mant   = V % 1000;
-
-    task_display_line("Temp: %2d C, Vref: %1d.%3d V", T, v_entier, v_mant);
-    task_sleep(1000);
-  }
-  
 }
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 {
+  static DMA_HandleTypeDef  hdma_adc;
+
+  /*## Enable peripherals and GPIO Clocks #################################*/
   __HAL_RCC_ADC1_CLK_ENABLE();
-  HAL_NVIC_SetPriority(ADC_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(ADC_IRQn);
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /*## Configure the DMA streams ##########################################*/
+  /* Set the parameters to be configured */
+  hdma_adc.Instance = DMA2_Stream0; //ADCx_DMA_STREAM;
+  hdma_adc.Init.Channel = DMA_CHANNEL_0; //ADCx_DMA_CHANNEL;
+  hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
+  hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
+  hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+  hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+  hdma_adc.Init.Mode = DMA_CIRCULAR;
+  hdma_adc.Init.Priority = DMA_PRIORITY_HIGH;
+  hdma_adc.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+  hdma_adc.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+  hdma_adc.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_adc.Init.PeriphBurst = DMA_PBURST_SINGLE;
+
+  HAL_DMA_Init(&hdma_adc);
+
+  /* Associate the initialized DMA handle to the ADC handle */
+  __HAL_LINKDMA(hadc, DMA_Handle, hdma_adc);
+
+  /*## Configure the NVIC for DMA #########################################*/
+  /* NVIC configuration for DMA transfer complete interrupt */
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 }
 
 // NOTE : this handles all 3 of the ADCs
-void ADC_IRQHandler(void)
+void DMA2_Stream0_IRQHandler(void)
 {
-  HAL_ADC_IRQHandler(&AdcHandle);
+  HAL_DMA_IRQHandler(AdcHandle.DMA_Handle);
 }
 
-// NOTE : this method relies on this code being faster than
-//        the adc conversion (which it is). Use DMA for best results.
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
-  static int index = 0;
   if (hadc->Instance == ADC1) {
-    adc_values[index] = HAL_ADC_GetValue(hadc);
-    if (++index >= 2) {
-      event_notify(&adc_event);
-      index = 0;
-    }
+    event_notify(&adc_event);
   }
 }

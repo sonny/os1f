@@ -35,6 +35,7 @@
  * functions.
  */
 
+#define IDLE_STACK_SIZE 512
 #define MIN_STACK_SIZE 1024
 #define MAIN_STACK_SIZE 1024
 
@@ -44,7 +45,7 @@ static struct task *idle_task;       // not protected
 
 static int task_insert_index = 0; // protected by lock
 static int current_task = 0;      // protected by disable irq
-struct task *current_task_ptr;    // protected by disable irq -- global, but not explicitly extern
+struct task *current_task_ptr = NULL;    // protected by disable irq -- global, but not explicitly extern
 
 static volatile uint32_t lock;
 
@@ -98,15 +99,16 @@ static void task_idle(void *p)
 
 static int task_start_idle(void)
 {
-  int alloc_size = MIN_STACK_SIZE + sizeof(struct task);
+  int alloc_size = IDLE_STACK_SIZE + sizeof(struct task);
   idle_task = mem_alloc(alloc_size);
 
   // sp points to the END (last address) of the allocated region
   uint32_t sp = (uint32_t)((void*)idle_task + alloc_size);
   void *r = task_stack_alloc_init(sp, (uint32_t)task_idle, 0);
 
+  //idle_task->sb = (void*)sp;
   idle_task->stack = r;
-  idle_task->stack_size = MIN_STACK_SIZE;
+  idle_task->stack_size = IDLE_STACK_SIZE;
   idle_task->state = TASK_STATE_READY;
   idle_task->id = -1;
   
@@ -132,12 +134,13 @@ static int task_start_main(void)
   
   __asm volatile ("ldr %0, =task_init_done\n" : "=r"(rp) : : "lr"); 
   void *r = task_stack_alloc_init(sp, rp, 0);
+  //main_task->sb = (void*)sp;
   main_task->stack = r;
   main_task->stack_size = MAIN_STACK_SIZE;
   main_task->state = TASK_STATE_READY;
   main_task->id = 0;
   TCB[0] = main_task;
-  task_insert_index = 1;
+  atomic_store(&task_insert_index, 1);
   
   // need to initialize the PSP for the first SVC call
   __set_PSP(__get_MSP());
@@ -165,6 +168,7 @@ int task_start(void (*f)(void*), int stack_size, void *param)
 
   void *r = task_stack_alloc_init(sp, (uint32_t)f, (uint32_t)param);
 
+  //task->sb = (void*)sp;
   task->stack = r;
   task->stack_size = stack_size;
   task->state = TASK_STATE_READY;
@@ -174,17 +178,28 @@ int task_start(void (*f)(void*), int stack_size, void *param)
   return task_index;
 }
 
+static inline bool task_change_from_state(struct task *t, uint32_t from, uint32_t to) {
+  return atomic_compare_exchange_strong(&(t->state), &from, to);
+}
+
+static inline bool task_change_from_state_current(uint32_t from, uint32_t to) {
+  return task_change_from_state(current_task_ptr, from, to);
+  //return atomic_compare_exchange_strong(&current_task_ptr->state, &from, to);
+}
+
 // NOTE: should only be called by task_next
 static bool _task_wake_all(void)
 {
   int i;
   bool wake = false;
+  uint32_t tick = osGetTick();
   for (i = 0; i < task_insert_index; ++i) {
     if (TCB[i]->state & TASK_STATE_SLEEP &&
-        TCB[i]->sleep_until < osGetTick() ) {
-
-      const int state = TASK_STATE_SLEEP;
-      atomic_compare_exchange_strong(&(TCB[i]->state), &state, TASK_STATE_READY);
+        TCB[i]->sleep_until < tick) {
+      //const int state = TASK_STATE_SLEEP;
+      //atomic_compare_exchange_strong(&(TCB[i]->state), &state, TASK_STATE_READY);
+      //task_change_from_state(TCB[i], TASK_STATE_SLEEP, TASK_STATE_READY);
+      TCB[i]->state = TASK_STATE_READY;
       wake = true;
     }
   }
@@ -221,36 +236,43 @@ struct task * task_next(void)
   return current_task_ptr;
 }
 
+
 // this is always executed in the context of the CURRENT_TASK
 // as long as constness of t is preserved, its fine
-void task_sleep(uint32_t ms) {
+__attribute__((always_inline)) void task_sleep(uint32_t ms) {
+//void task_sleep(uint32_t ms) {
   task_sleep_until(osGetTick() + ms);
 }
 
-void task_sleep_until(uint32_t ms) {
-  struct task * const t = current_task_ptr;
-  t->sleep_until = ms;
-  t->state = TASK_STATE_SLEEP;
-  yield();
+__attribute__((always_inline)) void task_sleep_until(uint32_t ms) {
+  //void task_sleep_until(uint32_t ms) {
+  if (task_change_from_state_current(TASK_STATE_READY, TASK_STATE_SLEEP))
+    {
+      current_task_ptr->sleep_until = ms;
+      yield();
+    }
 }
 
 
-void task_wait(uint32_t state)
+__attribute__((always_inline)) void task_wait(uint32_t state)
+//void task_wait(uint32_t state)
 {
-  struct task * const t = current_task_ptr;
-  t->state = state;
-  yield();
+  if (task_change_from_state_current(TASK_STATE_READY, state))
+      yield();
 }
 
-inline void task_change_state(uint32_t new)
+__attribute__((always_inline)) inline void task_change_state(uint32_t new)
+//inline void task_change_state(uint32_t new)
 {
   atomic_store(&current_task_ptr->state, new);
 }
 
 // NOTE: cannot nest mutexes with this implementation
-void task_notify(uint32_t id, int state)
+__attribute__((always_inline)) bool task_notify(uint32_t id, int state)
+//bool task_notify(uint32_t id, int state)
 {
-  atomic_compare_exchange_strong(&(TCB[id]->state), &state, TASK_STATE_READY);
+  //atomic_compare_exchange_strong(&(TCB[id]->state), &state, TASK_STATE_READY);
+  return task_change_from_state(TCB[id], state, TASK_STATE_READY);
 }
 
 const struct task *task_get(uint32_t id)

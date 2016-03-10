@@ -21,15 +21,17 @@ static struct task_data td[4] = {
   { interval:800}
 };
 
+extern struct task *TCB[];
+
 int main()
 {
   osInit();
 
-  task_start(task, 0, &td[0]);
-  task_start(task, 0, &td[1]);
-  task_start(task, 0, &td[2]);
-  task_start(task_rude, 0, NULL);
-  task_start(adc_task, 512, NULL);
+  task_start(task, 512, &td[0]);
+  task_start(task, 512, &td[1]);
+  task_start(task, 512, &td[2]);
+  task_start(task_rude, 512, NULL);
+  task_start(adc_task, 1024, NULL);
   
 
   /* Our main starts here */
@@ -37,11 +39,20 @@ int main()
   while (1) {
     uint32_t now = osGetTick();
     task_display_line("Task Main: %6d", count++);
+    os_display_line_at(12, "procs--[M] %d, [1] %d, [2] %d, [3] %d, [R] %d, [A] %d",
+                       TCB[0]->state, // main
+                       TCB[1]->state,
+                       TCB[2]->state, 
+                       TCB[3]->state,
+                       TCB[4]->state,
+                       TCB[5]->state
+                         );
     task_sleep_until(now + 1000);
   }
   return 0;
 
 }
+
 void task(void *p)
 {
   struct task_data *q = p;

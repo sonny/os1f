@@ -1,5 +1,5 @@
-BOARD := DISCOVERY
-#BOARD := NUCLEO
+#BOARD := DISCOVERY
+BOARD := NUCLEO
 PROJ := OS-CMSIS
 
 ARM-PATH  := /opt/arm/toolchain
@@ -29,7 +29,7 @@ ELF   := $(FINAL).elf
 
 CFLAGS := -mcpu=cortex-m7 -mthumb -Og -g3 -std=gnu11 -Wextra
 CFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections
-CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants 
+CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants -flto
 
 DEFINES := -DDEBUG -DTRACE -DSTM32F746xx
 

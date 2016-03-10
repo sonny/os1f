@@ -36,7 +36,7 @@ int task_start(void (*)(void*), int, void*);
 void task_sleep(uint32_t ms);
 void task_sleep_until(uint32_t ms);
 void task_wait(uint32_t on);
-void task_notify(uint32_t id, int state);
+bool task_notify(uint32_t id, int state);
 const struct task *task_get(uint32_t id);
 void task_change_state(uint32_t new);
 

@@ -7,6 +7,9 @@ void osInit()
 {
   HAL_Init();
   displayInit();
+
+  // lowest priority 
+  NVIC_SetPriority(PendSV_IRQn, 255);
   
 #ifdef ENABLE_FP
   set_FPCCR( get_FPCCR() | FPCCR_LSPEN | FPCCR_ASPEN );

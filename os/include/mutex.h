@@ -29,15 +29,16 @@ static inline void mutex_lock(struct mutex *m) {
   atomic_fetch_and(&m->waiting, ~(1<<tid));
 }
 
+
 static inline void mutex_unlock(struct mutex *m) {
+  uint32_t waiting = m->waiting;
   spinlock_unlock(&m->lock);
   int n = 31;
   
-  uint32_t waiting = m->waiting;
   while(waiting) {
     int z = __CLZ(waiting);
     int id = n - z;
-    atomic_fetch_and(&m->waiting, ~(1<<id));
+    //atomic_fetch_and(&m->waiting, ~(1<<id));
     task_notify(id, TASK_STATE_WAIT_MUTEX);
     waiting <<= (z+1);
     n -= (z+1);
