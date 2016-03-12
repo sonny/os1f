@@ -148,7 +148,6 @@ static int task_start_main(void)
                  "task_init_done: \n"  // return point from SVC_Handler
                  );
 
-
   return 0;
 }
 
@@ -168,7 +167,6 @@ int task_start(void (*f)(void*), int stack_size, void *param)
 
   void *r = task_stack_alloc_init(sp, (uint32_t)f, (uint32_t)param);
 
-  //task->sb = (void*)sp;
   task->stack = r;
   task->stack_size = stack_size;
   task->state = TASK_STATE_READY;
@@ -184,7 +182,6 @@ static inline bool task_change_from_state(struct task *t, uint32_t from, uint32_
 
 static inline bool task_change_from_state_current(uint32_t from, uint32_t to) {
   return task_change_from_state(current_task_ptr, from, to);
-  //return atomic_compare_exchange_strong(&current_task_ptr->state, &from, to);
 }
 
 // NOTE: should only be called by task_next
@@ -196,10 +193,7 @@ static bool _task_wake_all(void)
   for (i = 0; i < task_insert_index; ++i) {
     if (TCB[i]->state & TASK_STATE_SLEEP &&
         TCB[i]->sleep_until < tick) {
-      //const int state = TASK_STATE_SLEEP;
-      //atomic_compare_exchange_strong(&(TCB[i]->state), &state, TASK_STATE_READY);
-      //task_change_from_state(TCB[i], TASK_STATE_SLEEP, TASK_STATE_READY);
-      TCB[i]->state = TASK_STATE_READY;
+      TCB[i]->state = TASK_STATE_READY; // no need for stdatomic if called as specified
       wake = true;
     }
   }
@@ -237,41 +231,31 @@ struct task * task_next(void)
 }
 
 
-// this is always executed in the context of the CURRENT_TASK
-// as long as constness of t is preserved, its fine
 __attribute__((always_inline)) void task_sleep(uint32_t ms) {
-//void task_sleep(uint32_t ms) {
   task_sleep_until(osGetTick() + ms);
 }
 
 __attribute__((always_inline)) void task_sleep_until(uint32_t ms) {
-  //void task_sleep_until(uint32_t ms) {
-  if (task_change_from_state_current(TASK_STATE_READY, TASK_STATE_SLEEP))
-    {
-      current_task_ptr->sleep_until = ms;
-      yield();
-    }
+  if (task_change_from_state_current(TASK_STATE_READY, TASK_STATE_SLEEP)) {
+    current_task_ptr->sleep_until = ms;
+    yield();
+  }
 }
 
-
 __attribute__((always_inline)) void task_wait(uint32_t state)
-//void task_wait(uint32_t state)
 {
   if (task_change_from_state_current(TASK_STATE_READY, state))
       yield();
 }
 
-__attribute__((always_inline)) inline void task_change_state(uint32_t new)
-//inline void task_change_state(uint32_t new)
+__attribute__((always_inline)) void task_change_state(uint32_t new)
 {
   atomic_store(&current_task_ptr->state, new);
 }
 
 // NOTE: cannot nest mutexes with this implementation
 __attribute__((always_inline)) bool task_notify(uint32_t id, int state)
-//bool task_notify(uint32_t id, int state)
 {
-  //atomic_compare_exchange_strong(&(TCB[id]->state), &state, TASK_STATE_READY);
   return task_change_from_state(TCB[id], state, TASK_STATE_READY);
 }
 

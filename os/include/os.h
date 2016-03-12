@@ -1,6 +1,7 @@
 #ifndef __OS_H__
 #define __OS_H__
 
+#include "board.h"
 #include "os_config.h"
 #include "stm32f7xx_hal.h"
 

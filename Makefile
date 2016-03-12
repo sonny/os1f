@@ -1,5 +1,5 @@
-#BOARD := DISCOVERY
-BOARD := NUCLEO
+BOARD := DISCOVERY
+#BOARD := NUCLEO
 PROJ := OS-CMSIS
 
 ARM-PATH  := /opt/arm/toolchain

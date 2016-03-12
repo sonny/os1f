@@ -36,14 +36,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   VCP_TX_GPIO_CLK_ENABLE();
   VCP_RX_GPIO_CLK_ENABLE();
   
-  /* Select SysClk as source of USART1 clocks */
-#if defined(BOARD_DISCOVERY)
-  RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
-  RCC_PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_SYSCLK;
-#elif defined(BOARD_NUCLEO)
-  RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART3;
-  RCC_PeriphClkInit.Usart3ClockSelection = RCC_USART3CLKSOURCE_SYSCLK;
-#endif
+  RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_VCP;
+  RCC_PeriphClkInit.VCPClockSelection = RCC_VCPCLKSOURCE_SYSCLK;
   HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphClkInit);
 
   /* Enable USARTx clock */
