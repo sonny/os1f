@@ -20,13 +20,15 @@
 #define WAIT_EVENT 2
 
 struct task {
-  void *stack;
-  uint32_t id;
+  void *stack; // MUST BE FIRST or modify SP_OFFSET
+  void *stack_start;
+  void *stack_end;
+  int32_t id;
   uint32_t stack_size;
   uint32_t timeout_at;
   uint32_t sleep_until;
   uint32_t state
-  __attribute__ ((aligned (8)));
+  __attribute__ ((aligned (4)));
 };
 
 void task_init(void);

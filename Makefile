@@ -3,14 +3,14 @@ BOARD := DISCOVERY
 PROJ := OS-CMSIS
 
 ARM-PATH  := /opt/arm/toolchain
-OOCD-PATH := /opt/openocd
+#OOCD-PATH := /opt/openocd
 
 # COMMANDS
 CC      := $(ARM-PATH)/bin/arm-none-eabi-gcc
 GDB     := $(ARM-PATH)/bin/arm-none-eabi-gdb
 OBJDUMP := $(ARM-PATH)/bin/arm-none-eabi-objdump
 SIZE    := $(ARM-PATH)/bin/arm-none-eabi-size
-OPENOCD := $(OOCD-PATH)/bin/openocd
+OPENOCD := openocd #$(OOCD-PATH)/bin/openocd
 XTERM   := xterm
 
 OUT := BUILD

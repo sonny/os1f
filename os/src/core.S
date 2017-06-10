@@ -7,7 +7,8 @@
 
         // offset of stack pointer in task struct
         .set SP_OFFSET, 0
-
+        .set SIZEOF_STRUCT_STACKED_REGS, 32
+        
         .text
 
 
@@ -25,13 +26,15 @@ context_handler:
         ldr     r0, =current_task_ptr
         ldr     r0, [r0]
         str     r1, [r0, #SP_OFFSET]
-        bl      task_next
-        ldr     r0, [r0, #SP_OFFSET]
+        bl      task_next                 // returns NEW current_task_ptr
+        ldr     r1, [r0, #SP_OFFSET]      // get stored sp
 #ifdef ENABLE_FP
-        vldmia  r0!, {s16-s31}
+        vldmia  r1!, {s16-s31}
 #endif
-        ldmia   r0!, {r4-r11, lr}
-        msr     PSP, r0
+        ldmia   r1!, {r4-r11, lr}
+        msr     PSP, r1                   // global SP to task sp
+//        add     r1, #SIZEOF_STRUCT_STACKED_REGS
+//        str     r1, [r0, #SP_OFFSET]      // re-set task sp
         cpsie   I
         bx      lr
 

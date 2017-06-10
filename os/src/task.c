@@ -39,12 +39,12 @@
 #define MIN_STACK_SIZE 1024
 #define MAIN_STACK_SIZE 1024
 
-struct task *TCB[TASK_COUNT]; // not protected
+struct task *TCB[TASK_COUNT];        // not protected
 static struct task *main_task;       // not protected 
 static struct task *idle_task;       // not protected 
 
-static int task_insert_index = 0; // protected by lock
-static int current_task = 0;      // protected by disable irq
+static int task_insert_index = 0;    // protected by lock
+static int current_task = 0;         // protected by disable irq
 struct task *current_task_ptr = NULL;    // protected by disable irq -- global, but not explicitly extern
 
 static volatile uint32_t lock;
@@ -53,7 +53,7 @@ static int get_next_task_insert(void) {
   return atomic_fetch_add(&task_insert_index, 1);
 }
 
-static void * task_stack_init(uint32_t stack_end,  uint32_t ret, uint32_t param);
+static void * task_stack_init(struct regs* task_sp,  uint32_t ret, uint32_t param);
 static int task_start_idle(void);
 static int task_start_main(void);
 
@@ -72,22 +72,23 @@ void task_init(void)
   idle_task->stack = idle_stack;
 }
 
-static void * task_stack_alloc_init(uint32_t stack_end, uint32_t ret, uint32_t param)
+static void * task_stack_alloc_init(uint32_t stack_start, uint32_t ret, uint32_t param)
 {
-  uint32_t stack_start = (uint32_t)((void*)stack_end - sizeof(struct regs));
-  void * result = task_stack_init(stack_start, ret, param);
-  return result;
+  uint32_t task_sp = (uint32_t)((void*)stack_start - sizeof(struct regs));
+  void * result = task_stack_init(task_sp, ret, param);
+  
+  return task_sp;
 }
 
-static void * task_stack_init(uint32_t stack_start, uint32_t ret, uint32_t param)
+static void * task_stack_init(struct regs* task_sp, uint32_t ret, uint32_t param)
 {
-  struct regs *r = (struct regs*)stack_start;
-  memset(r, 0, sizeof(struct regs));   // initialiaze everything to 0
-  r->stacked.r0 = param;          // first param to function call
-  r->stacked.pc = ret;            // return execution location
-  r->stacked.xspr = 0x01000000;   // thumb mode enabled (required);
-  r->aux.lr = 0xfffffffd;         // EXEC_RETURN, USE PSP
-  return r;
+  //  struct regs *r = (struct regs*)task_sp;
+  memset(task_sp, 0, sizeof(struct regs));   // initialiaze everything to 0
+  task_sp->stacked.r0 = param;          // first param to function call
+  task_sp->stacked.pc = ret;            // return execution location
+  task_sp->stacked.xspr = 0x01000000;   // thumb mode enabled (required);
+  task_sp->aux.lr = 0xfffffffd;         // EXEC_RETURN, USE PSP
+  return task_sp;
 }
 
 static volatile int q = 0;
@@ -106,7 +107,9 @@ static int task_start_idle(void)
   uint32_t sp = (uint32_t)((void*)idle_task + alloc_size);
   void *r = task_stack_alloc_init(sp, (uint32_t)task_idle, 0);
 
-  //idle_task->sb = (void*)sp;
+  idle_task->stack_start = (void*)sp;
+  idle_task->stack_end = (void*)idle_task + sizeof(struct task);
+
   idle_task->stack = r;
   idle_task->stack_size = IDLE_STACK_SIZE;
   idle_task->state = TASK_STATE_READY;
@@ -134,7 +137,10 @@ static int task_start_main(void)
   
   __asm volatile ("ldr %0, =task_init_done\n" : "=r"(rp) : : "lr"); 
   void *r = task_stack_alloc_init(sp, rp, 0);
-  //main_task->sb = (void*)sp;
+
+  main_task->stack_start = (void*)sp + stack_size;
+  main_task->stack_end = (void*)main_task + sizeof(struct task);
+
   main_task->stack = r;
   main_task->stack_size = MAIN_STACK_SIZE;
   main_task->state = TASK_STATE_READY;
@@ -162,12 +168,15 @@ int task_start(void (*f)(void*), int stack_size, void *param)
   struct task *task = mem_alloc(alloc_size);
 
   // sp points to the END (last address) of the allocated region
-  uint32_t sp = (uint32_t)((void*)task + alloc_size);
+  void *stack_start = (void*)task + alloc_size;
+  //uint32_t sp = (uint32_t)((void*)task + alloc_size);
   /* check the return value? */
 
-  void *r = task_stack_alloc_init(sp, (uint32_t)f, (uint32_t)param);
+  void *task_sp = task_stack_alloc_init(stack_start, (uint32_t)f, (uint32_t)param);
 
-  task->stack = r;
+  task->stack_start = stack_start;
+  task->stack_end = (void*)task + sizeof(struct task);
+  task->stack = task_sp;
   task->stack_size = stack_size;
   task->state = TASK_STATE_READY;
   task->id = task_index;
