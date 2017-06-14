@@ -72,9 +72,15 @@ void task_init(void)
   idle_task->stack = idle_stack;
 }
 
-static void * task_stack_alloc_init(uint32_t stack_start, uint32_t ret, uint32_t param)
+static void * task_stack_alloc_init(void* stack_start, uint32_t ret, uint32_t param)
 {
-  uint32_t task_sp = (uint32_t)((void*)stack_start - sizeof(struct regs));
+  void* task_sp = (void*)stack_start - sizeof(struct regs);
+  // ensure that task_sp is 8 byte aligned
+  // TODO: check CCR first
+  int rem = (uint32_t)task_sp % 8;
+  if (rem) {        // if there is a remainder, then we are not aligned
+    task_sp -= rem; // rem should really only be 4 or 0
+  }
   void * result = task_stack_init(task_sp, ret, param);
   
   return task_sp;
@@ -104,13 +110,13 @@ static int task_start_idle(void)
   idle_task = mem_alloc(alloc_size);
 
   // sp points to the END (last address) of the allocated region
-  uint32_t sp = (uint32_t)((void*)idle_task + alloc_size);
-  void *r = task_stack_alloc_init(sp, (uint32_t)task_idle, 0);
+  void *stack_start = (void*)idle_task + alloc_size;
+  void *task_sp = task_stack_alloc_init(stack_start, (uint32_t)task_idle, 0);
 
-  idle_task->stack_start = (void*)sp;
+  idle_task->stack_start = stack_start;
   idle_task->stack_end = (void*)idle_task + sizeof(struct task);
 
-  idle_task->stack = r;
+  idle_task->stack = task_sp;
   idle_task->stack_size = IDLE_STACK_SIZE;
   idle_task->state = TASK_STATE_READY;
   idle_task->id = -1;
@@ -124,24 +130,24 @@ static int task_start_main(void)
   
   uint32_t stack_ptr  = get_SP();
   uint32_t stack_size = stack_base - stack_ptr;
-  uint32_t rp = -1;
+  uint32_t return_ptr = -1;
 
   int alloc_size = MAIN_STACK_SIZE + sizeof(struct task);
   main_task = mem_alloc(alloc_size);
 
   // sp points to the END (last address) of the allocated region
   // offset by stack size calculated at the top
-  uint32_t sp = (uint32_t)((void*)main_task + alloc_size - stack_size);
+  void *task_sp = (void*)main_task + alloc_size - stack_size;
   // copy the (current) contents of the stack to the new region
-  memcpy((void*)sp, (void*)stack_ptr, stack_size);
+  memcpy(task_sp, (void*)stack_ptr, stack_size);
   
-  __asm volatile ("ldr %0, =task_init_done\n" : "=r"(rp) : : "lr"); 
-  void *r = task_stack_alloc_init(sp, rp, 0);
+  __asm volatile ("ldr %0, =task_init_done\n" : "=r"(return_ptr) : : "lr"); 
+  task_sp = task_stack_alloc_init(task_sp, return_ptr, 0);
 
-  main_task->stack_start = (void*)sp + stack_size;
+  main_task->stack_start = (void*)main_task + alloc_size;
   main_task->stack_end = (void*)main_task + sizeof(struct task);
 
-  main_task->stack = r;
+  main_task->stack = task_sp;
   main_task->stack_size = MAIN_STACK_SIZE;
   main_task->state = TASK_STATE_READY;
   main_task->id = 0;
@@ -169,8 +175,7 @@ int task_start(void (*f)(void*), int stack_size, void *param)
 
   // sp points to the END (last address) of the allocated region
   void *stack_start = (void*)task + alloc_size;
-  //uint32_t sp = (uint32_t)((void*)task + alloc_size);
-  /* check the return value? */
+  /* TODO: check the return value? */
 
   void *task_sp = task_stack_alloc_init(stack_start, (uint32_t)f, (uint32_t)param);
 

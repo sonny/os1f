@@ -2,6 +2,7 @@
 
 delete
 b context_handler
+layout asm
 
 commands
         echo START of contect handler\n
@@ -13,7 +14,7 @@ commands
         info symbol $tpc
         printf "Stack Size: %d, SP Offset: %d\n", $stack_size, $sp_off
 
-         c
+        c
 end
 
 # after task switch
