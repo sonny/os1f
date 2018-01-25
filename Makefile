@@ -20,18 +20,19 @@ SRCS :=
 OBJS :=
 DEPS := 
 
--include sources.mk
-
-MKFILES := Makefile sources.mk openocd.mk
+-include sources_auto.mk
 
 FINAL := $(OUT)/$(PROJ)
 ELF   := $(FINAL).elf
 
-CFLAGS := -mcpu=cortex-m7 -mthumb -Og -g3 -std=gnu11 -Wextra
+CFLAGS := -mcpu=cortex-m7 -mthumb -Og -g3 -Wextra
 CFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections
-CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants -flto
+CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants
+CFLAGS += -flto
 
-DEFINES := -DDEBUG -DTRACE -DSTM32F746xx
+# TODO: implement non-printf trace functions
+#DEFINES := -DDEBUG -DTRACE -DSTM32F746xx
+DEFINES := -DDEBUG -DSTM32F746xx
 
 ifeq ($(BOARD),DISCOVERY)
 DEFINES += -DBOARD_DISCOVERY
@@ -40,13 +41,17 @@ DEFINES += -DBOARD_NUCLEO
 endif
 
 INCLUDES := $(addprefix -I, $(INC_DIRS))
-LDFLAGS := -T mem.ld -T sections.ld -T libs.ld -nostartfiles -Xlinker --gc-sections -Lldscripts  --specs=nano.specs
-
+LDFLAGS += -Wl,--gc-sections,--print-memory-usage -z defs 
+LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs 
 
 vpath %.c $(SRC_DIRS)
-#vpath %.h $(INC_DIRS)
+vpath %.S $(SRC_DIRS)
+vpath %.h $(INC_DIRS)
 
 all: $(FINAL).siz $(FINAL).disass;
+
+analyze: CFLAGS += -fstack-usage
+analyze: $(OBJS)
 
 ## disassembly
 $(OUT)/%.disass: $(ELF)
@@ -56,10 +61,14 @@ $(OUT)/%.disass: $(ELF)
 $(OUT)/%.siz: $(ELF)
 	$(SIZE) --format=berkeley $<
 
+## Check for missing symbols
+link-check: LDFLAGS := --specs=nosys.specs
+link-check: $(OBJS)
+	$(CC) $(LDFLAGS) -o $(OUT)/link-check $(OBJS) 
+
 ## Build ELF file
 $(OUT)/%.elf: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map,$*.map -o $@ $(OBJS) 
-
 
 ## Build Object files from S files
 $(OUT)/%.o: %.S 

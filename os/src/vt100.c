@@ -7,7 +7,7 @@
  * Basic VT100 display functionality
  */ 
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
@@ -15,6 +15,7 @@
 #include "mutex.h"
 #include "event.h"
 #include "serial.h"
+#include "vsnprintf.h"
 
 #define BUFF_SIZE 128
 
@@ -32,7 +33,7 @@ static inline int vt100_save_cursor(char * restrict s) {
 
 // Unsave Cursor <ESC>[u
 static inline int vt100_unsave_cursor(char * restrict s) {
-  return sprintf(s, ESC "[u" );
+  //return sprintf(s, ESC "[u" );
   const int size = 3;
   memcpy(s, ESC "[u", size+1);
   return size;
@@ -46,7 +47,7 @@ static inline int vt100_cursor_down(char * restrict s, int count) {
 
 // Erase Screen <ESC>[2J
 static inline int  vt100_erase_screen(char * restrict s) {
-  //  return sprintf(s, ESC "[2J" );
+  //return sprintf(s, ESC "[2J" );
   const int size = 4;
   memcpy(s, ESC "[2J", size+1);
   return size;
@@ -88,10 +89,10 @@ static char pbuff[BUFF_SIZE];
 void term_init(void) {
   mutex_init(&screen_lock);
   mutex_lock(&screen_lock);
-  //  char pbuff[32];
+
   int offset = vt100_hide_cursor(pbuff);
   offset += vt100_erase_screen(pbuff+offset);
-  //printf(pbuff);
+
   write(1, pbuff, strlen(pbuff));
   mutex_unlock(&screen_lock);
 }
@@ -100,9 +101,7 @@ void term_init(void) {
  * cleanup terminal
  */
 void term_cleanup(void) {
-  //char pbuff[32];
   vt100_show_cursor(pbuff);
-  //printf(pbuff);
   write(1, pbuff, strlen(pbuff));
 }
 
@@ -118,19 +117,18 @@ void term_cleanup(void) {
 
 
 void term_vprintf_at_wait(int col, int row, const char *fmt, va_list args) {
-  //static char pbuff[128];
-  static struct _reent reent;
+  static char pbuff[128];
+  //static struct _reent reent;
   
   mutex_lock(&screen_lock);
 
   int offset = vt100_save_cursor(pbuff);
   offset += vt100_cursor_home(pbuff + offset, col, row);
-  //offset += vsnprintf(pbuff + offset, 128 - offset, fmt, args);
-  offset += _vsnprintf_r(&reent, pbuff + offset, 128 - offset, fmt, args);
+  offset += os_vsnprintf(pbuff + offset, 128 - offset, fmt, args);
   offset += vt100_unsave_cursor(pbuff + offset);
 
   event_subscribe(VCPCompleteEvent);
-  //printf(pbuff);
+
   write(1, pbuff, strlen(pbuff));
   event_wait(VCPCompleteEvent);
 

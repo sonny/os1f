@@ -38,8 +38,9 @@ void adc_task(void *p)
 
     int v_entier = V / 1000;
     int v_mant   = V % 1000;
+    double v = V/1000.0;
 
-    task_display_line("Temp: %2d C, Vref: %1d.%3d V %c", T, v_entier, v_mant, rot[rot_idx]);
+    task_display_line("Temp: %d C, Vref: %f V %c", T, v, rot[rot_idx]);
     rot_idx = (rot_idx + 1) % 4;
     task_sleep(200);
   }

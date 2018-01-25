@@ -27,26 +27,18 @@ int main()
 {
   osInit();
 
-  task_start(task, 512, &td[0]);
-  task_start(task, 512, &td[1]);
-  task_start(task, 512, &td[2]);
-  task_start(task_rude, 512, NULL);
-  task_start(adc_task, 1024, NULL);
+  task_start(task, 128, &td[0]);
+  task_start(task, 128, &td[1]);
+  task_start(task, 128, &td[2]);
+  task_start(task_rude, 128, NULL);
+  task_start(adc_task, 0, NULL);
   
 
   /* Our main starts here */
   int count = 0;
   while (1) {
     uint32_t now = osGetTick();
-    task_display_line("Task Main: %6d", count++);
-    os_display_line_at(12, "procs--[M] %d, [1] %d, [2] %d, [3] %d, [R] %d, [A] %d",
-                       TCB[0]->state, // main
-                       TCB[1]->state,
-                       TCB[2]->state, 
-                       TCB[3]->state,
-                       TCB[4]->state,
-                       TCB[5]->state
-                         );
+    task_display_line("Task Main: %d", count++);
     task_sleep_until(now + 1000);
   }
   return 0;
@@ -64,7 +56,7 @@ void task(void *p)
     {
       uint32_t now = osGetTick();
 
-      task_display_line("Task   %2d: %6d", id, counter++);
+      task_display_line("Task   %d: %d", id, counter++);
       task_sleep_until(now + q->interval);
     } 
 }
@@ -81,7 +73,7 @@ void task_rude(void *p)
     {
       counter++;
       if ((counter % divisor) == 0) {
-        task_display_line("Task   %2d: %6d", id, counter/divisor);
+        task_display_line("Task   %d: %d", id, counter/divisor);
       }
     } 
 }

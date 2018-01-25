@@ -11,7 +11,7 @@
 
 static void *_current;
 static void *_end;
-static uint8_t dynMemRegion[DYN_MEM_REGION_SIZE];
+static uint8_t dynMemRegion[DYN_MEM_REGION_SIZE]  __attribute__ ((aligned (ALIGN_SIZE)));
 
 static volatile uint32_t lock;
 

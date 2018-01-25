@@ -40,7 +40,7 @@ void task_sleep_until(uint32_t ms);
 void task_wait(uint32_t on);
 bool task_notify(uint32_t id, int state);
 const struct task *task_get(uint32_t id);
-void task_change_state(uint32_t new);
+void task_change_state(uint32_t new_state);
 
 static inline const struct task * task_current(void)
 {

@@ -35,8 +35,8 @@
  * functions.
  */
 
-#define IDLE_STACK_SIZE 512
-#define MIN_STACK_SIZE 1024
+#define IDLE_STACK_SIZE 256
+#define MIN_STACK_SIZE 512
 #define MAIN_STACK_SIZE 1024
 
 struct task *TCB[TASK_COUNT];        // not protected
@@ -60,7 +60,6 @@ static int task_start_main(void);
 void task_init(void)
 {
   uint32_t rp = -1;
-  // start task idle
   task_start_idle();
   current_task = -1;
   current_task_ptr = idle_task;
@@ -75,9 +74,10 @@ void task_init(void)
 static void * task_stack_alloc_init(void* stack_start, uint32_t ret, uint32_t param)
 {
   void* task_sp = (void*)stack_start - sizeof(struct regs);
-  // ensure that task_sp is 8 byte aligned
-  // TODO: check CCR first
-  int rem = (uint32_t)task_sp % 8;
+  // ensure that address where (struct stacked_regs) is allocated is 8 byte aligned
+  // TODO: check CCR first - CCR has a bit enforcing stack alignment to 8 or 4 bytes -
+  // it defaults to 8 bytes
+  int rem = (uint32_t) ((void*)task_sp + sizeof(struct aux_regs)) % 8;
   if (rem) {        // if there is a remainder, then we are not aligned
     task_sp -= rem; // rem should really only be 4 or 0
   }
@@ -88,7 +88,6 @@ static void * task_stack_alloc_init(void* stack_start, uint32_t ret, uint32_t pa
 
 static void * task_stack_init(struct regs* task_sp, uint32_t ret, uint32_t param)
 {
-  //  struct regs *r = (struct regs*)task_sp;
   memset(task_sp, 0, sizeof(struct regs));   // initialiaze everything to 0
   task_sp->stacked.r0 = param;          // first param to function call
   task_sp->stacked.pc = ret;            // return execution location
@@ -262,9 +261,9 @@ __attribute__((always_inline)) void task_wait(uint32_t state)
       yield();
 }
 
-__attribute__((always_inline)) void task_change_state(uint32_t new)
+__attribute__((always_inline)) void task_change_state(uint32_t new_state)
 {
-  atomic_store(&current_task_ptr->state, new);
+  atomic_store(&current_task_ptr->state, new_state);
 }
 
 // NOTE: cannot nest mutexes with this implementation
