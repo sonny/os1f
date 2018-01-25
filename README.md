@@ -20,12 +20,9 @@ embedded processors (such as the M7 and M4). Specifically, my development is
 targeted at the [32F746GDISCOVERY development board](http://www.st.com/en/evaluation-tools/32f746gdiscovery.html).
 
 ## Features
-* Fully pre-emptable task based OS
-
-  A task is similar to a process in that it has its own run-time stack, 
-but there is no memory protection (currently).
+* Fully Preemtive Multitasking OS
 * Very simple heap allocator
-* Mutexes and Spinlocks for concurrency management
+* Concurrency primitives - Mutexes (only atm)
 * Events
 * Serial IO (can also output text to the LCD)
 * VT100 emulation for creating formatted Serial output
