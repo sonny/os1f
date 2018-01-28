@@ -282,13 +282,15 @@ g_pfnVectors:
    .thumb_set UsageFault_Handler,Default_Handler
 
    .weak      SVC_Handler
-   .thumb_set SVC_Handler,context_handler
+   .thumb_set SVC_Handler,Default_Handler
+//   .thumb_set SVC_Handler,context_handler
 
    .weak      DebugMon_Handler
    .thumb_set DebugMon_Handler,Default_Handler
 
    .weak      PendSV_Handler
-   .thumb_set PendSV_Handler,context_handler
+   .thumb_set PendSV_Handler,Default_Handler
+//   .thumb_set PendSV_Handler,context_handler
 
    .weak      SysTick_Handler
    .thumb_set SysTick_Handler,Default_Handler              
