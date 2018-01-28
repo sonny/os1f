@@ -10,15 +10,28 @@
 void printmsg(char *m);
 static void task_func(void *);
 
+struct func_data {
+  char * name;
+  uint32_t sleep;
+};
+
+
+static struct func_data fdata[4] = {
+  {.name = "Task1", .sleep = 1000},
+  {.name = "Task2", .sleep = 500},
+  {.name = "Task3", .sleep = 250},
+  {.name = "Task4", .sleep = 125},
+};
+
 int main(void)
 {
   // start in handler mode - using MSP in privileged mode
   osInit();
 
-  taskStart(task_func, 256, (void*)"Task 0");
-  taskStart(task_func, 256, (void*)"Task 1");
-  taskStart(task_func, 256, (void*)"Task 2");
-  taskStart(task_func, 256, (void*)"Task 3");
+  taskStart(task_func, 256, (void*)&fdata[0]);
+  taskStart(task_func, 256, (void*)&fdata[1]);
+  taskStart(task_func, 256, (void*)&fdata[2]);
+  taskStart(task_func, 256, (void*)&fdata[3]);
 
   static char buffer[64];
   
@@ -35,13 +48,12 @@ void task_func(void *context)
   static char buffer[64];
   int divisor = 1000000; // 10 million
   unsigned int k = 0;
+  struct func_data * fdata = context;
   while (1) {
     ++k;
-    if ((k % divisor) == 0) { // 10 million
-      os_snprintf(buffer, 64, "%s [%d]\n", (char*)context, k/divisor);
-      printmsg(buffer);
-      //syscall_yield();
-    }
+    os_snprintf(buffer, 64, "%s [%d]\n", fdata->name, k);
+    printmsg(buffer);
+    taskSleep(fdata->sleep);
   };
 }
 

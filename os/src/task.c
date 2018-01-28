@@ -42,10 +42,15 @@ void taskNext(void)
   // Since PendSV is the lowest priority, another irq handler
   // can update the state of the TCB to activate an inactive task
   current_task_idx = (current_task_idx + 1) % TASK_COUNT;
-  while(!TCB[current_task_idx].flags & TASK_ACTIVE)
+  while(! (TCB[current_task_idx].flags & TASK_ACTIVE) )
     current_task_idx = (current_task_idx + 1) % TASK_COUNT;
 
   current_task = &TCB[current_task_idx];
+}
+
+inline void * taskGet(int i)
+{
+  return &TCB[i];
 }
 
 static void task_end(void)

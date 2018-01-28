@@ -4,11 +4,10 @@
 #include "defs.h"
 #include "memory.h"
 
+static void kernel_task(void *context);
+
 void osInit(void)
 {
-  /* Enable the CPU Cache */
-  //CPU_CACHE_Enable();
-
   HAL_Init();
 
   // lowest priority 
@@ -20,8 +19,7 @@ void osInit(void)
 #endif /* ENABLE_FP */
 
   mem_init();
-  //  int ticks_per_ms = HAL_RCC_GetHCLKFreq() / 1000;
-  //  SysTick_Config(ticks_per_ms);
+  taskStart(kernel_task, 128, NULL);
 }
 
 void osStart(void)
@@ -36,6 +34,28 @@ void osStart(void)
   kernel_sync_barrier();
 
   syscall_start();
+}
+
+static void kernel_task(void *context)
+{
+  /* TODO: ensure atomicity */
+  while (1) {
+    // wake up sleeping tasks
+    int i;
+    /* TODO: handle rollover */
+    uint32_t tick = HAL_GetTick();
+    for (i = 0; i < TASK_COUNT; ++i) {
+      struct task *t = taskGet(i);
+      if (t->flags & TASK_SLEEP) {
+        if (t->sleep_until < tick) {
+          t->flags = TASK_ACTIVE;
+          t->sleep_until = 0;
+        }
+      }
+    }
+    
+    syscall_yield();
+  }
 }
 
 void SysTick_Handler(void)
