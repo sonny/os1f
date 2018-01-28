@@ -3,6 +3,9 @@
 
 #include "stm32f7xx_hal.h"
 
+void osInit(void);
+void osStart(void);
+
 static inline void __attribute__ ((always_inline))
 kernel_critical_begin(void)
 {

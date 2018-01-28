@@ -1,6 +1,8 @@
 #ifndef __DEFS_H__
 #define __DEFS_H__
 
+#define TIME_SLICE 5 // in milliseconds
+
 #define TASK_INACTIVE (0x0)
 #define TASK_ACTIVE   (0x1)
 #define TASK_COUNT  4

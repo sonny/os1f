@@ -94,6 +94,15 @@ int os_vsnprintf(char *str, size_t size, const char *format, va_list ap) {
   return length+1;
 }
 
+int os_snprintf(char *buffer, size_t size, const char * fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  os_vsnprintf(buffer, size, fmt, args);
+  va_end(args);
+}
+
+
 static int count_digits(int value, int base) {
   int count = 0;
   if (value == 0) return 1; // base case

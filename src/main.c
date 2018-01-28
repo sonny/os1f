@@ -5,40 +5,27 @@
 #include "defs.h"
 #include "task.h"
 #include "semihosting.h"
+#include "vsnprintf.h"
 
 void printmsg(char *m);
-static void local_osInit(void);
-
-
 static void task_func(void *);
-
-extern void initialise_monitor_handles(void);
 
 int main(void)
 {
-  //initialise_monitor_handles();
+  // start in handler mode - using MSP in privileged mode
+  osInit();
+
+  taskStart(task_func, 128, (void*)"Task 0");
+  taskStart(task_func, 128, (void*)"Task 1");
+  taskStart(task_func, 128, (void*)"Task 2");
+  taskStart(task_func, 128, (void*)"Task 3");
+
+  static char buffer[64];
   
-  // start in handler mode
-  // using MSP in privileged mode
-  local_osInit();
-  taskStart(task_func, 512, (void*)"Task 0");
-  taskStart(task_func, 512, (void*)"Task 1");
-  taskStart(task_func, 512, (void*)"Task 2");
-  taskStart(task_func, 512, (void*)"Task 3");
+  os_snprintf(buffer, 64, "Ckock is %d\n", HAL_RCC_GetHCLKFreq());
+  printmsg(buffer);
 
-  printmsg("HELLLLO\n");
-
-  // temporary stack space
-  void * pspStart = mem_alloc(256) + 256;
-  //kernel_CONTROL_set(0X1 << 1); // USE PSP in thread mode (default is MSP)
-
-  kernel_sync_barrier();
-  kernel_PSP_set((uint32_t)pspStart);
-  kernel_sync_barrier();
-  kernel_CONTROL_set(0x01 << 1 | 0x01 << 0); // use PSP with unprivileged thread mode
-  kernel_sync_barrier();
-
-  syscall_start(); // does not return
+  osStart(); // does not return
   
   return 0;
 }
@@ -46,23 +33,16 @@ int main(void)
 void task_func(void *context)
 {
   static char buffer[64];
-
+  int divisor = 1000000; // 10 million
   int k = 0;
   while (1) {
-    snprintf(buffer, 64, "%s [%d]\n", (char*)context, ++k);
-    printmsg(buffer);
-    syscall_yield();
+    ++k;
+    if ((k % divisor) == 0) { // 10 million
+      os_snprintf(buffer, 64, "%s [%d]\n", (char*)context, k/divisor);
+      printmsg(buffer);
+      //syscall_yield();
+    }
   };
-}
-
-void local_osInit(void)
-{
-  // lowest priority 
-  NVIC_SetPriority(PendSV_IRQn, 255);
-  
-  //  SysTick_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-  mem_init();
 }
 
 void printmsg(char *m)
