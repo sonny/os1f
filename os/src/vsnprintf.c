@@ -115,6 +115,13 @@ static int count_digits(int value, int base) {
 
 static char * put_integer(char *str, int val, int base) {
   int digit;
+
+  // handle negative numbers
+  if (val < 0) {
+    *str++ = '-';
+    val = -val;
+  }
+
   char *p = str;
   int num_digits = count_digits(val, base);
   while(num_digits-- > 0) {

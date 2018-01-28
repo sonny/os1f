@@ -15,10 +15,10 @@ int main(void)
   // start in handler mode - using MSP in privileged mode
   osInit();
 
-  taskStart(task_func, 128, (void*)"Task 0");
-  taskStart(task_func, 128, (void*)"Task 1");
-  taskStart(task_func, 128, (void*)"Task 2");
-  taskStart(task_func, 128, (void*)"Task 3");
+  taskStart(task_func, 256, (void*)"Task 0");
+  taskStart(task_func, 256, (void*)"Task 1");
+  taskStart(task_func, 256, (void*)"Task 2");
+  taskStart(task_func, 256, (void*)"Task 3");
 
   static char buffer[64];
   
@@ -34,7 +34,7 @@ void task_func(void *context)
 {
   static char buffer[64];
   int divisor = 1000000; // 10 million
-  int k = 0;
+  unsigned int k = 0;
   while (1) {
     ++k;
     if ((k % divisor) == 0) { // 10 million
