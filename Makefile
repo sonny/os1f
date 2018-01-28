@@ -7,7 +7,7 @@ ARM-PATH  := /opt/arm/toolchain
 
 # COMMANDS
 CC      := $(ARM-PATH)/bin/arm-none-eabi-gcc
-GDB     := $(ARM-PATH)/bin/arm-none-eabi-gdb
+GDB     := $(ARM-PATH)/bin/arm-none-eabi-gdb-py
 OBJDUMP := $(ARM-PATH)/bin/arm-none-eabi-objdump
 SIZE    := $(ARM-PATH)/bin/arm-none-eabi-size
 OPENOCD := openocd #$(OOCD-PATH)/bin/openocd
@@ -25,10 +25,10 @@ DEPS :=
 FINAL := $(OUT)/$(PROJ)
 ELF   := $(FINAL).elf
 
-CFLAGS := -mcpu=cortex-m7 -mthumb -Og -g3 -Wextra
+CFLAGS := -mcpu=cortex-m7 -mthumb -Og -gdwarf-3 -g3 -Wextra
 CFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections
 CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants
-CFLAGS += -flto
+##CFLAGS += -flto
 
 # TODO: implement non-printf trace functions
 #DEFINES := -DDEBUG -DTRACE -DSTM32F746xx
@@ -43,6 +43,8 @@ endif
 INCLUDES := $(addprefix -I, $(INC_DIRS))
 LDFLAGS += -Wl,--gc-sections,--print-memory-usage -z defs 
 LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs 
+## for semihosting
+LDFLAGS += --specs=rdimon.specs -lc -lrdimon
 
 vpath %.c $(SRC_DIRS)
 vpath %.S $(SRC_DIRS)

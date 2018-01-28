@@ -5,18 +5,20 @@ set mem inaccessible-by-default off
 set confirm off
 #set target-async on
 
-set listsize 100
+#set listsize 100
+
+source dashboard.gdb
+dashboard source -style context 10
+dashboard assembly -style context 5
+
 
 target remote localhost:3333
 monitor reset halt
 monitor arm semihosting enable
 
-tui reg all
-#layout split
-layout regs
-layout src
-focus cmd
+
+
+
 load
 tbreak main
 continue
-

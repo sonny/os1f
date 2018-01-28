@@ -8,6 +8,11 @@ gdb_server:
 	@($(OPENOCD) -f board/stm32f7discovery.cfg 2>&1) > openocd.log &
 
 
+experimental-debug: $(ELF) | gdb_server
+	$(GDB) -q -x dash-debug-hw.gdb $<
+	@killall -v openocd
+
+
 debug: $(ELF) | gdb_server
 	$(GDB) -q -x debug-hw.gdb $<
 	@killall -v openocd
