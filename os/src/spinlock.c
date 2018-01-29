@@ -15,6 +15,7 @@
  * to ensure synchronization
  */
 
+/*
 __attribute__ ((naked)) bool spinlock_try_lock(volatile uint32_t *l)
 {
   __asm volatile("   mov   r1, #1       \n" 
@@ -58,3 +59,4 @@ void spinlock_unlock(volatile uint32_t *l)
   *l = SPINLOCK_UNLOCKED;
 }
 
+*/

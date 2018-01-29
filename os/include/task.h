@@ -20,19 +20,20 @@ void taskStart(void (*)(void*), int, struct task *);
 void * taskGet(int i);
 
 
-__attribute__((always_inline)) static inline bool
-task_change_from_state(struct task *t, uint32_t from, uint32_t to)
+__attribute__((always_inline)) static inline
+bool task_change_from_state(struct task *t, uint32_t from, uint32_t to)
 {
   return atomic_compare_exchange_strong(&(t->flags), &from, to);
 }
 
-__attribute__((always_inline)) static inline bool
-task_change_from_state_current(uint32_t from, uint32_t to)
+__attribute__((always_inline)) static inline
+bool task_change_from_state_current(uint32_t from, uint32_t to)
 {
   return task_change_from_state(current_task, from, to);
 }
 
-__attribute__((always_inline)) static inline void taskSleepUntil(uint32_t ms) 
+__attribute__((always_inline)) static inline
+void taskSleepUntil(uint32_t ms) 
 {
   if (task_change_from_state_current(TASK_ACTIVE, TASK_SLEEP)) {
     current_task->sleep_until = ms;
@@ -40,10 +41,25 @@ __attribute__((always_inline)) static inline void taskSleepUntil(uint32_t ms)
   }
 }
 
-__attribute__((always_inline)) static inline void taskSleep(uint32_t ms) 
+__attribute__((always_inline)) static inline
+void taskSleep(uint32_t ms) 
 {
   taskSleepUntil(HAL_GetTick() + ms);
 }
 
+__attribute__((always_inline)) static inline
+void taskWait(uint32_t state)
+{
+  if (task_change_from_state_current(TASK_ACTIVE, state)) {
+    syscall_yield();
+  }
+}
+
+// NOTE: cannot nest mutexes with this implementation
+__attribute__((always_inline)) static inline
+bool task_notify(uint32_t id, int state)
+{
+  return task_change_from_state(TCB[id], state, TASK_ACTIVE);
+}
 
 #endif /* __TASK_H__ */
