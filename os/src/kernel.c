@@ -38,7 +38,6 @@ void osStart(void)
 
 static void kernel_task(void *context)
 {
-  /* TODO: ensure atomicity */
   while (1) {
     // wake up sleeping tasks
     int i;
@@ -48,8 +47,9 @@ static void kernel_task(void *context)
       struct task *t = taskGet(i);
       if (t->flags & TASK_SLEEP) {
         if (t->sleep_until < tick) {
-          t->flags = TASK_ACTIVE;
-          t->sleep_until = 0;
+          if (task_change_from_state(t, TASK_SLEEP, TASK_ACTIVE)) {
+            t->sleep_until = 0;
+          }
         }
       }
     }
