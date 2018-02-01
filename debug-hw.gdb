@@ -10,7 +10,9 @@ set output-radix 16
 
 target remote localhost:3333
 monitor reset halt
+
 monitor arm semihosting enable
+#monitor tpiu config internal itm.fifo uart off 8000000
 
 tui reg all
 #layout split

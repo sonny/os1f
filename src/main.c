@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include "stm32f7xx_hal.h"
 #include "kernel.h"
 #include "memory.h"
@@ -23,13 +24,15 @@ static struct func_data fdata[4] = {
   {.name = "Task4", .sleep = 500},
 };
 
+#define DEFAULT_STACK_SIZE 512
+
 int main(void)
 {
   // start in handler mode - using MSP in privileged mode
   osInit();
 
   // temporary stack space
-  void * pspStart = mem_alloc(256) + 256;
+  void * pspStart = mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE;
  
   kernel_sync_barrier();
   kernel_PSP_set((uint32_t)pspStart);
@@ -37,17 +40,13 @@ int main(void)
   kernel_CONTROL_set(0x01 << 1 | 0x01 << 0); // use PSP with unprivileged thread mode
   kernel_sync_barrier();
   
-  struct task * t0 = task_create(task_func, 256, (void*)&fdata[0]);
-  struct task * t1 = task_create(task_func, 256, (void*)&fdata[1]);
-  struct task * t2 = task_create(task_func, 256, (void*)&fdata[2]);
-  struct task * t3 = task_create(task_func, 256, (void*)&fdata[3]);
+  struct task * t0 = task_create(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]);
+  struct task * t1 = task_create(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1]);
+  struct task * t2 = task_create(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[2]);
+  struct task * t3 = task_create(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[3]);
 
-  static char buffer[32];
-  os_snprintf(buffer, 32, "Ckock is %d\n", HAL_RCC_GetHCLKFreq());
-  printmsg(buffer);
-
-
-
+  printf("Clock is %d\n", HAL_RCC_GetHCLKFreq());
+  
   task_start(t0);
   task_start(t1);
   task_start(t2);
@@ -67,19 +66,18 @@ void task_func(void *context)
   struct func_data * fdata = context;
   while (1) {
     ++k;
-    os_snprintf(buffer, 32, "%s [%d]\n", fdata->name, k);
-    printmsg(buffer);
+    printf("%s [%d]\n", fdata->name, k);
     task_sleep(fdata->sleep);
 
   };
 }
 
-void printmsg(char *m)
-{
-  int data[3] = {
-    1,        // stdout
-    (int)m,   // pointer to data
-    strlen(m) // size of data
-  };
-  call_host(SEMIHOSTING_SYS_WRITE, data);
-}
+/* void printmsg(char *m) */
+/* { */
+/*   int data[3] = { */
+/*     1,        // stdout */
+/*     (int)m,   // pointer to data */
+/*     strlen(m) // size of data */
+/*   }; */
+/*   call_host(SEMIHOSTING_SYS_WRITE, data); */
+/* } */
