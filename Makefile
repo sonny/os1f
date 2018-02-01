@@ -25,14 +25,14 @@ DEPS :=
 FINAL := $(OUT)/$(PROJ)
 ELF   := $(FINAL).elf
 
-CFLAGS := -mcpu=cortex-m7 -mthumb -Og -gdwarf-3 -g3 -Wextra
+CFLAGS := -mcpu=cortex-m7 -mthumb -Og -g3 -Wextra
 CFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections
 CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants
 ##CFLAGS += -flto
 
 # TODO: implement non-printf trace functions
 #DEFINES := -DDEBUG -DTRACE -DSTM32F746xx
-DEFINES := -DDEBUG -DSTM32F746xx -DOS_USE_SEMIHOSTING
+DEFINES := -DDEBUG -DTRACE -DSTM32F746xx -DOS_USE_SEMIHOSTING -DOS_USE_TRACE_SEMIHOSTING_DEBUG
 
 ifeq ($(BOARD),DISCOVERY)
 DEFINES += -DBOARD_DISCOVERY

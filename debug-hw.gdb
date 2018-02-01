@@ -6,6 +6,7 @@ set confirm off
 #set target-async on
 
 set listsize 100
+set output-radix 16
 
 target remote localhost:3333
 monitor reset halt

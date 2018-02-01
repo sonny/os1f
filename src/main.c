@@ -28,15 +28,31 @@ int main(void)
   // start in handler mode - using MSP in privileged mode
   osInit();
 
-  taskStart(task_func, 256, (void*)&fdata[0]);
-  taskStart(task_func, 256, (void*)&fdata[1]);
-  taskStart(task_func, 256, (void*)&fdata[2]);
-  taskStart(task_func, 256, (void*)&fdata[3]);
+  // temporary stack space
+  void * pspStart = mem_alloc(256) + 256;
+ 
+  kernel_sync_barrier();
+  kernel_PSP_set((uint32_t)pspStart);
+  kernel_sync_barrier();
+  kernel_CONTROL_set(0x01 << 1 | 0x01 << 0); // use PSP with unprivileged thread mode
+  kernel_sync_barrier();
+  
+  struct task * t0 = task_create(task_func, 256, (void*)&fdata[0]);
+  struct task * t1 = task_create(task_func, 256, (void*)&fdata[1]);
+  struct task * t2 = task_create(task_func, 256, (void*)&fdata[2]);
+  struct task * t3 = task_create(task_func, 256, (void*)&fdata[3]);
 
   static char buffer[32];
-  
   os_snprintf(buffer, 32, "Ckock is %d\n", HAL_RCC_GetHCLKFreq());
   printmsg(buffer);
+
+
+
+  task_start(t0);
+  task_start(t1);
+  task_start(t2);
+  task_start(t3);
+  
 
   osStart(); // does not return
   
@@ -53,7 +69,8 @@ void task_func(void *context)
     ++k;
     os_snprintf(buffer, 32, "%s [%d]\n", fdata->name, k);
     printmsg(buffer);
-    taskSleep(fdata->sleep);
+    task_sleep(fdata->sleep);
+
   };
 }
 

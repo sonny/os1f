@@ -5,6 +5,7 @@ INC_DIRS += board/STM32F7_$(BOARD)/include/BSP
 
 INC_DIRS += system/include
 INC_DIRS += system/include/arm
+INC_DIRS += system/include/cortexm
 INC_DIRS += system/include/cmsis 
 INC_DIRS += system/include/stm32f7xx 
 
