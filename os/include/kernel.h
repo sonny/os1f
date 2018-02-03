@@ -4,8 +4,8 @@
 #include "stm32f7xx_hal.h"
 #include "defs.h"
 
-void osInit(void);
-void osStart(void);
+//void osInit(void);
+void os_start(void);
 
 __attribute__ ((always_inline)) static inline 
 void kernel_critical_begin(void)
@@ -22,6 +22,14 @@ void kernel_critical_end(void)
 }
 
 __attribute__ ((always_inline)) static inline 
+uint32_t kernel_SP_get(void)
+{
+  register uint32_t result;
+  __asm volatile ("mov %0, sp\n"  : "=r" (result) );
+  return(result);
+}
+
+__attribute__ ((always_inline)) static inline 
 uint32_t kernel_PSP_get(void)
 {
   register uint32_t result;
@@ -33,6 +41,12 @@ __attribute__ ((always_inline)) static inline
 void kernel_PSP_set(uint32_t sp)
 {
   __asm volatile ("MSR psp, %0\n" : : "r" (sp) : "sp");
+}
+
+__attribute__ ((always_inline)) static inline 
+void kernel_MSP_set(uint32_t sp)
+{
+  __asm volatile ("MSR msp, %0\n" : : "r" (sp) : "sp");
 }
 
 __attribute__ ((always_inline)) static inline 

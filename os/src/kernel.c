@@ -4,28 +4,19 @@
 #include "defs.h"
 #include "task.h"
 #include "syscall.h"
-#include "memory.h"
 
-void osInit(void)
+
+void os_start(void)
 {
-  HAL_Init();
+  HAL_Init(); 
 
-  // lowest priority 
-  //NVIC_SetPriority(PendSV_IRQn, 255);
-  //NVIC_SetPriority(SVC_IRQn, 254);
-  
-#ifdef ENABLE_FP
-  set_FPCCR( get_FPCCR() | FPCCR_LSPEN | FPCCR_ASPEN );
-  set_CONTROL( get_CONTROL() | CONTROL_FPCA );
-#endif /* ENABLE_FP */
+/* #ifdef ENABLE_FP */
+/*   set_FPCCR( get_FPCCR() | FPCCR_LSPEN | FPCCR_ASPEN ); */
+/*   set_CONTROL( get_CONTROL() | CONTROL_FPCA ); */
+/* #endif /\* ENABLE_FP *\/ */
 
-  mem_init();
   kernel_task_init();
-}
-
-void osStart(void)
-{
-  syscall_start();
+  // after here we are in user mode
 }
 
 void SysTick_Handler(void)

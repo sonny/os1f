@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "stm32f7xx_hal.h"
 #include "kernel.h"
-#include "memory.h"
+//#include "memory.h"
 #include "defs.h"
 #include "task.h"
 #include "semihosting.h"
@@ -28,32 +28,21 @@ static struct func_data fdata[4] = {
 
 int main(void)
 {
-  // start in handler mode - using MSP in privileged mode
-  osInit();
-
-  // temporary stack space
-  void * pspStart = mem_alloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE;
- 
-  kernel_sync_barrier();
-  kernel_PSP_set((uint32_t)pspStart);
-  kernel_sync_barrier();
-  kernel_CONTROL_set(0x01 << 1 | 0x01 << 0); // use PSP with unprivileged thread mode
-  kernel_sync_barrier();
-  
-  struct task * t0 = task_create(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]);
-  struct task * t1 = task_create(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1]);
-  struct task * t2 = task_create(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[2]);
-  struct task * t3 = task_create(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[3]);
+  // switch modes and make main a normal user task
+  os_start();
 
   printf("Clock is %d\n", HAL_RCC_GetHCLKFreq());
+  extern char _Heap_Begin, _Heap_Limit,_estack;
+  printf("Heap begin: 0x%x, Heap limit: 0x%x\n", &_Heap_Begin, &_Heap_Limit);
   
-  task_start(t0);
-  task_start(t1);
-  task_start(t2);
-  task_start(t3);
+  task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]);
   
-
-  osStart(); // does not return
+  uint32_t z = 0;
+  while (1) {
+    ++z;
+    printf("Main Task [%d]\n", z);
+    task_sleep(500);
+  }
   
   return 0;
 }

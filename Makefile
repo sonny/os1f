@@ -43,7 +43,7 @@ endif
 
 INCLUDES := $(addprefix -I, $(INC_DIRS))
 LDFLAGS += -Wl,--gc-sections,--print-memory-usage -z defs 
-LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs 
+LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs
 ## for semihosting
 LDFLAGS += --specs=rdimon.specs -lc -lrdimon
 

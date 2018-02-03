@@ -6,24 +6,28 @@
 #include "syscall.h"
 
 struct task {
-  void * psp;
-  uint32_t id;
+  void * stackp;
+  int32_t  id;
   uint32_t state;
   uint32_t sleep_until;  
 };
 
-struct task_iter {
-  uint32_t idx;
-};
+struct task * task_create(int stack_size);
+struct task * task_init(struct task *t, void (*func)(void*), void *context);
 
-struct task * task_create(void (*)(void*), int, void *);
-void task_iter_get(struct task_iter*);
-struct task * task_iter_next(struct task_iter*);
 
 __attribute__((always_inline)) static inline
-void task_start(struct task *task)
+void task_schedule(struct task *task)
 {
   syscall_task_start(task);
+}
+
+__attribute__((always_inline)) static inline
+void task_create_schedule(void (*func)(void*), int stack_size, void *context)
+{
+  struct task * t = task_create(stack_size);
+  task_init(t, func, context);
+  task_schedule(t);
 }
 
 __attribute__((always_inline)) static inline
@@ -44,5 +48,34 @@ void task_wait(uint32_t state)
 /* { */
 /*   return task_change_from_state(TCB[id], state, TASK_ACTIVE); */
 /* } */
+
+struct stacked_regs {
+  uint32_t r0;
+  uint32_t r1;
+  uint32_t r2;
+  uint32_t r3;
+  uint32_t r12;
+  uint32_t lr; // r14
+  uint32_t pc; // r15
+  uint32_t xpsr;
+};
+
+struct manual_regs {
+  uint32_t r4;
+  uint32_t r5;
+  uint32_t r6;
+  uint32_t r7;
+  uint32_t r8;
+  uint32_t r9;
+  uint32_t r10;
+  uint32_t r11;
+};
+
+struct regs {
+  struct manual_regs manual;
+  struct stacked_regs stacked;
+};
+
+
 
 #endif /* __TASK_H__ */
