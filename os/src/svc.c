@@ -8,10 +8,11 @@ static void svc_yield(void);
 static void svc_task_start(struct task *);
 static void svc_task_sleep(uint32_t);
 static void svc_task_wait(uint32_t);
+static void svc_event_wait(struct event *e);
+static void svc_event_notify(struct event *e);
 
 void SVC_Handler_C(void)
 {
-  //uint32_t psp = kernel_PSP_get();
   uint32_t r0, r1, r2, r3;
 
   // account for push done by the wrapper
@@ -39,6 +40,12 @@ void SVC_Handler_C(void)
     break;
   case SVC_TASK_WAIT:
     svc_task_wait(r1);
+    break;
+  case SVC_EVENT_WAIT:
+    svc_event_wait((struct event *)r1);
+    break;
+  case SVC_EVENT_NOTIFY:
+    svc_event_notify((struct event *)r1);
     break;
   default:
     kernel_break();
@@ -82,4 +89,19 @@ void svc_task_wait(uint32_t wait_state)
   kernel_task_wait(wait_state);
   kernel_critical_end();
   kernel_PendSV_set();
+}
+
+void svc_event_wait(struct event *e)
+{
+  kernel_critical_begin();
+  kernel_task_event_wait(e);
+  kernel_critical_end();
+  kernel_PendSV_set();
+}
+
+void svc_event_notify(struct event *e)
+{
+  kernel_critical_begin();
+  kernel_task_event_notify(e);
+  kernel_critical_end();
 }

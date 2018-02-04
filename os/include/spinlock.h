@@ -19,11 +19,24 @@
  * to ensure synchronization
  */
 
+
+__attribute__ ((always_inline)) static inline
+bool spinlock_locked_as(volatile uint32_t *l, uint32_t lock_value)
+{
+  return *l == lock_value;
+}
+
+__attribute__ ((always_inline)) static inline
+bool spinlock_try_lock_value(volatile uint32_t *l, uint32_t lock_value)
+{
+  const uint32_t unlocked = SPINLOCK_UNLOCKED;
+  return atomic_compare_exchange_strong(l, &unlocked, lock_value);
+}
+
 __attribute__ ((always_inline)) static inline
 bool spinlock_try_lock(volatile uint32_t *l)
 {
-  const uint32_t unlocked = SPINLOCK_UNLOCKED;
-  return atomic_compare_exchange_strong(l, &unlocked, SPINLOCK_LOCKED);
+  return spinlock_try_lock_value(l, SPINLOCK_LOCKED);
 }
 
 __attribute__ ((always_inline)) static inline

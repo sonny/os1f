@@ -10,38 +10,41 @@
 
 struct mutex {
   volatile uint32_t lock;
-  uint32_t waiting;
+  uint32_t depth;
+  struct event waiting;
 };
 
-static inline void mutex_init(struct mutex* m) {
-  m->waiting = 0;
+static inline
+void mutex_init(struct mutex* m) {
+  m->depth = 0;
+  event_init(m);
 }
 
-static inline void mutex_lock(struct mutex *m) {
-  int tid = task_current()->id;
-  
-  while (!spinlock_try_lock(&m->lock)) {
-    atomic_fetch_or(&m->waiting, (1<<tid));
-    task_wait(TASK_STATE_WAIT_MUTEX);     /* this yields */
+static inline
+void mutex_lock(struct mutex *m) {
+  int tid = current()->id;
+
+  if (spinlock_locked_as(&m->lock, tid)) {
+    m->depth++;
+  }
+  else {
+    while (!spinlock_try_lock(&m->lock, tid)) {
+      event_wait(&m->waiting);
+    }
   }
 
-  /* got lock */
-  atomic_fetch_and(&m->waiting, ~(1<<tid));
+  /* got lock -- waiting cleared by notify */
 }
 
 
-static inline void mutex_unlock(struct mutex *m) {
-  uint32_t waiting = m->waiting;
-  spinlock_unlock(&m->lock);
-  int n = 31;
-  
-  while(waiting) {
-    int z = __CLZ(waiting);
-    int id = n - z;
-    //atomic_fetch_and(&m->waiting, ~(1<<id));
-    task_notify(id, TASK_STATE_WAIT_MUTEX);
-    waiting <<= (z+1);
-    n -= (z+1);
+static inline
+void mutex_unlock(struct mutex *m) {
+  if (m->depth == 0) {
+    spinlock_unlock(&m->lock);
+    event_notify(&m->waiting);
+  }
+  else {
+    m->depth--;
   }
 }
 

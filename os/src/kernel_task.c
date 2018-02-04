@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "kernel.h"
 #include "task.h"
+#include "event.h"
 #include "defs.h"
 #include <string.h>
 #include <assert.h>
@@ -145,6 +146,29 @@ void kernel_task_sleep(uint32_t ms)
 void kernel_task_wait(uint32_t wait_state)
 {
   current_task->state = wait_state;
+}
+
+void kernel_task_event_wait(struct event * e)
+{
+  e->waiting |= 1 << current_task->id;
+  current_task->state = TASK_WAIT;
+}
+
+void kernel_task_event_notify(struct event * e)
+{
+  uint32_t waiting = e->waiting;
+  int n = 31;
+  
+  while(waiting) {
+    uint32_t z = __CLZ(waiting);
+    int id = n - z;
+    // notify task
+    TCB[id]->state = TASK_ACTIVE;
+    waiting <<= (z+1);
+    n -= (z+1);
+  }
+  e->waiting = 0;
+
 }
 
 void kernel_task_update_global_SP(void)
