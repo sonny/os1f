@@ -5,7 +5,9 @@
 #include <stdbool.h>
 #include <stdatomic.h>
 #include "stm32f746xx.h"
+#include "kernel_task.h"
 #include "task.h"
+#include "event.h"
 #include "spinlock.h"
 
 struct mutex {
@@ -17,23 +19,36 @@ struct mutex {
 static inline
 void mutex_init(struct mutex* m) {
   m->depth = 0;
-  event_init(m);
+  event_init(&m->waiting);
 }
 
 static inline
 void mutex_lock(struct mutex *m) {
-  int tid = current()->id;
+  int tid = current_task_id();
 
   if (spinlock_locked_as(&m->lock, tid)) {
     m->depth++;
   }
   else {
-    while (!spinlock_try_lock(&m->lock, tid)) {
+    while (!spinlock_try_lock_value(&m->lock, tid)) {
       event_wait(&m->waiting);
     }
   }
 
   /* got lock -- waiting cleared by notify */
+}
+
+static inline
+int mutex_lock_try(struct mutex *m) {
+  int tid = current_task_id();
+
+  if (spinlock_locked_as(&m->lock, tid)) {
+    m->depth++;
+    return 1;
+  }
+  else 
+    return spinlock_try_lock_value(&m->lock, tid);
+
 }
 
 

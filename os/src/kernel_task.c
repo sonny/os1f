@@ -181,4 +181,7 @@ void kernel_task_update_local_SP(void)
  current_task->stackp = (void*)kernel_PSP_get();
 }
 
-
+uint32_t current_task_id(void)
+{
+  return current_task->id;
+}
