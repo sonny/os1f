@@ -3,11 +3,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <malloc.h>
 #include "syscall.h"
 #include "event.h"
 
 struct task {
   void * stackp;
+  void * stack_free;
   int32_t  id;
   uint32_t state;
   uint32_t sleep_until;
@@ -16,6 +18,13 @@ struct task {
 
 struct task * task_create(int stack_size);
 struct task * task_init(struct task *t, void (*func)(void*), void *context);
+
+__attribute__((always_inline)) static inline
+void task_free(struct task * t)
+{
+  free(t->stack_free);
+  free(t);
+}
 
 __attribute__((always_inline)) static inline
 void task_schedule(struct task *task)
@@ -44,18 +53,20 @@ void task_sleep(uint32_t ms)
   syscall_task_sleep(ms);
 }
 
-__attribute__((always_inline)) static inline
-void task_wait(uint32_t state)
-{
-  syscall_task_wait(state);
-}
+/* __attribute__((always_inline)) static inline */
+/* void task_wait(uint32_t state) */
+/* { */
+/*   syscall_task_wait(state); */
+/* } */
 
 __attribute__((always_inline)) static inline
 void task_join(struct task * t)
 {
   event_wait(&t->join);
-  // clean up task
+  syscall_task_remove(t);
+  task_free(t);
 }
+
 
 struct stacked_regs {
   uint32_t r0;

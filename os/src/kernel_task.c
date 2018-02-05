@@ -8,11 +8,13 @@
 
 #define IDLE_STACK_SIZE 128
 #define MAIN_STACK_SIZE 1024
+#define IDLE_TASK_ID    -1
+#define DEAD_TASK_ID    -2
 
 static struct task *TCB[TASK_COUNT];
 static struct task *current_task = NULL;
 static int task_insert_idx = 1;
-static int current_task_idx = -1;
+static int current_task_idx = IDLE_TASK_ID;
 
 /* idle task */
 static uint8_t idle_task_stack[IDLE_STACK_SIZE];
@@ -74,7 +76,7 @@ void kernel_task_init(void)
   memset(TCB, 0, TASK_COUNT * sizeof(struct task*));
   // Init Idle Task
   idle_task.stackp = &idle_task_stack[0] + IDLE_STACK_SIZE;
-  idle_task.id = -1;
+  idle_task.id = IDLE_TASK_ID;
   idle_task.state = TASK_ACTIVE;
   idle_task.sleep_until = 0;
   task_init(&idle_task, kernel_task_idle_func, NULL);
@@ -101,7 +103,7 @@ void kernel_task_active_next(void)
    *    giving up.
    */
   current_task = &idle_task; // the default
-  current_task_idx = -1;
+  current_task_idx = IDLE_TASK_ID;
   do {
     next_task_idx = (next_task_idx + 1) % task_insert_idx;
     struct task * task = TCB[next_task_idx];
@@ -132,8 +134,22 @@ void kernel_task_wakeup(void)
 
 void kernel_task_start(struct task * new)
 {
-  new->id = task_insert_idx;
-  TCB[task_insert_idx++] = new;
+  int i, new_idx = task_insert_idx;
+  bool recycle = false;
+
+  // look for a task to recycle
+  for (i = 1; i < task_insert_idx; ++i) {
+    if (TCB[i] == 0) {
+      new_idx = i;
+      recycle = true;
+      break;
+    }
+  }
+
+  if (!recycle) task_insert_idx++;
+  
+  new->id = new_idx;
+  TCB[new_idx] = new;
   new->state = TASK_ACTIVE;
 }
 
@@ -143,10 +159,10 @@ void kernel_task_sleep(uint32_t ms)
   current_task->sleep_until = HAL_GetTick() + ms;
 }
 
-void kernel_task_wait(uint32_t wait_state)
-{
-  current_task->state = wait_state;
-}
+/* void kernel_task_wait(uint32_t wait_state) */
+/* { */
+/*   current_task->state = wait_state; */
+/* } */
 
 void kernel_task_event_wait(struct event * e)
 {
@@ -163,12 +179,21 @@ void kernel_task_event_notify(struct event * e)
     uint32_t z = __CLZ(waiting);
     int id = n - z;
     // notify task
-    TCB[id]->state = TASK_ACTIVE;
+    struct task * t = TCB[id];
+    if (t) 
+      TCB[id]->state = TASK_ACTIVE;
+
+    // update indexes
     waiting <<= (z+1);
     n -= (z+1);
   }
   e->waiting = 0;
 
+}
+
+void kernel_task_remove(struct task * t)
+{
+  TCB[t->id] = NULL;
 }
 
 void kernel_task_update_global_SP(void)

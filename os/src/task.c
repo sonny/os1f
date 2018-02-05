@@ -25,12 +25,16 @@ struct task * task_create(int stack_size)
 
   // We need to ensure that the stack is 8-byte aligned
   // We allocate 7 more bytes and round up the address
-  void * s = (void*)((uintptr_t)malloc(stack_size + 7) & ~(uintptr_t)0x7);
-  // WARNING: this address cannot be freed
+  //void * s = (void*)((uintptr_t)malloc(stack_size + 7) & ~(uintptr_t)0x7);
+  void * s = malloc(stack_size + 7);
+  t->stack_free = s;
+  s = (void*)((uintptr_t)s & ~(uintptr_t)0x7);
 
   memset(s, 0, stack_size);
   t->stackp = s + stack_size;
-  
+
+  event_init(&t->join);
+
   return t;
 }
 
