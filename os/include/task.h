@@ -23,11 +23,12 @@ void task_schedule(struct task *task)
 }
 
 __attribute__((always_inline)) static inline
-void task_create_schedule(void (*func)(void*), int stack_size, void *context)
+struct task * task_create_schedule(void (*func)(void*), int stack_size, void *context)
 {
   struct task * t = task_create(stack_size);
   task_init(t, func, context);
   task_schedule(t);
+  return t;
 }
 
 __attribute__((always_inline)) static inline
