@@ -41,7 +41,7 @@ void syscall_start(void)
 }
 
 static inline __attribute__ ((always_inline))
-void syscall_yield(uint32_t ms)
+void syscall_yield(void)
 {
   __syscall(SVC_YIELD);
 }

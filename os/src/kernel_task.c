@@ -185,3 +185,11 @@ uint32_t current_task_id(void)
 {
   return current_task->id;
 }
+
+void kernel_task_end(void)
+{
+  current_task->state = TASK_END;
+  event_notify(&current_task->join);
+  task_yield();
+}
+

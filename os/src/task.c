@@ -3,17 +3,15 @@
 #include "task.h"
 #include "defs.h"
 
-static void task_end(void)
-{
-  while (1);
-}
+// implemented in kernel_task
+extern void kernel_task_end(void);
 
 struct task * task_init(struct task *t, void (*func)(void*), void *context)
 {
   struct regs *r = t->stackp - sizeof(struct regs);
   r->stacked.r0 = (uint32_t)context;
   r->stacked.pc = (uint32_t)func & 0xfffffffe;
-  r->stacked.lr = (uint32_t)&task_end;
+  r->stacked.lr = (uint32_t)&kernel_task_end;
   r->stacked.xpsr = 0x01000000;   // thumb mode enabled (required);
 
   t->stackp = r;
@@ -35,6 +33,5 @@ struct task * task_create(int stack_size)
   
   return t;
 }
-
 
 

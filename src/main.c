@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "stm32f7xx_hal.h"
 #include "kernel.h"
+#include "kernel_task.h"
 #include "defs.h"
 #include "task.h"
 #include "semihosting.h"
@@ -9,6 +10,7 @@
 
 void printmsg(char *m);
 static void task_func(void *);
+static void task_once(void *);
 
 struct func_data {
   char * name;
@@ -34,8 +36,13 @@ int main(void)
   printf("Heap begin: 0x%x, Heap limit: 0x%x\n", &_Heap_Begin, &_Heap_Limit);
   
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]);
+  struct task * tonce =
+    task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL);
 
-  memory_thread_test();
+  task_join(tonce);
+  
+  // Unocmment to test memory allocation syncronization
+  // memory_thread_test();
   
   uint32_t z = 0;
   while (1) {
@@ -49,7 +56,6 @@ int main(void)
 
 void task_func(void *context)
 {
-  char buffer[32];
   int divisor = 1000000; // 10 million
   unsigned int k = 0;
   struct func_data * fdata = context;
@@ -61,12 +67,11 @@ void task_func(void *context)
   };
 }
 
-/* void printmsg(char *m) */
-/* { */
-/*   int data[3] = { */
-/*     1,        // stdout */
-/*     (int)m,   // pointer to data */
-/*     strlen(m) // size of data */
-/*   }; */
-/*   call_host(SEMIHOSTING_SYS_WRITE, data); */
-/* } */
+void task_once(void *context)
+{
+  uint32_t tick = HAL_GetTick();
+  int tid = current_task_id();
+  
+  printf("ONCE Task id [%d] at %d ms\n", tid, tick);
+}
+

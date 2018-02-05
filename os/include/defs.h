@@ -7,6 +7,7 @@
 #define TASK_ACTIVE   (1)
 #define TASK_SLEEP    (2)
 #define TASK_WAIT     (3)
+#define TASK_END      (4)
 
 #define TASK_COUNT    16
 

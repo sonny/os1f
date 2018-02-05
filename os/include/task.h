@@ -4,17 +4,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "syscall.h"
+#include "event.h"
 
 struct task {
   void * stackp;
   int32_t  id;
   uint32_t state;
-  uint32_t sleep_until;  
+  uint32_t sleep_until;
+  struct event join;
 };
 
 struct task * task_create(int stack_size);
 struct task * task_init(struct task *t, void (*func)(void*), void *context);
-
 
 __attribute__((always_inline)) static inline
 void task_schedule(struct task *task)
@@ -32,6 +33,12 @@ struct task * task_create_schedule(void (*func)(void*), int stack_size, void *co
 }
 
 __attribute__((always_inline)) static inline
+void task_yield(void) 
+{
+  syscall_yield();
+}
+
+__attribute__((always_inline)) static inline
 void task_sleep(uint32_t ms) 
 {
   syscall_task_sleep(ms);
@@ -43,12 +50,12 @@ void task_wait(uint32_t state)
   syscall_task_wait(state);
 }
 
-// NOTE: cannot nest mutexes with this implementation
-/* __attribute__((always_inline)) static inline */
-/* bool task_notify(uint32_t id, int state) */
-/* { */
-/*   return task_change_from_state(TCB[id], state, TASK_ACTIVE); */
-/* } */
+__attribute__((always_inline)) static inline
+void task_join(struct task * t)
+{
+  event_wait(&t->join);
+  // clean up task
+}
 
 struct stacked_regs {
   uint32_t r0;
