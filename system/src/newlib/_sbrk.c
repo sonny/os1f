@@ -18,13 +18,14 @@ _sbrk(int incr);
 // The definitions used here should be kept in sync with the
 // stack definitions in the linker script.
 
+extern char _Heap_Begin; // Defined by the linker.
+extern char _Heap_Limit; // Defined by the linker.
+
+static char* current_heap_end;
+
 caddr_t
 _sbrk(int incr)
 {
-  extern char _Heap_Begin; // Defined by the linker.
-  extern char _Heap_Limit; // Defined by the linker.
-
-  static char* current_heap_end;
   char* current_block_address;
 
   if (current_heap_end == 0)
@@ -59,6 +60,11 @@ _sbrk(int incr)
   current_heap_end += incr;
 
   return (caddr_t) current_block_address;
+}
+
+uint32_t heap_size_get(void)
+{
+  return current_heap_end - &_Heap_Begin;
 }
 
 // ----------------------------------------------------------------------------

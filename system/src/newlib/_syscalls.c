@@ -15,7 +15,7 @@ int errno;
 #include <_ansi.h>
 #include <_syslist.h>
 #include <errno.h>
-//#include <sys/types.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/times.h>
@@ -568,7 +568,7 @@ static int
 newslot (void);
 
 /* Register name faking - works in collusion with the linker.  */
-register char* stack_ptr asm ("sp");
+register char* stack_ptr __asm ("sp");
 
 /* following is copied from libc/stdio/local.h to check std streams */
 extern void _EXFUN(__sinit,(struct _reent*));
@@ -1046,7 +1046,9 @@ _stat (const char*fname, struct stat *st)
     {
       return -1;
     }
-  st->st_mode |= S_IFREG | S_IREAD;
+  /* st->st_mode |= S_IFREG | S_IREAD; S_READ is BSD_VISIBLE*/
+  st->st_mode |= S_IFREG;
+  
   res = _swistat (fd, st);
   /* Not interested in the error. */
   _close (fd);

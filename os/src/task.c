@@ -1,6 +1,5 @@
 #include <string.h>
 #include <stdlib.h>
-//#include "memory.h"
 #include "task.h"
 #include "defs.h"
 
@@ -25,7 +24,12 @@ struct task * task_create(int stack_size)
 {
   struct task *t = malloc(sizeof(struct task));
   memset(t, 0, sizeof(struct task));
-  void * s = malloc(stack_size);
+
+  // We need to ensure that the stack is 8-byte aligned
+  // We allocate 7 more bytes and round up the address
+  void * s = (void*)((uintptr_t)malloc(stack_size + 7) & ~(uintptr_t)0x7);
+  // WARNING: this address cannot be freed
+
   memset(s, 0, stack_size);
   t->stackp = s + stack_size;
   

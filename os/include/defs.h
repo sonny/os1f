@@ -20,6 +20,7 @@
 #define SVC_EVENT_WAIT    0x00010004
 #define SVC_EVENT_NOTIFY  0x00010005
 
+#define DEFAULT_STACK_SIZE 512
 
 /* Forward struct declarations */
 struct task;
