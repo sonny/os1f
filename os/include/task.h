@@ -69,6 +69,17 @@ void task_join(struct task * t)
   task_free(t);
 }
 
+static inline
+struct task * list_to_task(struct list * list)
+{
+  return (struct task *)list;
+}
+
+static inline
+struct list * task_to_list(struct task * task)
+{
+  return (struct list *)task;
+}
 
 struct stacked_regs {
   uint32_t r0;

@@ -40,17 +40,11 @@ void SVC_Handler_C(void)
   case SVC_TASK_SLEEP:
     svc_task_sleep(r1);
     break;
-  /* case SVC_TASK_WAIT: */
-  /*   svc_task_wait(r1); */
-  /*   break; */
   case SVC_EVENT_WAIT:
     svc_event_wait((struct event *)r1);
     break;
   case SVC_EVENT_NOTIFY:
     svc_event_notify((struct event *)r1);
-    break;
-  case SVC_TASK_REMOVE:
-    svc_task_remove((struct task *)r1);
     break;
   default:
     kernel_break();
@@ -87,14 +81,6 @@ void svc_task_sleep(uint32_t ms)
   kernel_critical_end();
   kernel_PendSV_set();
 }
-
-/* void svc_task_wait(uint32_t wait_state) */
-/* { */
-/*   kernel_critical_begin(); */
-/*   kernel_task_wait(wait_state); */
-/*   kernel_critical_end(); */
-/*   kernel_PendSV_set(); */
-/* } */
 
 void svc_event_wait(struct event *e)
 {

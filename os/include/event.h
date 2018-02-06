@@ -1,18 +1,17 @@
 #ifndef __EVENT_H__
 #define __EVENT_H__
 
-#include <stdatomic.h>
-#include "stm32f746xx.h"
-#include "task.h"
+#include "syscall.h"
+#include "list.h"
 
 struct event {
-  uint32_t waiting;
+  struct list waiting;
 };
 
 static inline
 void event_init(struct event *e)
 {
-  e->waiting = 0;
+  list_init(&e->waiting);
 }
 
 static inline
@@ -26,6 +25,12 @@ static inline
 void event_wait(struct event *e)
 {
   syscall_event_wait(e);
+}
+
+static inline
+bool event_task_waiting(struct event *e)
+{
+  return !list_empty(&e->waiting);
 }
 
 #endif  /* __EVENT_H__ */

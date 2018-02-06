@@ -58,12 +58,6 @@ void syscall_task_sleep(uint32_t ms)
   __syscall2(SVC_TASK_SLEEP, ms);
 }
 
-/* static inline __attribute__ ((always_inline)) */
-/* void syscall_task_wait(uint32_t state) */
-/* { */
-/*   __syscall2(SVC_TASK_WAIT, state); */
-/* } */
-
 static inline __attribute__ ((always_inline))
 void syscall_event_wait(struct event *e)
 {

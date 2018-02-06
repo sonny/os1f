@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include "kernel.h"
 #include "task.h"
-#include "task_list.h"
 #include "event.h"
 #include "defs.h"
 #include "list.h"
@@ -15,7 +14,7 @@
 static struct task * current_task = NULL;
 static struct list task_active;
 static struct list task_sleeping;
-static struct list task_waiting;
+//static struct list task_waiting;
 
 /* idle task */
 static uint8_t idle_task_stack[IDLE_STACK_SIZE];
@@ -33,7 +32,7 @@ void kernel_task_init(void)
   // Init TCB
   list_init(&task_active);
   list_init(&task_sleeping);
-  list_init(&task_waiting);
+  //  list_init(&task_waiting);
   
   // Init Idle Task
   idle_task.stackp = &idle_task_stack[0] + IDLE_STACK_SIZE;
@@ -49,7 +48,7 @@ void kernel_task_init(void)
 // NOTE: Do Not Call from inside an IRQ
 // This function switches modes from privileged to user
 // Handle with care
-// NOTE: NO MALLOC until after syscall_start
+// NOTE: NO MALLOC (or any other syscall) until after syscall_start
 static void kernel_task_main_hoist(void)
 {
   // Copy current stack to new main stack
@@ -77,7 +76,7 @@ static void kernel_task_main_hoist(void)
   list_init(&main_task.node);
   list_addAtRear(&task_active, task_to_list(&main_task));
 
-  current_task = NULL;
+  current_task = &main_task;
   
   // Set PSP to our new stack and Change mode to unprivileged
   kernel_sync_barrier();
@@ -94,31 +93,28 @@ static void kernel_task_main_hoist(void)
 
 void kernel_task_schedule(void)
 {
-  if (current_task) {
-    switch(current_task->state) {
-    case TASK_END:
-      break;
-    case TASK_SLEEP:
-      list_addAtRear(&task_sleeping, task_to_list(current_task)); 
-      break;
-    case TASK_WAIT:
-      list_addAtRear(&task_waiting, task_to_list(current_task));
-      break;
-    case TASK_ACTIVE:
-      list_addAtRear(&task_active, task_to_list(current_task)); 
-      break;
-    default:
-      // invalid state
-      kernel_break();
-      break;
-    }
+  switch(current_task->state) {
+  case TASK_END:
+    // do not reschedule
+    break;
+  case TASK_SLEEP:
+    // Task is scheduled by task_sleep
+    break;
+  case TASK_WAIT:
+    // Task is scheduled by task_event_wait
+    break;
+  case TASK_ACTIVE:
+    list_addAtRear(&task_active, task_to_list(current_task)); 
+    break;
+  default:
+    // invalid state
+    kernel_break();
+    break;
   }
-  current_task = NULL;
 }
 
 void kernel_task_active_next(void)
 {
-  assert(current_task == NULL && "Something bad happened to the scheduler");
   if (!list_empty(&task_active))
     current_task = list_to_task(list_removeFront(&task_active));
   else
@@ -136,13 +132,14 @@ void kernel_task_sleep(uint32_t ms)
   assert(current_task && "Current Task is NULL");
   current_task->state = TASK_SLEEP;
   current_task->sleep_until = HAL_GetTick() + ms;
+  list_addAtRear(&task_sleeping, task_to_list(current_task)); 
 }
 
 void kernel_task_event_wait(struct event * e)
 {
   assert(current_task && "Cannot Task is NULL");
-  e->waiting |= 1 << current_task->id;
   current_task->state = TASK_WAIT;
+  list_addAtRear(&e->waiting, task_to_list(current_task));
 }
 
 static inline
@@ -167,23 +164,14 @@ void kernel_task_wakeup(void)
   list_each_do(&task_sleeping, kernel_task_wakeup_task, (void*)tick);
 }
 
-static inline
-void kernel_task_event_notify_task(struct list *node, const void * ctx)
-{
-  const struct event * e = ctx;
-  struct task * t = list_to_task(node);
-  assert(t->state == TASK_WAIT && "Tasks in waiting queue must be waiting.");
-  if (((uint32_t)1 << t->id) & e->waiting) {
-    t->state = TASK_ACTIVE;
-
-    list_remove(node);
-    list_addAtRear(&task_active, node);
-  }
-}
-
 void kernel_task_event_notify(struct event * e)
 {
-  list_each_do(&task_waiting, kernel_task_event_notify_task, e);
+  while(!list_empty(&e->waiting)) {
+    struct task * task = list_to_task(list_removeFront(&e->waiting));
+    assert(task->state == TASK_WAIT && "Tasks in waiting queue must be waiting.");
+    task->state = TASK_ACTIVE;
+    list_addAtRear(&task_active, task_to_list(task));
+  }
 }
 
 void kernel_task_update_global_SP(void)
