@@ -5,6 +5,7 @@
 #include "defs.h"
 
 void kernel_task_init(void);
+void kernel_task_schedule(void);
 void kernel_task_active_next(void);
 void kernel_task_wakeup(void);
 void kernel_task_start(struct task * new);

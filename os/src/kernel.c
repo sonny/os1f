@@ -37,6 +37,7 @@ void PendSV_Handler_C(void)
   kernel_critical_begin();
 
   kernel_task_update_local_SP();
+  kernel_task_schedule();
   kernel_task_wakeup();
   kernel_task_active_next();
   kernel_task_update_global_SP();

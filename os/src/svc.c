@@ -113,7 +113,9 @@ void svc_event_notify(struct event *e)
 
 void svc_task_remove(struct task *t)
 {
+  /*
   kernel_critical_begin();
   kernel_task_remove(t);
   kernel_critical_end();
+  */
 }

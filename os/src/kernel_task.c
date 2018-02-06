@@ -10,7 +10,6 @@
 #define IDLE_STACK_SIZE 128
 #define MAIN_STACK_SIZE 1024
 #define IDLE_TASK_ID    -1
-#define DEAD_TASK_ID    -2
 
 struct task_node {
   struct list list;
@@ -18,7 +17,9 @@ struct task_node {
 };
 
 static struct task_node * current_task_node = NULL;
-static struct list _tcb;
+static struct list task_active;
+static struct list task_sleeping;
+static struct list task_waiting;
 
 /* idle task */
 static uint8_t idle_task_stack[IDLE_STACK_SIZE];
@@ -45,7 +46,10 @@ struct task *current_task(void)
 void kernel_task_init(void)
 {
   // Init TCB
-  list_init(&_tcb);
+  list_init(&task_active);
+  list_init(&task_sleeping);
+  list_init(&task_waiting);
+  
   // Init Idle Task
   idle_task.stackp = &idle_task_stack[0] + IDLE_STACK_SIZE;
   idle_task.id = IDLE_TASK_ID;
@@ -95,7 +99,7 @@ static void kernel_task_main_hoist(void)
 
   list_init((struct list*)&main_task_node);
   main_task_node.task = &main_task;
-  list_addAtRear(&_tcb, (struct list *)&main_task_node);
+  list_addAtRear(&task_active, (struct list *)&main_task_node);
 
   current_task_node = NULL;
   
@@ -112,28 +116,36 @@ static void kernel_task_main_hoist(void)
   syscall_start();
 }
 
-void kernel_task_active_next(void)
+void kernel_task_schedule(void)
 {
-  struct task_node *result = NULL;
-  struct list *next;
-
-   if (current_task_node) {
-     if (current_task_node->task->state == TASK_END)
-       free(current_task_node);
-     else
-       list_addAtRear(&_tcb, (struct list *)current_task_node); 
-   } 
-  
-  for (next = _tcb.next; next != &_tcb; next = next->next) {
-    struct task * t = ((struct task_node*)next)->task;
-    if ( t->state == TASK_ACTIVE ) {
-      list_remove(next);
-      result = (struct task_node*)next;
+  if (current_task_node) {
+    switch(current_task_node->task->state) {
+    case TASK_END:
+      free(current_task_node);
+      break;
+    case TASK_SLEEP:
+      list_addAtRear(&task_sleeping, (struct list *)current_task_node); 
+      break;
+    case TASK_WAIT:
+      list_addAtRear(&task_waiting, (struct list *)current_task_node);
+      break;
+    case TASK_ACTIVE:
+      list_addAtRear(&task_active, (struct list *)current_task_node); 
+      break;
+    default:
+      // invalid state
+      kernel_break();
       break;
     }
   }
+  current_task_node = NULL;
+}
 
-  current_task_node = result;
+void kernel_task_active_next(void)
+{
+  assert(current_task_node == NULL && "Something bad happened to the scheduler");
+  if (!list_empty(&task_active))
+    current_task_node = (struct task_node*)list_removeFront(&task_active);
 }
 
 static inline
@@ -141,29 +153,33 @@ void kernel_task_wakeup_task(struct list *l, const void * context)
 {
   struct task *t = ((struct task_node *)l)->task;
   const uint32_t tick = (uint32_t)context;
-  if (t->state == TASK_SLEEP) {
-    if (t->sleep_until < tick) {
-      t->sleep_until = 0;
-      t->state = TASK_ACTIVE;
-    }
+  assert(t->state == TASK_SLEEP && "Tasks in sleeping queue must be asleep.");
+
+  if (t->sleep_until < tick) {
+    t->sleep_until = 0;
+    t->state = TASK_ACTIVE;
+
+    list_remove(l);
+    list_addAtRear(&task_active, l);
   }
 }
 
 void kernel_task_wakeup(void)
 {
   uint32_t tick = HAL_GetTick(); 
-  list_each_do(&_tcb, kernel_task_wakeup_task, (void*)tick);
+  list_each_do(&task_sleeping, kernel_task_wakeup_task, (void*)tick);
 }
 
 void kernel_task_start(struct task * new)
 {
   struct task_node * tn = kernel_task_create_task_node(new);
   new->state = TASK_ACTIVE; 
-  list_addAtRear(&_tcb, (struct list*)tn);
+  list_addAtRear(&task_active, (struct list*)tn);
 }
 
 void kernel_task_sleep(uint32_t ms)
 {
+  assert(current_task_node && "Cannot sleep idle task.");
   struct task * t = current_task();
   t->state = TASK_SLEEP;
   t->sleep_until = HAL_GetTick() + ms;
@@ -171,8 +187,8 @@ void kernel_task_sleep(uint32_t ms)
 
 void kernel_task_event_wait(struct event * e)
 {
+  assert(current_task_node && "Cannot wait idle task.");
   struct task * t = current_task();
-  
   e->waiting |= 1 << t->id;
   t->state = TASK_WAIT;
 }
@@ -182,15 +198,18 @@ void kernel_task_event_notify_task(struct list *l, const void * ctx)
 {
   const struct event * e = ctx;
   struct task * t = ((struct task_node *)l)->task;
+  assert(t->state == TASK_WAIT && "Tasks in waiting queue must be waiting.");
   if (((uint32_t)1 << t->id) & e->waiting) {
     t->state = TASK_ACTIVE;
+
+    list_remove(l);
+    list_addAtRear(&task_active, l);
   }
 }
 
 void kernel_task_event_notify(struct event * e)
 {
-  uint32_t tick = HAL_GetTick(); 
-  list_each_do(&_tcb, kernel_task_event_notify_task, e);
+  list_each_do(&task_waiting, kernel_task_event_notify_task, e);
 }
 
 /* void kernel_task_remove(struct task * t) */
