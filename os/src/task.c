@@ -18,6 +18,7 @@ struct task * task_init(struct task *t, void (*func)(void*), void *context)
   return t;
 }
 
+static int32_t next_task_id = 1;
 struct task * task_create(int stack_size)
 {
   struct task *t = malloc(sizeof(struct task));
@@ -32,6 +33,7 @@ struct task * task_create(int stack_size)
 
   memset(s, 0, stack_size);
   t->stackp = s + stack_size;
+  t->id = next_task_id++;
 
   event_init(&t->join);
 

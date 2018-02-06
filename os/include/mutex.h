@@ -56,7 +56,8 @@ static inline
 void mutex_unlock(struct mutex *m) {
   if (m->depth == 0) {
     spinlock_unlock(&m->lock);
-    event_notify(&m->waiting);
+    if (m->waiting.waiting)
+      event_notify(&m->waiting);
   }
   else {
     m->depth--;

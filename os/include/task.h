@@ -63,7 +63,7 @@ __attribute__((always_inline)) static inline
 void task_join(struct task * t)
 {
   event_wait(&t->join);
-  syscall_task_remove(t);
+  //syscall_task_remove(t);
   task_free(t);
 }
 
