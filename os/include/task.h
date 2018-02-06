@@ -6,8 +6,10 @@
 #include <malloc.h>
 #include "syscall.h"
 #include "event.h"
+#include "list.h"
 
 struct task {
+  struct list node;
   void * stackp;
   void * stack_free;
   int32_t  id;
@@ -17,7 +19,7 @@ struct task {
 };
 
 struct task * task_create(int stack_size);
-struct task * task_init(struct task *t, void (*func)(void*), void *context);
+struct task * task_stack_init(struct task *t, void (*func)(void*), void *context);
 
 __attribute__((always_inline)) static inline
 void task_free(struct task * t)
@@ -36,7 +38,7 @@ __attribute__((always_inline)) static inline
 struct task * task_create_schedule(void (*func)(void*), int stack_size, void *context)
 {
   struct task * t = task_create(stack_size);
-  task_init(t, func, context);
+  task_stack_init(t, func, context);
   task_schedule(t);
   return t;
 }

@@ -6,7 +6,7 @@
 // implemented in kernel_task
 extern void kernel_task_end(void);
 
-struct task * task_init(struct task *t, void (*func)(void*), void *context)
+struct task * task_stack_init(struct task *t, void (*func)(void*), void *context)
 {
   struct regs *r = t->stackp - sizeof(struct regs);
   r->stacked.r0 = (uint32_t)context;
@@ -35,6 +35,7 @@ struct task * task_create(int stack_size)
   t->stackp = s + stack_size;
   t->id = next_task_id++;
 
+  list_init(&t->node);
   event_init(&t->join);
 
   return t;

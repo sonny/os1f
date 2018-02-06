@@ -27,5 +27,6 @@
 /* Forward struct declarations */
 struct task;
 struct event;
+struct list;
 
 #endif  /*__DEFS_H__ */

@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "kernel.h"
 #include "task.h"
+#include "task_list.h"
 #include "event.h"
 #include "defs.h"
 #include "list.h"
@@ -11,12 +12,7 @@
 #define MAIN_STACK_SIZE 1024
 #define IDLE_TASK_ID    -1
 
-struct task_node {
-  struct list list;
-  struct task *task;
-};
-
-static struct task_node * current_task_node = NULL;
+static struct task * current_task = NULL;
 static struct list task_active;
 static struct list task_sleeping;
 static struct list task_waiting;
@@ -28,20 +24,9 @@ static struct task idle_task = {0};
 /* main task */
 static uint8_t main_task_stack[MAIN_STACK_SIZE]; // default size of main stack
 static struct task main_task = {0};
-static struct task_node main_task_node;
 
 static void kernel_task_main_hoist(void);
-
 static void kernel_task_idle_func(void *c) { while (1); }
-
-static inline
-struct task *current_task(void)
-{
-  if (current_task_node)
-    return current_task_node->task;
-  else
-    return &idle_task;
-}
 
 void kernel_task_init(void)
 {
@@ -55,18 +40,10 @@ void kernel_task_init(void)
   idle_task.id = IDLE_TASK_ID;
   idle_task.state = TASK_ACTIVE;
   idle_task.sleep_until = 0;
-  task_init(&idle_task, kernel_task_idle_func, NULL);
+  list_init(&idle_task.node);
+  task_stack_init(&idle_task, kernel_task_idle_func, NULL);
   
   kernel_task_main_hoist();
-}
-
-static inline
-struct task_node * kernel_task_create_task_node(struct task *task)
-{
-  struct task_node * result = malloc(sizeof(struct task_node));
-  list_init((struct list *)result);
-  result->task = task;
-  return result;
 }
 
 // NOTE: Do Not Call from inside an IRQ
@@ -97,11 +74,10 @@ static void kernel_task_main_hoist(void)
   main_task.state = TASK_ACTIVE;
   main_task.sleep_until = 0;
 
-  list_init((struct list*)&main_task_node);
-  main_task_node.task = &main_task;
-  list_addAtRear(&task_active, (struct list *)&main_task_node);
+  list_init(&main_task.node);
+  list_addAtRear(&task_active, task_to_list(&main_task));
 
-  current_task_node = NULL;
+  current_task = NULL;
   
   // Set PSP to our new stack and Change mode to unprivileged
   kernel_sync_barrier();
@@ -118,19 +94,18 @@ static void kernel_task_main_hoist(void)
 
 void kernel_task_schedule(void)
 {
-  if (current_task_node) {
-    switch(current_task_node->task->state) {
+  if (current_task) {
+    switch(current_task->state) {
     case TASK_END:
-      free(current_task_node);
       break;
     case TASK_SLEEP:
-      list_addAtRear(&task_sleeping, (struct list *)current_task_node); 
+      list_addAtRear(&task_sleeping, task_to_list(current_task)); 
       break;
     case TASK_WAIT:
-      list_addAtRear(&task_waiting, (struct list *)current_task_node);
+      list_addAtRear(&task_waiting, task_to_list(current_task));
       break;
     case TASK_ACTIVE:
-      list_addAtRear(&task_active, (struct list *)current_task_node); 
+      list_addAtRear(&task_active, task_to_list(current_task)); 
       break;
     default:
       // invalid state
@@ -138,20 +113,42 @@ void kernel_task_schedule(void)
       break;
     }
   }
-  current_task_node = NULL;
+  current_task = NULL;
 }
 
 void kernel_task_active_next(void)
 {
-  assert(current_task_node == NULL && "Something bad happened to the scheduler");
+  assert(current_task == NULL && "Something bad happened to the scheduler");
   if (!list_empty(&task_active))
-    current_task_node = (struct task_node*)list_removeFront(&task_active);
+    current_task = list_to_task(list_removeFront(&task_active));
+  else
+    current_task = &idle_task;
+}
+
+void kernel_task_start(struct task * new)
+{
+  new->state = TASK_ACTIVE; 
+  list_addAtRear(&task_active, task_to_list(new));
+}
+
+void kernel_task_sleep(uint32_t ms)
+{
+  assert(current_task && "Current Task is NULL");
+  current_task->state = TASK_SLEEP;
+  current_task->sleep_until = HAL_GetTick() + ms;
+}
+
+void kernel_task_event_wait(struct event * e)
+{
+  assert(current_task && "Cannot Task is NULL");
+  e->waiting |= 1 << current_task->id;
+  current_task->state = TASK_WAIT;
 }
 
 static inline
-void kernel_task_wakeup_task(struct list *l, const void * context)
+void kernel_task_wakeup_task(struct list *node, const void * context)
 {
-  struct task *t = ((struct task_node *)l)->task;
+  struct task *t = list_to_task(node);
   const uint32_t tick = (uint32_t)context;
   assert(t->state == TASK_SLEEP && "Tasks in sleeping queue must be asleep.");
 
@@ -159,8 +156,8 @@ void kernel_task_wakeup_task(struct list *l, const void * context)
     t->sleep_until = 0;
     t->state = TASK_ACTIVE;
 
-    list_remove(l);
-    list_addAtRear(&task_active, l);
+    list_remove(node);
+    list_addAtRear(&task_active, node);
   }
 }
 
@@ -170,40 +167,17 @@ void kernel_task_wakeup(void)
   list_each_do(&task_sleeping, kernel_task_wakeup_task, (void*)tick);
 }
 
-void kernel_task_start(struct task * new)
-{
-  struct task_node * tn = kernel_task_create_task_node(new);
-  new->state = TASK_ACTIVE; 
-  list_addAtRear(&task_active, (struct list*)tn);
-}
-
-void kernel_task_sleep(uint32_t ms)
-{
-  assert(current_task_node && "Cannot sleep idle task.");
-  struct task * t = current_task();
-  t->state = TASK_SLEEP;
-  t->sleep_until = HAL_GetTick() + ms;
-}
-
-void kernel_task_event_wait(struct event * e)
-{
-  assert(current_task_node && "Cannot wait idle task.");
-  struct task * t = current_task();
-  e->waiting |= 1 << t->id;
-  t->state = TASK_WAIT;
-}
-
 static inline
-void kernel_task_event_notify_task(struct list *l, const void * ctx)
+void kernel_task_event_notify_task(struct list *node, const void * ctx)
 {
   const struct event * e = ctx;
-  struct task * t = ((struct task_node *)l)->task;
+  struct task * t = list_to_task(node);
   assert(t->state == TASK_WAIT && "Tasks in waiting queue must be waiting.");
   if (((uint32_t)1 << t->id) & e->waiting) {
     t->state = TASK_ACTIVE;
 
-    list_remove(l);
-    list_addAtRear(&task_active, l);
+    list_remove(node);
+    list_addAtRear(&task_active, node);
   }
 }
 
@@ -212,34 +186,27 @@ void kernel_task_event_notify(struct event * e)
   list_each_do(&task_waiting, kernel_task_event_notify_task, e);
 }
 
-/* void kernel_task_remove(struct task * t) */
-/* { */
-/*   //TCB[t->id] = NULL; */
-/* } */
-
-
 void kernel_task_update_global_SP(void)
 {
-  struct task * t = current_task();
-  kernel_PSP_set((uint32_t)t->stackp);
+  assert(current_task && "Current task cannot be null");
+  kernel_PSP_set((uint32_t)current_task->stackp);
 }
 
 void kernel_task_update_local_SP(void)
 {
-  struct task * t = current_task();
-  t->stackp = (void*)kernel_PSP_get();
+  assert(current_task && "Current task cannot be null");
+  current_task->stackp = (void*)kernel_PSP_get();
 }
 
 uint32_t current_task_id(void)
 {
-  return current_task()->id;
+  return current_task->id;
 }
 
 void kernel_task_end(void)
 {
-  struct task * t = current_task();
-  t->state = TASK_END;
-  event_notify(&t->join);
+  current_task->state = TASK_END;
+  event_notify(&current_task->join);
   task_yield();
 }
 
