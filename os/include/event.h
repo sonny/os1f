@@ -8,6 +8,8 @@ struct event {
   struct list waiting;
 };
 
+#define EVENT_STATIC_INIT(name) { LIST_STATIC_INIT( (name).waiting ) }
+
 static inline
 void event_init(struct event *e)
 {

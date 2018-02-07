@@ -23,6 +23,7 @@
 #define SVC_TASK_REMOVE   0x00010006
 
 #define DEFAULT_STACK_SIZE 512
+#define STDIO_BUFFER_SIZE 256
 
 /* Forward struct declarations */
 struct task;

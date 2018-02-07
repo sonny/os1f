@@ -12,36 +12,39 @@
 #define IDLE_TASK_ID    -1
 
 static struct task * current_task = NULL;
-static struct list task_active;
-static struct list task_sleeping;
-//static struct list task_waiting;
+static struct list task_active = LIST_STATIC_INIT(task_active);
+static struct list task_sleeping = LIST_STATIC_INIT(task_sleeping);
 
 /* idle task */
 static uint8_t idle_task_stack[IDLE_STACK_SIZE];
-static struct task idle_task = {0};
+static struct task idle_task = {
+  .node = LIST_STATIC_INIT(idle_task.node),
+  .stackp = &idle_task_stack[0] + IDLE_STACK_SIZE,
+  .stack_free = 0,
+  .id = -1,
+  .state = TASK_ACTIVE,
+  .sleep_until = 0,
+  .join = EVENT_STATIC_INIT(idle_task.join)
+};
 
 /* main task */
 static uint8_t main_task_stack[MAIN_STACK_SIZE]; // default size of main stack
-static struct task main_task = {0};
+static struct task main_task = {
+  .node = LIST_STATIC_INIT(main_task.node),
+  .stackp = &main_task_stack[0] + MAIN_STACK_SIZE,
+  .stack_free = 0,
+  .id = 0,
+  .state = TASK_ACTIVE,
+  .sleep_until = 0,
+  .join = EVENT_STATIC_INIT(main_task.join)
+};
 
 static void kernel_task_main_hoist(void);
 static void kernel_task_idle_func(void *c) { while (1); }
 
 void kernel_task_init(void)
 {
-  // Init TCB
-  list_init(&task_active);
-  list_init(&task_sleeping);
-  //  list_init(&task_waiting);
-  
-  // Init Idle Task
-  idle_task.stackp = &idle_task_stack[0] + IDLE_STACK_SIZE;
-  idle_task.id = IDLE_TASK_ID;
-  idle_task.state = TASK_ACTIVE;
-  idle_task.sleep_until = 0;
-  list_init(&idle_task.node);
   task_stack_init(&idle_task, kernel_task_idle_func, NULL);
-  
   kernel_task_main_hoist();
 }
 
@@ -69,11 +72,6 @@ static void kernel_task_main_hoist(void)
   
   // Init main task object
   main_task.stackp = adjusted_main_task_sp;
-  main_task.id = 0;
-  main_task.state = TASK_ACTIVE;
-  main_task.sleep_until = 0;
-
-  list_init(&main_task.node);
   list_addAtRear(&task_active, task_to_list(&main_task));
 
   current_task = &main_task;

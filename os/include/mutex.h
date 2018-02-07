@@ -16,6 +16,8 @@ struct mutex {
   struct event waiting;
 };
 
+#define MUTEX_STATIC_INIT(name) { 0, 0, EVENT_STATIC_INIT( (name).waiting ) }
+
 static inline
 void mutex_init(struct mutex* m) {
   m->depth = 0;

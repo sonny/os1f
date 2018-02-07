@@ -1,7 +1,7 @@
 #include <malloc.h>
 #include "mutex.h"
 
-static struct mutex malloc_mutex = {0};
+static struct mutex malloc_mutex = MUTEX_STATIC_INIT(malloc_mutex);
 
 void __malloc_lock (struct _reent reent)
 {

@@ -5,10 +5,12 @@
 #include "task.h"
 #include "syscall.h"
 
+extern void initialise_monitor_handles(void);
 
 void os_start(void)
 {
   HAL_Init(); 
+  initialise_monitor_handles();
 
 /* #ifdef ENABLE_FP */
 /*   set_FPCCR( get_FPCCR() | FPCCR_LSPEN | FPCCR_ASPEN ); */

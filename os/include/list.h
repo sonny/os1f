@@ -10,6 +10,8 @@ struct list {
   struct list *next;
 };
 
+#define LIST_STATIC_INIT(name) { &(name), &(name) }
+
 void printlist(struct list *head);
 
 /**

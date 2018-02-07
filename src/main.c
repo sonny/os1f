@@ -1,12 +1,12 @@
 #include <string.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include "stm32f7xx_hal.h"
 #include "kernel.h"
 #include "kernel_task.h"
 #include "defs.h"
 #include "task.h"
 #include "semihosting.h"
-#include "vsnprintf.h"
+#include "os_printf.h"
 
 void printmsg(char *m);
 static void task_func(void *);
