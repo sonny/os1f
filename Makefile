@@ -31,9 +31,11 @@ CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants
 ##CFLAGS += -flto
 
 # TODO: implement non-printf trace functions
-DEFINES := -DDEBUG -DTRACE -DSTM32F746xx 
+DEFINES := -DSTM32F746xx 
 #DEFINEs += -DOS_USE_TRACE_ITM
+DEFINES += -DDEBUG -DTRACE 
 DEFINES += -DOS_USE_SEMIHOSTING -DOS_USE_TRACE_SEMIHOSTING_DEBUG
+#DEFINES += -DOS_USE_VCP
 
 ifeq ($(BOARD),DISCOVERY)
 DEFINES += -DBOARD_DISCOVERY

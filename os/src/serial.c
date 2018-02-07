@@ -1,4 +1,5 @@
 #include "stm32f7xx_hal.h"
+#include "board.h"
 #include "serial.h"
 #include "event.h"
 
@@ -60,21 +61,11 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   HAL_GPIO_Init(VCP_RX_GPIO_PORT, &GPIO_InitStruct);
 
   /* enable interrupt in NVIC */
-  HAL_NVIC_SetPriority(VCP_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(VCP_IRQn);
+  //HAL_NVIC_SetPriority(VCP_IRQn, 0, 0);
+  //HAL_NVIC_EnableIRQ(VCP_IRQn);
+  //NVIC_SetPriority(VCP_IRQn, 128);
+  NVIC_EnableIRQ(VCP_IRQn);
 }
-
-/* 
-   NOTE: not safe AT ALL. Its fine if only the VT100
-   code is using this, but if something else calls
-   this register event outside of VT100's lock, the
-   whole thing will get hosed.
- */
-//static struct event *vcp_event = NULL;
-//void serial_register_event(struct event *e)
-//{
-//  vcp_event = e;
-//}
 
 //void USART1_IRQHandler(void)
 void VCP_IRQHandler(void)
@@ -82,10 +73,17 @@ void VCP_IRQHandler(void)
   HAL_UART_IRQHandler(&VCPHandle);
 }
 
-int _write(int file, char *ptr, int len)
+/* int _write(int file, char *ptr, int len) */
+/* { */
+/*   (void)file; */
+/*   HAL_UART_Transmit_IT(&VCPHandle, ptr, len); */
+/*   return len; */
+/* } */
+
+int os_puts_vcp(char *buffer, int len)
 {
-  (void)file;
-  HAL_UART_Transmit_IT(&VCPHandle, ptr, len);
+  HAL_UART_Transmit_IT(&VCPHandle, buffer, len); 
+  event_wait(VCPCompleteEvent);
   return len;
 }
 

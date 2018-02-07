@@ -1,7 +1,8 @@
 #include <stdint.h>
+#include "defs.h"
 #include "kernel.h"
 #include "kernel_task.h"
-#include "defs.h"
+#include "serial.h"
 #include "task.h"
 #include "syscall.h"
 
@@ -9,7 +10,8 @@ extern void initialise_monitor_handles(void);
 
 void os_start(void)
 {
-  HAL_Init(); 
+  HAL_Init();
+  serialInit();
   initialise_monitor_handles();
 
 /* #ifdef ENABLE_FP */

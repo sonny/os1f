@@ -25,6 +25,10 @@
 #define DEFAULT_STACK_SIZE 512
 #define STDIO_BUFFER_SIZE 256
 
+#ifndef VCP_BAUD
+#define VCP_BAUD 115200
+#endif
+  
 /* Forward struct declarations */
 struct task;
 struct event;
