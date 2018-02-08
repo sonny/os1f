@@ -61,10 +61,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   HAL_GPIO_Init(VCP_RX_GPIO_PORT, &GPIO_InitStruct);
 
   /* enable interrupt in NVIC */
-  //HAL_NVIC_SetPriority(VCP_IRQn, 0, 0);
-  //HAL_NVIC_EnableIRQ(VCP_IRQn);
-  //NVIC_SetPriority(VCP_IRQn, 128);
-  NVIC_EnableIRQ(VCP_IRQn);
+  HAL_NVIC_SetPriority(VCP_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(VCP_IRQn);
 }
 
 //void USART1_IRQHandler(void)
@@ -89,6 +87,6 @@ int os_puts_vcp(char *buffer, int len)
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-  event_notify(VCPCompleteEvent);
+  protected_event_notify(VCPCompleteEvent);
 }
 
