@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "task.h"
 #include "defs.h"
+#include "kernel_task.h"
 
 // implemented in kernel_task
 extern void kernel_task_end(void);
@@ -26,7 +27,6 @@ struct task * task_create(int stack_size)
 
   // We need to ensure that the stack is 8-byte aligned
   // We allocate 7 more bytes and round up the address
-  //void * s = (void*)((uintptr_t)malloc(stack_size + 7) & ~(uintptr_t)0x7);
   void * s = malloc(stack_size + 7);
   t->stack_free = s;
   s = (void*)((uintptr_t)s & ~(uintptr_t)0x7);
@@ -41,4 +41,43 @@ struct task * task_create(int stack_size)
   return t;
 }
 
+static void protected_task_start(void * cxt)
+{
+  struct task * new = cxt;
+  kernel_critical_begin();
+  kernel_task_start(new);
+  kernel_critical_end();
+}
+
+static void protected_task_sleep(void *cxt)
+{
+  uint32_t ms = (uint32_t)cxt;
+  kernel_critical_begin();
+  kernel_task_sleep(ms);
+  kernel_critical_end();
+  kernel_PendSV_set();
+}
+
+static void protected_task_yield(void *cxt)
+{
+  kernel_PendSV_set();
+}
+
+inline
+void task_schedule(struct task *task)
+{
+  service_call(protected_task_start, task);
+}
+
+inline
+void task_sleep(uint32_t ms) 
+{
+  service_call(protected_task_sleep, (void*)ms);
+}
+
+inline
+void task_yield(void) 
+{
+  service_call(protected_task_yield, NULL);
+}
 

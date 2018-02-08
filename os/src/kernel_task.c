@@ -59,6 +59,19 @@ void kernel_task_init(void)
   kernel_task_main_hoist();
 }
 
+static
+void protected_start(void * cxt)
+{
+  kernel_PendSV_set();
+}
+
+static inline
+void service_start(void)
+{
+  service_call(protected_start, NULL);
+}
+
+
 // NOTE: Do Not Call from inside an IRQ
 // This function switches modes from privileged to user
 // Handle with care

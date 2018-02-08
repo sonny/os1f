@@ -43,19 +43,15 @@ struct task {
 
 struct task * task_create(int stack_size);
 struct task * task_stack_init(struct task *t, void (*func)(void*), void *context);
-
+void task_schedule(struct task *task);
+void task_sleep(uint32_t ms);
+void task_yield(void);
 
 __attribute__((always_inline)) static inline
 void task_free(struct task * t)
 {
   free(t->stack_free);
   free(t);
-}
-
-__attribute__((always_inline)) static inline
-void task_schedule(struct task *task)
-{
-  service_task_start(task);
 }
 
 __attribute__((always_inline)) static inline
@@ -67,17 +63,6 @@ struct task * task_create_schedule(void (*func)(void*), int stack_size, void *co
   return t;
 }
 
-__attribute__((always_inline)) static inline
-void task_yield(void) 
-{
-  service_yield();
-}
-
-__attribute__((always_inline)) static inline
-void task_sleep(uint32_t ms) 
-{
-  service_task_sleep(ms);
-}
 
 __attribute__((always_inline)) static inline
 void task_join(struct task * t)
