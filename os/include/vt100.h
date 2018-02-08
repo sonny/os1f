@@ -23,7 +23,7 @@ typedef struct {
 
 void term_init(void);
 void term_cleanup(void);
-void term_set_scroll(int line, int count);
-void term_printf_at(int col, int row, const char *fmt, ...);
-void term_vprintf_at_wait(int col, int row, const char *fmt, va_list args);
+//void term_set_scroll(int line, int count);
+int term_printf_at(int col, int row, const char *fmt, ...);
+
 #endif /* VT100_H_ */

@@ -22,7 +22,7 @@
 #define SVC_EVENT_NOTIFY  0x00010005
 #define SVC_TASK_REMOVE   0x00010006
 
-#define DEFAULT_STACK_SIZE 512
+#define DEFAULT_STACK_SIZE 256
 #define STDIO_BUFFER_SIZE 256
 
 #ifndef VCP_BAUD
@@ -30,8 +30,9 @@
 #endif
   
 /* Forward struct declarations */
-typedef struct task task_t;
+typedef struct task  task_t;
 typedef struct event event_t;
-typedef struct list list_t;
+typedef struct list  list_t;
+typedef struct mutex mutex_t;
 
 #endif  /*__DEFS_H__ */

@@ -7,18 +7,23 @@
 
 int os_iprintf(const char *fmt, ...)
 {
-  int len;
   va_list va;
 
-  char *buffer = malloc(STDIO_BUFFER_SIZE);
   va_start (va, fmt);
-  len = os_vsniprintf(buffer, STDIO_BUFFER_SIZE, fmt, va);
+  int len = os_viprintf(fmt, va);
   va_end (va);
 
+  return len;
+
+}
+
+int os_viprintf(const char *fmt, va_list va)
+{
+  char *buffer = malloc(STDIO_BUFFER_SIZE);
+  int len = os_vsniprintf(buffer, STDIO_BUFFER_SIZE, fmt, va);
   os_puts(buffer, len);
   free(buffer);
   return len;
-
 }
 
 int os_vsniprintf(char * buff, size_t size, const char *fmt, va_list va)
@@ -95,7 +100,7 @@ int os_itoa(int val, char *bf, int radix, bool is_unsigned)
   p += num_digits;
   do {
     int digit = val % radix;
-    *(--p) = (digit < 10) ? '0' + digit : 'a' + digit;
+    *(--p) = (digit < 10) ? '0' + digit : 'a' + digit - 10;
     val /= radix;
       
   } while (val > 0);

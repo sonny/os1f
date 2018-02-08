@@ -19,13 +19,13 @@ struct mutex {
 #define MUTEX_STATIC_INIT(name) { 0, 0, EVENT_STATIC_INIT( (name).waiting ) }
 
 static inline
-void mutex_init(struct mutex* m) {
+void mutex_init(mutex_t* m) {
   m->depth = 0;
   event_init(&m->waiting);
 }
 
 static inline
-void mutex_lock(struct mutex *m) {
+void mutex_lock(mutex_t *m) {
   int tid = current_task_id();
 
   if (spinlock_locked_as(&m->lock, tid)) {
@@ -41,7 +41,7 @@ void mutex_lock(struct mutex *m) {
 }
 
 static inline
-int mutex_lock_try(struct mutex *m) {
+int mutex_lock_try(mutex_t *m) {
   int tid = current_task_id();
 
   if (spinlock_locked_as(&m->lock, tid)) {
@@ -55,7 +55,7 @@ int mutex_lock_try(struct mutex *m) {
 
 
 static inline
-void mutex_unlock(struct mutex *m) {
+void mutex_unlock(mutex_t *m) {
   if (m->depth == 0) {
     spinlock_unlock(&m->lock);
     if (event_task_waiting(&m->waiting))

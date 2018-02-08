@@ -2,6 +2,7 @@
 #include "board.h"
 #include "serial.h"
 #include "event.h"
+#include "mutex.h"
 
 static UART_HandleTypeDef VCPHandle;
 static event_t _vcp_complete_event;
@@ -78,10 +79,14 @@ void VCP_IRQHandler(void)
 /*   return len; */
 /* } */
 
+static mutex_t serial_lock = MUTEX_STATIC_INIT(serial_lock);
+
 int os_puts_vcp(char *buffer, int len)
 {
+  mutex_lock(&serial_lock);
   HAL_UART_Transmit_IT(&VCPHandle, buffer, len); 
   event_wait(VCPCompleteEvent);
+  mutex_unlock(&serial_lock);
   return len;
 }
 
