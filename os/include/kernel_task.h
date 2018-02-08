@@ -15,7 +15,8 @@ void kernel_task_update_global_SP(void);
 void kernel_task_update_local_SP(void);
 void kernel_task_event_wait(struct event * e);
 void kernel_task_event_notify(struct event * e);
-void kernel_task_remove(struct task *);
+void kernel_task_save_context(void);
+void kernel_task_load_context(void);
 
 uint32_t current_task_id(void);
 

@@ -26,7 +26,7 @@ FINAL := $(OUT)/$(PROJ)
 ELF   := $(FINAL).elf
 
 CFLAGS := -mcpu=cortex-m7 -mthumb -Og -g3 -Wextra -std=c11
-CFLAGS += -fmessage-length=0 -fsigned-char -ffunction-sections
+CFLAGS += -fsigned-char -ffunction-sections
 CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants
 ##CFLAGS += -flto
 

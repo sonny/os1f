@@ -8,7 +8,7 @@
 #include <assert.h>
 
 #define IDLE_STACK_SIZE 128
-#define MAIN_STACK_SIZE 1024
+#define MAIN_STACK_SIZE 1024  // default size of main stack
 #define IDLE_TASK_ID    -1
 
 static struct task * current_task = NULL;
@@ -16,10 +16,10 @@ static struct list task_active = LIST_STATIC_INIT(task_active);
 static struct list task_sleeping = LIST_STATIC_INIT(task_sleeping);
 
 /* idle task */
-static uint8_t idle_task_stack[IDLE_STACK_SIZE];
+static uint8_t idle_task_stack[IDLE_STACK_SIZE] __attribute__((aligned (8)));
 static struct task idle_task = {
   .node = LIST_STATIC_INIT(idle_task.node),
-  .stackp = &idle_task_stack[0] + IDLE_STACK_SIZE,
+  .sp = &idle_task_stack[0] + IDLE_STACK_SIZE,
   .stack_free = 0,
   .id = -1,
   .state = TASK_ACTIVE,
@@ -28,10 +28,10 @@ static struct task idle_task = {
 };
 
 /* main task */
-static uint8_t main_task_stack[MAIN_STACK_SIZE]; // default size of main stack
+static uint8_t main_task_stack[MAIN_STACK_SIZE] __attribute__((aligned (8)));
 static struct task main_task = {
   .node = LIST_STATIC_INIT(main_task.node),
-  .stackp = &main_task_stack[0] + MAIN_STACK_SIZE,
+  .sp = &main_task_stack[0] + MAIN_STACK_SIZE,
   .stack_free = 0,
   .id = 0,
   .state = TASK_ACTIVE,
@@ -41,6 +41,16 @@ static struct task main_task = {
 
 static void kernel_task_main_hoist(void);
 static void kernel_task_idle_func(void *c) { while (1); }
+
+void kernel_task_save_context(void)
+{
+  __asm volatile ("stmia %0, {r4-r11} \n" :: "r" (&current_task->sw_context) :);
+}
+
+void kernel_task_load_context(void)
+{
+  __asm volatile ("ldmia %0, {r4-r11} \n" :: "r" (&current_task->sw_context) :);
+}
 
 void kernel_task_init(void)
 {
@@ -52,6 +62,7 @@ void kernel_task_init(void)
 // This function switches modes from privileged to user
 // Handle with care
 // NOTE: NO MALLOC (or any other syscall) until after syscall_start
+extern uint32_t main_return_point;
 static void kernel_task_main_hoist(void)
 {
   // Copy current stack to new main stack
@@ -64,15 +75,19 @@ static void kernel_task_main_hoist(void)
   // Note: this is where the stack pointer will be once
   // we enter the context switching handler.
   // Advance main_task_sp to account for stacked/pushed regs
-  void * adjusted_main_task_sp = main_task_sp - sizeof(struct regs);
+  void * adjusted_main_task_sp = main_task_sp - sizeof(hw_stack_frame_t);
   // Ensure that result stack is aligned on 8 byte boundary
   if ((uint32_t)adjusted_main_task_sp % 8) {
     adjusted_main_task_sp -= 4;
   }
   
   // Init main task object
-  main_task.stackp = adjusted_main_task_sp;
-  list_addAtRear(&task_active, task_to_list(&main_task));
+  main_task.sp = adjusted_main_task_sp;
+
+  // Setup return HW frame
+  hw_stack_frame_t * frame = adjusted_main_task_sp;
+  frame->pc = main_return_point;
+  frame->xpsr = 0x01000000;
 
   current_task = &main_task;
   
@@ -87,6 +102,7 @@ static void kernel_task_main_hoist(void)
 
   // need to call start here in order to keep the SP valid
   syscall_start();
+  __asm volatile("main_return_point: \n");
 }
 
 void kernel_task_schedule(void)
@@ -175,13 +191,13 @@ void kernel_task_event_notify(struct event * e)
 void kernel_task_update_global_SP(void)
 {
   assert(current_task && "Current task cannot be null");
-  kernel_PSP_set((uint32_t)current_task->stackp);
+  kernel_PSP_set((uint32_t)current_task->sp);
 }
 
 void kernel_task_update_local_SP(void)
 {
   assert(current_task && "Current task cannot be null");
-  current_task->stackp = (void*)kernel_PSP_get();
+  current_task->sp = (void*)kernel_PSP_get();
 }
 
 uint32_t current_task_id(void)

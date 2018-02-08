@@ -36,16 +36,19 @@ void SysTick_Handler(void)
 
 
 // called by ASM PendSV_Handler
-void PendSV_Handler_C(void)
+//void PendSV_Handler_C(void)
+void PendSV_Handler(void)
 {
   kernel_critical_begin();
+  kernel_task_save_context();
 
   kernel_task_update_local_SP();
   kernel_task_schedule();
   kernel_task_wakeup();
   kernel_task_active_next();
   kernel_task_update_global_SP();
-    
+
+  kernel_task_load_context();
   kernel_critical_end();
 }
 

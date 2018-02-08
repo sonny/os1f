@@ -8,13 +8,13 @@ extern void kernel_task_end(void);
 
 struct task * task_stack_init(struct task *t, void (*func)(void*), void *context)
 {
-  struct regs *r = t->stackp - sizeof(struct regs);
-  r->stacked.r0 = (uint32_t)context;
-  r->stacked.pc = (uint32_t)func & 0xfffffffe;
-  r->stacked.lr = (uint32_t)&kernel_task_end;
-  r->stacked.xpsr = 0x01000000;   // thumb mode enabled (required);
+  hw_stack_frame_t *frame = t->sp - sizeof(hw_stack_frame_t);
+  frame->r0 = (uint32_t)context;
+  frame->pc = (uint32_t)func & 0xfffffffe;
+  frame->lr = (uint32_t)&kernel_task_end;
+  frame->xpsr = 0x01000000;   // thumb mode enabled (required);
 
-  t->stackp = r;
+  t->sp = frame;
   return t;
 }
 
@@ -32,7 +32,7 @@ struct task * task_create(int stack_size)
   s = (void*)((uintptr_t)s & ~(uintptr_t)0x7);
 
   memset(s, 0, stack_size);
-  t->stackp = s + stack_size;
+  t->sp = s + stack_size;
   t->id = next_task_id++;
 
   list_init(&t->node);

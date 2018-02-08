@@ -13,21 +13,18 @@ static void svc_event_notify(struct event *e);
 static void svc_task_remove(struct task *t);
 
 
-void SVC_Handler_C(void)
+//void SVC_Handler_C(void)
+void SVC_Handler(void)
 {
-  uint32_t r0, r1, r2, r3;
+  register uint32_t * frame;
+  __asm volatile("mrs %0, psp \n" : "=r" (frame) ::);
 
-  // account for push done by the wrapper
-  __asm volatile("mrs r12, psp      \n"
-                 "ldr %0, [r12, 32] \n"
-                 "ldr %1, [r12, 36] \n"
-                 "ldr %2, [r12, 40] \n"
-                 "ldr %3, [r12, 44] \n"
-                 : "=r" (r0), "=r" (r1), "=r" (r2), "=r" (r3)
-                 : /* no input */
-                 : "r12" );
-
-  switch (r0) {
+  uint32_t call = frame[0],
+    arg0 = frame[1],
+    arg1 = frame[2],
+    arg2 = frame[3];
+  
+  switch (call) {
   case SVC_YIELD:
     svc_yield();
     break;
@@ -35,16 +32,16 @@ void SVC_Handler_C(void)
     svc_start();
     break;
   case SVC_TASK_START:
-    svc_task_start((struct task *)r1);
+    svc_task_start((struct task *)arg0);
     break;
   case SVC_TASK_SLEEP:
-    svc_task_sleep(r1);
+    svc_task_sleep(arg0);
     break;
   case SVC_EVENT_WAIT:
-    svc_event_wait((struct event *)r1);
+    svc_event_wait((struct event *)arg0);
     break;
   case SVC_EVENT_NOTIFY:
-    svc_event_notify((struct event *)r1);
+    svc_event_notify((struct event *)arg0);
     break;
   default:
     kernel_break();
@@ -55,10 +52,12 @@ void SVC_Handler_C(void)
 static inline
 void svc_start(void)
 {
-  kernel_critical_begin();
-  kernel_task_active_next();
-  kernel_task_update_global_SP();
-  kernel_critical_end();
+  kernel_PendSV_set();
+
+  /* kernel_critical_begin(); */
+  /* kernel_task_active_next(); */
+  /* kernel_task_update_global_SP(); */
+  /* kernel_critical_end(); */
 }
 
 static inline
@@ -97,11 +96,3 @@ void svc_event_notify(struct event *e)
   kernel_critical_end();
 }
 
-void svc_task_remove(struct task *t)
-{
-  /*
-  kernel_critical_begin();
-  kernel_task_remove(t);
-  kernel_critical_end();
-  */
-}

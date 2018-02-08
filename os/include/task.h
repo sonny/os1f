@@ -8,18 +8,42 @@
 #include "event.h"
 #include "list.h"
 
+typedef struct {
+  uint32_t r0;
+  uint32_t r1;
+  uint32_t r2;
+  uint32_t r3;
+  uint32_t r12;
+  uint32_t lr; // r14
+  uint32_t pc; // r15
+  uint32_t xpsr;
+} hw_stack_frame_t;
+
+typedef struct {
+  uint32_t r4;
+  uint32_t r5;
+  uint32_t r6;
+  uint32_t r7;
+  uint32_t r8;
+  uint32_t r9;
+  uint32_t r10;
+  uint32_t r11;
+} sw_stack_frame_t;
+
 struct task {
   struct list node;
-  void * stackp;
+  void * sp;
   void * stack_free;
   int32_t  id;
   uint32_t state;
   uint32_t sleep_until;
+  sw_stack_frame_t sw_context;
   struct event join;
 };
 
 struct task * task_create(int stack_size);
 struct task * task_stack_init(struct task *t, void (*func)(void*), void *context);
+
 
 __attribute__((always_inline)) static inline
 void task_free(struct task * t)
@@ -55,17 +79,10 @@ void task_sleep(uint32_t ms)
   syscall_task_sleep(ms);
 }
 
-/* __attribute__((always_inline)) static inline */
-/* void task_wait(uint32_t state) */
-/* { */
-/*   syscall_task_wait(state); */
-/* } */
-
 __attribute__((always_inline)) static inline
 void task_join(struct task * t)
 {
   event_wait(&t->join);
-  //syscall_task_remove(t);
   task_free(t);
 }
 
@@ -81,32 +98,11 @@ struct list * task_to_list(struct task * task)
   return (struct list *)task;
 }
 
-struct stacked_regs {
-  uint32_t r0;
-  uint32_t r1;
-  uint32_t r2;
-  uint32_t r3;
-  uint32_t r12;
-  uint32_t lr; // r14
-  uint32_t pc; // r15
-  uint32_t xpsr;
-};
 
-struct manual_regs {
-  uint32_t r4;
-  uint32_t r5;
-  uint32_t r6;
-  uint32_t r7;
-  uint32_t r8;
-  uint32_t r9;
-  uint32_t r10;
-  uint32_t r11;
-};
-
-struct regs {
-  struct manual_regs manual;
-  struct stacked_regs stacked;
-};
+typedef struct {
+  sw_stack_frame_t sw_frame;
+  hw_stack_frame_t hw_frame;
+} stack_frame_t;
 
 
 
