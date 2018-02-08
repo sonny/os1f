@@ -6,13 +6,13 @@
 #include <assert.h>
 
 struct list {
-  struct list *prev;
-  struct list *next;
+  list_t *prev;
+  list_t *next;
 };
 
 #define LIST_STATIC_INIT(name) { &(name), &(name) }
 
-void printlist(struct list *head);
+void printlist(list_t *head);
 
 /**
  * Initialize list 
@@ -21,7 +21,7 @@ void printlist(struct list *head);
  * @return void
  */
 static inline
-void list_init(struct list *head)
+void list_init(list_t *head)
 {
   assert(head && "List Head is a Null Pointer");
   head->prev = head;
@@ -36,7 +36,7 @@ void list_init(struct list *head)
  * @note Not Implemented
  */
 static inline
-int list_size(const struct list *head)
+int list_size(const list_t *head)
 {
   assert(0 && "Not implemented");
   return 0;
@@ -49,7 +49,7 @@ int list_size(const struct list *head)
  * @return true if list is empty
  */
 static inline
-bool list_empty(const struct list *head)
+bool list_empty(const list_t *head)
 {
   assert(head && "List Head is a Null Pointer");
   return (head->next == head);
@@ -67,7 +67,7 @@ bool list_empty(const struct list *head)
  * @return void
  */
 static inline
-void list_insert(struct list * restrict new, struct list *prev, struct list *next)
+void list_insert(list_t * restrict new, list_t *prev, list_t *next)
 {
   assert(new && prev && next && "Invalid list pointers");
   next->prev = new;
@@ -84,7 +84,7 @@ void list_insert(struct list * restrict new, struct list *prev, struct list *nex
  * @return void
  */
 static inline
-void list_addAtFront(struct list * restrict head, struct list * restrict new)
+void list_addAtFront(list_t * restrict head, list_t * restrict new)
 {
   assert(head && new && "List Head is a Null Pointer");
   assert(new->next == new && new->prev == new && "New node is not initialized");
@@ -99,7 +99,7 @@ void list_addAtFront(struct list * restrict head, struct list * restrict new)
  * @return void
  */
 static inline
-void list_addAtRear(struct list * restrict head, struct list * restrict new)
+void list_addAtRear(list_t * restrict head, list_t * restrict new)
 {
   assert(head && new && "List Head is a Null Pointer");
   assert(new->next == new && new->prev == new && "New node is not initialized");
@@ -115,7 +115,7 @@ void list_addAtRear(struct list * restrict head, struct list * restrict new)
  *       that it is removed from any that it might belong to.
  */
 static inline
-void list_remove(struct list *node)
+void list_remove(list_t *node)
 {
   assert(node && "List node is a Null Pointer");
   node->next->prev = node->prev;
@@ -131,7 +131,7 @@ void list_remove(struct list *node)
  * @return node that was removed
  */
 static inline
-struct list *list_removeNode(struct list * restrict head, struct list * restrict node)
+list_t *list_removeNode(list_t * restrict head, list_t * restrict node)
 {
   assert(head && node && "List Node is a Null Pointer");
   if (list_empty(head)) return NULL;
@@ -146,7 +146,7 @@ struct list *list_removeNode(struct list * restrict head, struct list * restrict
  * @return first node in list
  */
 static inline
-struct list* list_removeFront(struct list *head)
+list_t* list_removeFront(list_t *head)
 {
   assert(head && "List Head is a Null Pointer");
   return list_removeNode(head, head->next);
@@ -159,7 +159,7 @@ struct list* list_removeFront(struct list *head)
  * @return last node in list
  */
 static inline
-struct list *list_removeRear(struct list *head)
+list_t *list_removeRear(list_t *head)
 {
   assert(head && "List Head is a Null Pointer");
   return list_removeNode(head, head->prev);
@@ -180,11 +180,11 @@ struct list *list_removeRear(struct list *head)
  * @return void
  */
 static inline
-void list_each_do_if(struct list *head,
-                     void (*func)(struct list*, const void*),
-                     bool (*pred)(struct list*, const void*),
+void list_each_do_if(list_t *head,
+                     void (*func)(list_t*, const void*),
+                     bool (*pred)(list_t*, const void*),
                      const void * context) {
-  struct list *pos, *tmp;
+  list_t *pos, *tmp;
   for (pos = (head)->next, tmp = pos->next;
        pos != (head);
        pos = tmp, tmp = pos->next) {
@@ -206,8 +206,8 @@ void list_each_do_if(struct list *head,
  * @return void
  */
 static inline
-void list_each_do(struct list *head,
-               void (*func)(struct list*, const void*),
+void list_each_do(list_t *head,
+               void (*func)(list_t*, const void*),
                const void *context) {
   list_each_do_if(head, func, NULL, context);
 }

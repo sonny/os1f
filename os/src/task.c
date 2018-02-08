@@ -7,7 +7,7 @@
 // implemented in kernel_task
 extern void kernel_task_end(void);
 
-struct task * task_stack_init(struct task *t, void (*func)(void*), void *context)
+task_t * task_stack_init(task_t *t, void (*func)(void*), void *context)
 {
   hw_stack_frame_t *frame = t->sp - sizeof(hw_stack_frame_t);
   frame->r0 = (uint32_t)context;
@@ -20,10 +20,10 @@ struct task * task_stack_init(struct task *t, void (*func)(void*), void *context
 }
 
 static int32_t next_task_id = 1;
-struct task * task_create(int stack_size)
+task_t * task_create(int stack_size)
 {
-  struct task *t = malloc(sizeof(struct task));
-  memset(t, 0, sizeof(struct task));
+  task_t *t = malloc(sizeof(task_t));
+  memset(t, 0, sizeof(task_t));
 
   // We need to ensure that the stack is 8-byte aligned
   // We allocate 7 more bytes and round up the address
@@ -43,7 +43,7 @@ struct task * task_create(int stack_size)
 
 static void protected_task_start(void * cxt)
 {
-  struct task * new = cxt;
+  task_t * new = cxt;
   kernel_critical_begin();
   kernel_task_start(new);
   kernel_critical_end();
@@ -55,16 +55,16 @@ static void protected_task_sleep(void *cxt)
   kernel_critical_begin();
   kernel_task_sleep(ms);
   kernel_critical_end();
-  kernel_PendSV_set();
+  protected_kernel_context_switch(NULL);
 }
 
 static void protected_task_yield(void *cxt)
 {
-  kernel_PendSV_set();
+  protected_kernel_context_switch(NULL);
 }
 
 inline
-void task_schedule(struct task *task)
+void task_schedule(task_t *task)
 {
   service_call(protected_task_start, task);
 }

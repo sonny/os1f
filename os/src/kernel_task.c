@@ -12,13 +12,13 @@
 #define MAIN_STACK_SIZE 1024  // default size of main stack
 #define IDLE_TASK_ID    -1
 
-static struct task * current_task = NULL;
-static struct list task_active = LIST_STATIC_INIT(task_active);
-static struct list task_sleeping = LIST_STATIC_INIT(task_sleeping);
+static task_t * current_task = NULL;
+static list_t task_active = LIST_STATIC_INIT(task_active);
+static list_t task_sleeping = LIST_STATIC_INIT(task_sleeping);
 
 /* idle task */
 static uint8_t idle_task_stack[IDLE_STACK_SIZE] __attribute__((aligned (8)));
-static struct task idle_task = {
+static task_t idle_task = {
   .node = LIST_STATIC_INIT(idle_task.node),
   .sp = &idle_task_stack[0] + IDLE_STACK_SIZE,
   .stack_free = 0,
@@ -30,7 +30,7 @@ static struct task idle_task = {
 
 /* main task */
 static uint8_t main_task_stack[MAIN_STACK_SIZE] __attribute__((aligned (8)));
-static struct task main_task = {
+static task_t main_task = {
   .node = LIST_STATIC_INIT(main_task.node),
   .sp = &main_task_stack[0] + MAIN_STACK_SIZE,
   .stack_free = 0,
@@ -62,7 +62,7 @@ void kernel_task_init(void)
 static
 void protected_start(void * cxt)
 {
-  kernel_PendSV_set();
+  protected_kernel_context_switch(NULL);
 }
 
 static inline
@@ -149,7 +149,7 @@ void kernel_task_active_next(void)
     current_task = &idle_task;
 }
 
-void kernel_task_start(struct task * new)
+void kernel_task_start(task_t * new)
 {
   new->state = TASK_ACTIVE; 
   list_addAtRear(&task_active, task_to_list(new));
@@ -163,7 +163,7 @@ void kernel_task_sleep(uint32_t ms)
   list_addAtRear(&task_sleeping, task_to_list(current_task)); 
 }
 
-void kernel_task_event_wait(struct event * e)
+void kernel_task_event_wait(event_t * e)
 {
   assert(current_task && "Cannot Task is NULL");
   current_task->state = TASK_WAIT;
@@ -171,9 +171,9 @@ void kernel_task_event_wait(struct event * e)
 }
 
 static inline
-void kernel_task_wakeup_task(struct list *node, const void * context)
+void kernel_task_wakeup_task(list_t *node, const void * context)
 {
-  struct task *t = list_to_task(node);
+  task_t *t = list_to_task(node);
   const uint32_t tick = (uint32_t)context;
   assert(t->state == TASK_SLEEP && "Tasks in sleeping queue must be asleep.");
 
@@ -192,10 +192,10 @@ void kernel_task_wakeup(void)
   list_each_do(&task_sleeping, kernel_task_wakeup_task, (void*)tick);
 }
 
-void kernel_task_event_notify(struct event * e)
+void kernel_task_event_notify(event_t * e)
 {
   while(!list_empty(&e->waiting)) {
-    struct task * task = list_to_task(list_removeFront(&e->waiting));
+    task_t * task = list_to_task(list_removeFront(&e->waiting));
     assert(task->state == TASK_WAIT && "Tasks in waiting queue must be waiting.");
     task->state = TASK_ACTIVE;
     list_addAtRear(&task_active, task_to_list(task));

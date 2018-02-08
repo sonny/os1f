@@ -13,7 +13,7 @@
 struct mutex {
   volatile uint32_t lock;
   uint32_t depth;
-  struct event waiting;
+  event_t waiting;
 };
 
 #define MUTEX_STATIC_INIT(name) { 0, 0, EVENT_STATIC_INIT( (name).waiting ) }

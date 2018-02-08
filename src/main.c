@@ -47,7 +47,7 @@ int main(void)
     ++z;
     printf("Main Task\tid : %d, counter : %d\n", tid, z);
 
-    struct task * tonce =
+    task_t * tonce =
       task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL);
 
     task_join(tonce);

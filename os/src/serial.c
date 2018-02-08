@@ -4,8 +4,8 @@
 #include "event.h"
 
 static UART_HandleTypeDef VCPHandle;
-static struct event _vcp_complete_event;
-struct event * VCPCompleteEvent = &_vcp_complete_event;
+static event_t _vcp_complete_event;
+event_t * VCPCompleteEvent = &_vcp_complete_event;
 
 void serialInit(void)
 {

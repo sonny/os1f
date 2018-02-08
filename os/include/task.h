@@ -31,33 +31,33 @@ typedef struct {
 } sw_stack_frame_t;
 
 struct task {
-  struct list node;
+  list_t node;
   void * sp;
   void * stack_free;
   int32_t  id;
   uint32_t state;
   uint32_t sleep_until;
   sw_stack_frame_t sw_context;
-  struct event join;
+  event_t join;
 };
 
-struct task * task_create(int stack_size);
-struct task * task_stack_init(struct task *t, void (*func)(void*), void *context);
-void task_schedule(struct task *task);
+task_t * task_create(int stack_size);
+task_t * task_stack_init(task_t *t, void (*func)(void*), void *context);
+void task_schedule(task_t *task);
 void task_sleep(uint32_t ms);
 void task_yield(void);
 
 __attribute__((always_inline)) static inline
-void task_free(struct task * t)
+void task_free(task_t * t)
 {
   free(t->stack_free);
   free(t);
 }
 
 __attribute__((always_inline)) static inline
-struct task * task_create_schedule(void (*func)(void*), int stack_size, void *context)
+task_t * task_create_schedule(void (*func)(void*), int stack_size, void *context)
 {
-  struct task * t = task_create(stack_size);
+  task_t * t = task_create(stack_size);
   task_stack_init(t, func, context);
   task_schedule(t);
   return t;
@@ -65,22 +65,22 @@ struct task * task_create_schedule(void (*func)(void*), int stack_size, void *co
 
 
 __attribute__((always_inline)) static inline
-void task_join(struct task * t)
+void task_join(task_t * t)
 {
   event_wait(&t->join);
   task_free(t);
 }
 
 static inline
-struct task * list_to_task(struct list * list)
+task_t * list_to_task(list_t * list)
 {
-  return (struct task *)list;
+  return (task_t *)list;
 }
 
 static inline
-struct list * task_to_list(struct task * task)
+list_t * task_to_list(task_t * task)
 {
-  return (struct list *)task;
+  return (list_t *)task;
 }
 
 

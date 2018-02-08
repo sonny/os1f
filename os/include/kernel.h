@@ -4,8 +4,9 @@
 #include "stm32f7xx_hal.h"
 #include "defs.h"
 
-//void osInit(void);
 void os_start(void);
+void protected_kernel_context_switch(void * cxt);
+void kernel_context_switch(void);
 
 __attribute__ ((always_inline)) static inline 
 void kernel_critical_begin(void)
@@ -61,11 +62,12 @@ void kernel_sync_barrier(void)
   __asm volatile ("isb \n");
 }
 
-__attribute__ ((always_inline)) static inline 
-void kernel_PendSV_set(void)
-{
-  SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
-}
+
+/* __attribute__ ((always_inline)) static inline  */
+/* void kernel_PendSV_set(void) */
+/* { */
+/*   SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk; */
+/* } */
 
 __attribute__ ((always_inline)) static inline 
 void kernel_break(void)

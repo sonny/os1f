@@ -6,6 +6,7 @@
 
 typedef void (*svcall_t)(void*);
 
-void service_call(void (*call)(void*), void *cxt);
+void service_call(svcall_t, void *cxt);
+void pend_service_call(svcall_t, void *cxt);
 
 #endif  /* __SVC_H__ */

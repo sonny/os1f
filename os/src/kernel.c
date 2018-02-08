@@ -22,21 +22,8 @@ void os_start(void)
   // after here we are in user mode
 }
 
-void SysTick_Handler(void)
-{
-  HAL_IncTick();
-  static int counter = 0;
-
-  if (++counter > TIME_SLICE) {
-    counter = 0;
-    kernel_PendSV_set();
-  }
-}
-
-
-// called by ASM PendSV_Handler
-//void PendSV_Handler_C(void)
-void PendSV_Handler(void)
+static
+void context_switch(void * cxt)
 {
   kernel_critical_begin();
   kernel_task_save_context();
@@ -49,6 +36,29 @@ void PendSV_Handler(void)
 
   kernel_task_load_context();
   kernel_critical_end();
+}
+
+inline
+void protected_kernel_context_switch(void * cxt)
+{
+  pend_service_call(context_switch, NULL);
+}
+
+inline
+void kernel_context_switch(void)
+{
+  service_call(protected_kernel_context_switch, NULL);
+}
+
+void SysTick_Handler(void)
+{
+  HAL_IncTick();
+  static int counter = 0;
+
+  if (++counter > TIME_SLICE) {
+    counter = 0;
+    pend_service_call(context_switch, NULL);
+  }
 }
 
 

@@ -30,8 +30,8 @@
 #endif
   
 /* Forward struct declarations */
-struct task;
-struct event;
-struct list;
+typedef struct task task_t;
+typedef struct event event_t;
+typedef struct list list_t;
 
 #endif  /*__DEFS_H__ */
