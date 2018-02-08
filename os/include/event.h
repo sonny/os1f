@@ -1,7 +1,7 @@
 #ifndef __EVENT_H__
 #define __EVENT_H__
 
-#include "syscall.h"
+#include "svc.h"
 #include "list.h"
 
 struct event {
@@ -19,14 +19,14 @@ void event_init(struct event *e)
 static inline
 void event_notify(struct event *e)
 {
-  syscall_event_notify(e);
+  service_event_notify(e);
 }
 
 
 static inline
 void event_wait(struct event *e)
 {
-  syscall_event_wait(e);
+  service_event_wait(e);
 }
 
 static inline

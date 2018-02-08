@@ -4,7 +4,6 @@
 #include "kernel_task.h"
 #include "serial.h"
 #include "task.h"
-#include "syscall.h"
 
 extern void initialise_monitor_handles(void);
 

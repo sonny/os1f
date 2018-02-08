@@ -1,96 +1,104 @@
 #include <stdint.h>
+#include "svc.h"
 #include "kernel.h"
 #include "kernel_task.h"
 #include "defs.h"
 
-static void svc_start(void);
-static void svc_yield(void);
-static void svc_task_start(struct task *);
-static void svc_task_sleep(uint32_t);
-static void svc_task_wait(uint32_t);
-static void svc_event_wait(struct event *e);
-static void svc_event_notify(struct event *e);
-static void svc_task_remove(struct task *t);
+static void svc_start(void*);
+static void svc_yield(void*);
+static void svc_task_start(void*);
+static void svc_task_sleep(void*);
+static void svc_task_wait(void*);
+static void svc_event_wait(void*);
+static void svc_event_notify(void*);
 
+void service_call(void (*call)(void*), void *cxt)
+{
+  __asm volatile("svc 0\n");
+}
 
-//void SVC_Handler_C(void)
+void service_start(void)
+{
+  service_call(svc_start, NULL);
+}
+
+void service_yield(void)
+{
+  service_call(svc_yield, NULL);
+}
+
+void service_task_start(struct task *t)
+{
+  service_call(svc_task_start, t);
+}
+
+void service_task_sleep(uint32_t ms)
+{
+  service_call(svc_task_sleep, (void*)ms);
+}
+
+void service_event_wait(struct event *e)
+{
+  service_call(svc_event_wait, e);
+}
+
+void service_event_notify(struct event *e)
+{
+  service_call(svc_event_notify, e);
+}
+
 void SVC_Handler(void)
 {
   register uint32_t * frame;
   __asm volatile("mrs %0, psp \n" : "=r" (frame) ::);
 
-  uint32_t call = frame[0],
-    arg0 = frame[1],
-    arg1 = frame[2],
-    arg2 = frame[3];
+  svcall_t call = (svcall_t)frame[0];
+  void *args = (void*)frame[1];
   
-  switch (call) {
-  case SVC_YIELD:
-    svc_yield();
-    break;
-  case SVC_START:
-    svc_start();
-    break;
-  case SVC_TASK_START:
-    svc_task_start((struct task *)arg0);
-    break;
-  case SVC_TASK_SLEEP:
-    svc_task_sleep(arg0);
-    break;
-  case SVC_EVENT_WAIT:
-    svc_event_wait((struct event *)arg0);
-    break;
-  case SVC_EVENT_NOTIFY:
-    svc_event_notify((struct event *)arg0);
-    break;
-  default:
-    kernel_break();
-    break;
-  }
+  call(args);
 }
 
 static inline
-void svc_start(void)
-{
-  kernel_PendSV_set();
-
-  /* kernel_critical_begin(); */
-  /* kernel_task_active_next(); */
-  /* kernel_task_update_global_SP(); */
-  /* kernel_critical_end(); */
-}
-
-static inline
-void svc_yield(void)
+void svc_start(void * cxt)
 {
   kernel_PendSV_set();
 }
 
-void svc_task_start(struct task * new)
+static inline
+void svc_yield(void *cxt)
 {
+  kernel_PendSV_set();
+}
+
+void svc_task_start(void * cxt)
+{
+  struct task * new = cxt;
   kernel_critical_begin();
   kernel_task_start(new);
   kernel_critical_end();
 }
 
-void svc_task_sleep(uint32_t ms)
+void svc_task_sleep(void *cxt)
 {
+  uint32_t ms = (uint32_t)cxt;
   kernel_critical_begin();
   kernel_task_sleep(ms);
   kernel_critical_end();
   kernel_PendSV_set();
 }
 
-void svc_event_wait(struct event *e)
+void svc_event_wait(void * cxt)
 {
+  struct event *e = cxt;
   kernel_critical_begin();
   kernel_task_event_wait(e);
   kernel_critical_end();
   kernel_PendSV_set();
 }
 
-void svc_event_notify(struct event *e)
+void svc_event_notify(void *cxt)
 {
+  struct event *e = cxt;
   kernel_critical_begin();
   kernel_task_event_notify(e);
   kernel_critical_end();

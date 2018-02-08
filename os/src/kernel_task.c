@@ -4,6 +4,7 @@
 #include "event.h"
 #include "defs.h"
 #include "list.h"
+#include "svc.h"
 #include <string.h>
 #include <assert.h>
 
@@ -101,7 +102,7 @@ static void kernel_task_main_hoist(void)
   kernel_sync_barrier();
 
   // need to call start here in order to keep the SP valid
-  syscall_start();
+  service_start();
   __asm volatile("main_return_point: \n");
 }
 

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <malloc.h>
-#include "syscall.h"
+#include "svc.h"
 #include "event.h"
 #include "list.h"
 
@@ -55,7 +55,7 @@ void task_free(struct task * t)
 __attribute__((always_inline)) static inline
 void task_schedule(struct task *task)
 {
-  syscall_task_start(task);
+  service_task_start(task);
 }
 
 __attribute__((always_inline)) static inline
@@ -70,13 +70,13 @@ struct task * task_create_schedule(void (*func)(void*), int stack_size, void *co
 __attribute__((always_inline)) static inline
 void task_yield(void) 
 {
-  syscall_yield();
+  service_yield();
 }
 
 __attribute__((always_inline)) static inline
 void task_sleep(uint32_t ms) 
 {
-  syscall_task_sleep(ms);
+  service_task_sleep(ms);
 }
 
 __attribute__((always_inline)) static inline
