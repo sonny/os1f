@@ -34,9 +34,20 @@ int main(void)
   // switch modes and make main a normal user task
   os_start();
 
-  display_line_at(10, "Clock is %d\n", HAL_RCC_GetHCLKFreq());
+  int clk = HAL_RCC_GetHCLKFreq();
+  char *clk_str = "Hz";
+  if (clk > 1000000) {
+    clk /= 1000000;
+    clk_str = "MHz";
+  }
+  else if (clk > 10000) {
+    clk /= 1000;
+    clk_str = "KHz";
+  }
+  
+  display_line_at(12, "Clock is %d%s\n", clk, clk_str);
   int heap_size = (int)(&_Heap_Limit - &_Heap_Begin);
-  display_line_at(11, "Total Heap Space %d\n", heap_size);
+  //  display_line_at(11, "Total Heap Space %d\n", heap_size);
     
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]);
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1]);
@@ -51,7 +62,11 @@ int main(void)
   int tid = current_task_id();
   while (1) {
     ++z;
-    display_line_at(9, "Current Heap Size %d\n", heap_size_get());
+    int heap_current = heap_size_get();
+    int per = heap_current * 10000 / heap_size;
+    int per_entier = per / 100;
+    int per_mant = per % 100;
+    display_line_at(11, "Heap Use %d of %d, %d.%d%%\n", heap_size_get(), heap_size, per_entier, per_mant);
     task_display_line("Main Task\tid : %d, counter : %d\n", tid, z);
 
     task_t * tonce =
@@ -83,6 +98,6 @@ void task_once(void *context)
   uint32_t tick = HAL_GetTick();
   int tid = current_task_id();
   
-  display_line_at(12, "ONCE Task\tid : %d at %d ms\n", tid, tick);
+  display_line_at(9, "ONCE Task\tid : %d at %d ms\n", tid, tick);
 }
 
