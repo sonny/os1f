@@ -1,32 +1,30 @@
-#include "os.h"
-#include "task.h"
-
 #include <stdarg.h>
+#include "os_printf.h"
+#include "display.h"
 
-
-#ifdef DISPLAY_LCD
-#include "lcd.h"
-#include "stm32746g_discovery_lcd.h"
-#elif defined DISPLAY_SERIAL
-#include "serial.h"
-#include "vt100.h"
-#endif
 
 static void __display_line_at(int line, const char* fmt, va_list args)
 {
-  int ypos;
+  int ypos, xpos;
 
-#ifdef DISPLAY_LCD
+#ifdef OS_USE_LCD
   ypos = (line)*(BSP_LCD_GetFont()->Height + 4) + 5;
-  lcd_vprintf_at(5, ypos, fmt, args);
-#elif defined  DISPLAY_SERIAL
+  xpos = 5;
+#elif defined  OS_USE_VCP
   ypos = line + 2;
-  term_vprintf_at_wait(2, ypos, fmt, args);
+  xpos = 2;
 #endif
 
+  char *p = (char*)fmt;
+  while(*p) {
+    if (*p == '\n' || *p == '\t') *p = ' ';
+    p++;
+  }
+  
+  vprintf_at(xpos, ypos, fmt, args);
 }
 
-void os_display_line_at(int line, const char* fmt, ...)
+void display_line_at(int line, const char* fmt, ...)
 {
   va_list args;
   va_start(args, fmt);
@@ -34,20 +32,20 @@ void os_display_line_at(int line, const char* fmt, ...)
   va_end(args);
 }
 
-void task_display_line(const char *fmt, ...)
-{
-  va_list args; 
-  va_start(args, fmt);
-  __display_line_at(task_current()->id, fmt, args);
-  va_end(args);
-}
+/* void task_display_line(const char *fmt, ...) */
+/* { */
+/*   va_list args;  */
+/*   va_start(args, fmt); */
+/*   __display_line_at(task_current()->id, fmt, args); */
+/*   va_end(args); */
+/* } */
 
 
-void displayInit(void)
+void display_init(void)
 {
-#ifdef DISPLAY_LCD
+#ifdef OS_USE_LCD
   lcdInit();
-#elif defined  DISPLAY_SERIAL
+#elif defined  OS_USE_VCP
   serialInit();
   term_init();
 #endif

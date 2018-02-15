@@ -2,8 +2,7 @@
 #include <string.h>
 #include "defs.h"
 #include "os_printf.h"
-#include "semihosting.h"
-#include "serial.h"
+#include "display.h"
 
 int os_iprintf(const char *fmt, ...)
 {
@@ -108,6 +107,9 @@ int os_itoa(int val, char *bf, int radix, bool is_unsigned)
   return num_digits;
 }
 
+
+#ifdef OS_USE_SEMIHOSTING
+
 int os_putc_semihosting(char c)
 {
   char out = c;
@@ -120,3 +122,4 @@ int os_puts_semihosting(const char *str, int len)
   call_host(SEMIHOSTING_SYS_WRITE, args);
 }
 
+#endif

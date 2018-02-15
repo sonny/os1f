@@ -4,20 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #define printf   os_iprintf
-
-#ifdef OS_USE_SEMIHOSTING
-
-#define os_puts os_puts_semihosting
-#define os_putc os_putc_semihosting
-
-#elif defined(OS_USE_VCP)
-
-#define os_puts os_puts_vcp
-#define os_putc os_putc_vcp
-
-#endif
 
 int os_iprintf(const char *fmt, ...);
 int os_vsniprintf(char * buff, size_t size, const char *fmt, va_list va);

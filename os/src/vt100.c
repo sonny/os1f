@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "vt100.h"
+#include "display.h"
 #include "mutex.h"
 #include "event.h"
 #include "serial.h"
@@ -89,22 +90,33 @@ void term_cleanup(void)
   vt100_show_cursor();
 }
 
+
+int term_vprintf_at(int col, int row, const char *fmt, va_list args)
+{
+
+
+  int len  = vt100_save_cursor();
+  len     += vt100_cursor_home(col, row);
+  
+  len += os_viprintf(fmt, args);
+
+  len += vt100_unsave_cursor();
+  return len;
+}
+
 /**
  * call printf at specified coordinate
  * @param c coordinate of first character
  * @param fmt printf format string
  * @param ... paramater list to printf
  */
-int term_printf_at(int col, int row, const char *fmt, ...) {
+int term_printf_at(int col, int row, const char *fmt, ...)
+{
   va_list args;
 
-  int len  = vt100_save_cursor();
-  len     += vt100_cursor_home(col, row);
-  
-  va_start(args, fmt);	
-  len += os_viprintf(fmt, args);
+  va_start(args, fmt);
+  int len = term_vprintf_at(col, row, fmt, args);
   va_end(args);
 
-  len += vt100_unsave_cursor();
-  return len;
+  eturn len;
 }

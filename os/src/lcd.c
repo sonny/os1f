@@ -1,12 +1,12 @@
 #if defined(BOARD_DISCOVERY)
 
-//#include <stdio.h>
 #include <stdarg.h>
 #include "stm32746g_discovery_lcd.h"
+#include "defs.h"
 #include "mutex.h"
-#include "vsnprintf.h"
+#include "os_printf.h"
 
-static struct mutex screen_lock;
+static mutex_t screen_lock = MUTEX_STATIC_INIT(screen_lock);
 
 void lcdInit(void)
 {
@@ -33,17 +33,16 @@ void lcdInit(void)
   BSP_LCD_SetFont(&Font16);
 }
 
-
-
 void lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args)
 {
-  static char pbuff[128];
- 
+  char * buffer = malloc(STDIO_BUFFER_SIZE);
+  int len = os_vsniprintf(buffer, STDIO_BUFFER_SIZE, fmt, args);
+  
   mutex_lock(&screen_lock);
-  //vsnprintf(pbuff, 128, fmt, args);
-  os_vsnprintf(pbuff, 128, fmt, args);
-  BSP_LCD_DisplayStringAt(xpos, ypos, pbuff, LEFT_MODE);
+  BSP_LCD_DisplayStringAt(xpos, ypos, buffer, LEFT_MODE);
   mutex_unlock(&screen_lock);
+
+  free(buffer);
 }
 
 void lcd_printf_at(int xpos, int ypos, const char *fmt, ...)

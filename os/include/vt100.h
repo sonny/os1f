@@ -25,5 +25,5 @@ void term_init(void);
 void term_cleanup(void);
 //void term_set_scroll(int line, int count);
 int term_printf_at(int col, int row, const char *fmt, ...);
-
+int term_vprintf_at(int col, int row, const char *fmt, va_list args);
 #endif /* VT100_H_ */

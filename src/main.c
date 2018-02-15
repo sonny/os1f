@@ -5,9 +5,8 @@
 #include "kernel_task.h"
 #include "defs.h"
 #include "task.h"
-//#include "semihosting.h"
-#include "os_printf.h"
-#include "vt100.h"
+#include "display.h"
+
 
 void printmsg(char *m);
 static void task_func(void *);
@@ -34,13 +33,10 @@ int main(void)
   // switch modes and make main a normal user task
   os_start();
 
-  term_init();
-  
-  term_printf_at(0, 1, "Clock is %d\n", HAL_RCC_GetHCLKFreq());
+  display_line_at(1, "Clock is %d\n", HAL_RCC_GetHCLKFreq());
   int heap_size = (int)(&_Heap_Limit - &_Heap_Begin);
-  term_printf_at(0, 2, "Heap begin: 0x%x, Heap limit: 0x%x, size %d\n",
-                 &_Heap_Begin, &_Heap_Limit, heap_size);
-  
+  display_line_at(2, "Total Heap Space %d\n", heap_size);
+    
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]);
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1]);
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[2]);
@@ -53,8 +49,8 @@ int main(void)
   int tid = current_task_id();
   while (1) {
     ++z;
-    term_printf_at(0, 3, "Current Heap Size %d\n", heap_size_get());
-    term_printf_at(0, 4, "Main Task\tid : %d, counter : %d\n", tid, z);
+    display_line_at(3, "Current Heap Size %d\n", heap_size_get());
+    display_line_at(4, "Main Task\tid : %d, counter : %d\n", tid, z);
 
     task_t * tonce =
       task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL);
@@ -74,7 +70,7 @@ void task_func(void *context)
   struct func_data * fdata = context;
   while (1) {
     ++k;
-    term_printf_at(0, tid+4, "Simple Task\tid : %d, counter : %d\n", tid, k);
+    display_line_at(tid+4, "Simple Task\tid : %d, counter : %d\n", tid, k);
     task_sleep(fdata->sleep);
 
   };
@@ -85,6 +81,6 @@ void task_once(void *context)
   uint32_t tick = HAL_GetTick();
   int tid = current_task_id();
   
-  term_printf_at(0, 12, "ONCE Task\tid : %d at %d ms\n", tid, tick);
+  display_line_at(12, "ONCE Task\tid : %d at %d ms\n", tid, tick);
 }
 
