@@ -2,6 +2,7 @@
 #define __OS_DISPLAY_H__
 
 void display_init(void);
+void task_display_line(const char *fmt, ...);
 void display_line_at(int line, const char* fmt, ...);
 
 #ifdef OS_USE_SEMIHOSTING

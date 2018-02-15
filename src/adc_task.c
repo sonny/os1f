@@ -1,19 +1,16 @@
 #include "stm32f7xx_hal.h"
 #include "stm32f7xx_hal_adc.h"
-#include "sched.h"
 #include "event.h"
-#include "lcd.h"
 #include "display.h"
+#include "task.h"
 
-static struct event adc_event;
+static event_t adc_event = EVENT_STATIC_INIT(adc_event);
 static ADC_HandleTypeDef    AdcHandle;
 static uint32_t adc_values[2];
 static void adc_task_init(void);
 
 void adc_task(void *p)
 {
-  int id = task_current()->id;
-  int xpos = 10, ypos = (id*20 + 20);
   const uint16_t V25 = 943; // V25 = 0.76V, Vref = 3.3V
   const uint16_t Avg_Slope = 3; // Avg_Slope = 2.5mV/C
   int V, T;
@@ -23,7 +20,6 @@ void adc_task(void *p)
   adc_task_init();
 
   while(1) {
-    event_subscribe(&adc_event);
     //HAL_ADC_Start_IT(&AdcHandle);
     HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)adc_values, 2);
     event_wait(&adc_event);
@@ -38,9 +34,9 @@ void adc_task(void *p)
 
     int v_entier = V / 1000;
     int v_mant   = V % 1000;
-    double v = V/1000.0;
+    //double v = V/1000.0;
 
-    task_display_line("Temp: %d C, Vref: %f V %c", T, v, rot[rot_idx]);
+    task_display_line("Temp: %d C, Vref: %d.%d V %c", T, v_entier, v_mant, rot[rot_idx]);
     rot_idx = (rot_idx + 1) % 4;
     task_sleep(200);
   }
@@ -49,7 +45,7 @@ void adc_task(void *p)
 
 static void adc_task_init(void)
 {
-  event_init(&adc_event);
+  //event_init(&adc_event);
 
   ADC_ChannelConfTypeDef sConfig[2];
 
@@ -84,10 +80,17 @@ static void adc_task_init(void)
   HAL_ADC_ConfigChannel(&AdcHandle, &sConfig[1]);
 }
 
+static void adc_nvic_init(void *p)
+{
+ /*## Configure the NVIC for DMA #########################################*/
+  /* NVIC configuration for DMA transfer complete interrupt */
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+}
+
+static DMA_HandleTypeDef  hdma_adc;
 void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 {
-  static DMA_HandleTypeDef  hdma_adc;
-
   /*## Enable peripherals and GPIO Clocks #################################*/
   __HAL_RCC_ADC1_CLK_ENABLE();
   __HAL_RCC_DMA2_CLK_ENABLE();
@@ -115,9 +118,11 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 
   /*## Configure the NVIC for DMA #########################################*/
   /* NVIC configuration for DMA transfer complete interrupt */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+  //  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  //  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+  service_call(adc_nvic_init, NULL);
 }
+
 
 // NOTE : this handles all 3 of the ADCs
 void DMA2_Stream0_IRQHandler(void)
@@ -128,6 +133,6 @@ void DMA2_Stream0_IRQHandler(void)
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
   if (hadc->Instance == ADC1) {
-    event_notify(&adc_event);
+    protected_event_notify(&adc_event);
   }
 }

@@ -24,6 +24,7 @@ static struct func_data fdata[4] = {
   {.name = "Task4", .sleep = 500},
 };
 
+extern void adc_task(void*);
 extern void memory_thread_test(void);
 extern uint32_t heap_size_get(void);
 extern char _Heap_Begin, _Heap_Limit,_estack;
@@ -33,9 +34,9 @@ int main(void)
   // switch modes and make main a normal user task
   os_start();
 
-  display_line_at(1, "Clock is %d\n", HAL_RCC_GetHCLKFreq());
+  display_line_at(10, "Clock is %d\n", HAL_RCC_GetHCLKFreq());
   int heap_size = (int)(&_Heap_Limit - &_Heap_Begin);
-  display_line_at(2, "Total Heap Space %d\n", heap_size);
+  display_line_at(11, "Total Heap Space %d\n", heap_size);
     
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]);
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1]);
@@ -44,13 +45,14 @@ int main(void)
   
   // Unocmment to test memory allocation syncronization
   // memory_thread_test();
+  task_create_schedule(adc_task, 1024, NULL);
   
   uint32_t z = 0;
   int tid = current_task_id();
   while (1) {
     ++z;
-    display_line_at(3, "Current Heap Size %d\n", heap_size_get());
-    display_line_at(4, "Main Task\tid : %d, counter : %d\n", tid, z);
+    display_line_at(9, "Current Heap Size %d\n", heap_size_get());
+    task_display_line("Main Task\tid : %d, counter : %d\n", tid, z);
 
     task_t * tonce =
       task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL);
@@ -70,7 +72,7 @@ void task_func(void *context)
   struct func_data * fdata = context;
   while (1) {
     ++k;
-    display_line_at(tid+4, "Simple Task\tid : %d, counter : %d\n", tid, k);
+    task_display_line("Simple Task\tid : %d, counter : %d\n", tid, k);
     task_sleep(fdata->sleep);
 
   };

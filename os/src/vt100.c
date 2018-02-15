@@ -118,5 +118,5 @@ int term_printf_at(int col, int row, const char *fmt, ...)
   int len = term_vprintf_at(col, row, fmt, args);
   va_end(args);
 
-  eturn len;
+  return len;
 }
