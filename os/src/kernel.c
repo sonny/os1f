@@ -5,43 +5,42 @@
 #include "display.h"
 #include "task.h"
 
-extern void initialise_monitor_handles(void);
 
 void os_start(void)
 {
   HAL_Init();
   display_init();
-  initialise_monitor_handles();
 
-/* #ifdef ENABLE_FP */
-/*   set_FPCCR( get_FPCCR() | FPCCR_LSPEN | FPCCR_ASPEN ); */
-/*   set_CONTROL( get_CONTROL() | CONTROL_FPCA ); */
-/* #endif /\* ENABLE_FP *\/ */
-
+  #ifdef ENABLE_FPU
+  kernel_FPU_enable();
+  #endif /* ENABLE_FP */
+  
   kernel_task_init();
   // after here we are in user mode
 }
 
-static
-void context_switch(void * cxt)
-{
-  kernel_critical_begin();
-  kernel_task_save_context();
+/* static */
+/* void context_switch(void * cxt) */
+/* { */
+/*   //uint32_t exc_return = (uint32_t)cxt; */
+/*   kernel_critical_begin(); */
+/*   kernel_task_save_context(0); */
 
-  kernel_task_update_local_SP();
-  kernel_task_schedule();
-  kernel_task_wakeup();
-  kernel_task_active_next();
-  kernel_task_update_global_SP();
+/*   kernel_task_update_local_SP(); */
+/*   kernel_task_schedule(); */
+/*   kernel_task_wakeup(); */
+/*   kernel_task_active_next(); */
+/*   kernel_task_update_global_SP(); */
 
-  kernel_task_load_context();
-  kernel_critical_end();
-}
+/*   kernel_task_load_context(); */
+/*   kernel_critical_end(); */
+/* } */
 
 inline
 void protected_kernel_context_switch(void * cxt)
 {
-  pend_service_call(context_switch, NULL);
+  //pend_service_call(context_switch, NULL);
+  pend_service_call(NULL, NULL);
 }
 
 inline
@@ -57,7 +56,8 @@ void SysTick_Handler(void)
 
   if (++counter > TIME_SLICE) {
     counter = 0;
-    pend_service_call(context_switch, NULL);
+    //    pend_service_call(context_switch, NULL);
+    pend_service_call(NULL, NULL);
   }
 }
 

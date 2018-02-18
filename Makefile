@@ -1,5 +1,6 @@
 BOARD := DISCOVERY
 #BOARD := NUCLEO
+FPU := ENABLED
 PROJ := OS-CMSIS
 
 ARM-PATH  := /opt/arm/toolchain
@@ -38,6 +39,13 @@ DEFINES += -DDEBUG -DTRACE
 #DEFINES += -DOS_USE_VCP
 DEFINES += -DOS_USE_LCD
 
+ifeq ($(FPU),ENABLED)
+CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
+DEFINES += -DENABLE_FPU
+else
+CFLAGS += -mfloat-abi=soft
+endif
+
 ifeq ($(BOARD),DISCOVERY)
 DEFINES += -DBOARD_DISCOVERY
 else
@@ -46,7 +54,7 @@ endif
 
 INCLUDES := $(addprefix -I, $(INC_DIRS))
 LDFLAGS += -Wl,--gc-sections,--print-memory-usage -z defs 
-LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs -lc -lg
+LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs -lc -lg -lm
 ## for semihosting
 LDFLAGS += --specs=rdimon.specs -lrdimon
 
@@ -74,7 +82,7 @@ link-check: $(OBJS)
 
 ## Build ELF file
 $(OUT)/%.elf: $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map,$*.map -o $@ $(OBJS) 
+	$(CC) $(CFLAGS) -Wl,-Map,$*.map -o $@ $(OBJS) $(LDFLAGS) 
 
 ## Build Object files from S files
 $(OUT)/%.o: %.S 

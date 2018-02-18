@@ -9,8 +9,6 @@ void display_line_at(int line, const char* fmt, ...);
 
 #include "semihosting.h"
 
-#define printf_at term_printf_at
-#define vprintf_at term_vprintf_at
 #define os_puts os_puts_semihosting
 #define os_putc os_putc_semihosting
 

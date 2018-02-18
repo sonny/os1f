@@ -56,18 +56,38 @@ void kernel_CONTROL_set(uint32_t ctl)
   __asm volatile ("MSR control, %0\n" : : "r" (ctl) );
 }
 
+__attribute__( ( always_inline ) ) static inline
+uint32_t kernel_CONTROL_get(void)
+{
+  register uint32_t result;
+  __asm volatile ("MRS %0, control\n"  : "=r" (result) );
+  return(result);
+}
+
+#ifdef ENABLE_FPU
+
+__attribute__( ( always_inline ) ) static inline
+uint32_t kernel_FPU_enable(void)
+{
+  // enable CP10 and CP11 coprocessors in CPACR
+  __asm volatile ("ldr r0, =0xE000ED88  \n"
+                  "ldr r1, [r0]         \n"
+                  "orr r1, #(0xf << 20) \n"
+                  "str r1, [r0]         \n"
+                  "dsb                  \n"
+                  : 
+                  : 
+                  : "r0", "r1");
+                  
+}
+
+#endif
+
 __attribute__ ((always_inline)) static inline 
 void kernel_sync_barrier(void)
 {
   __asm volatile ("isb \n");
 }
-
-
-/* __attribute__ ((always_inline)) static inline  */
-/* void kernel_PendSV_set(void) */
-/* { */
-/*   SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk; */
-/* } */
 
 __attribute__ ((always_inline)) static inline 
 void kernel_break(void)

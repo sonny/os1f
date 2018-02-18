@@ -30,6 +30,17 @@ typedef struct {
   uint32_t r11;
 } sw_stack_frame_t;
 
+typedef struct {
+  uint32_t s[16]; // s0-s15
+  uint32_t fpscr;
+  uint32_t reserved;
+} hw_fp_stack_frame_t;
+
+typedef struct {
+  uint32_t s[16]; // s16 - s31
+} sw_fp_stack_frame_t;
+
+
 struct task {
   list_t node;
   void * sp;
@@ -37,8 +48,13 @@ struct task {
   int32_t  id;
   uint32_t state;
   uint32_t sleep_until;
+  bool uses_fpu;
   sw_stack_frame_t sw_context;
+#ifdef ENABLE_FPU
+  sw_fp_stack_frame_t sw_fp_context;
+#endif
   event_t join;
+  uint32_t exc_return;
 };
 
 task_t * task_create(int stack_size);

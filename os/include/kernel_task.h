@@ -15,8 +15,8 @@ void kernel_task_update_global_SP(void);
 void kernel_task_update_local_SP(void);
 void kernel_task_event_wait(event_t *);
 void kernel_task_event_notify(event_t *);
-void kernel_task_save_context(void);
-void kernel_task_load_context(void);
+void kernel_task_save_context(int);
+uint32_t kernel_task_load_context(void);
 
 uint32_t current_task_id(void);
 

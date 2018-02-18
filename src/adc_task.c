@@ -12,8 +12,9 @@ static void adc_task_init(void);
 void adc_task(void *p)
 {
   const uint16_t V25 = 943; // V25 = 0.76V, Vref = 3.3V
-  const uint16_t Avg_Slope = 3; // Avg_Slope = 2.5mV/C
-  int V, T;
+  //const uint16_t Avg_Slope = 3; // Avg_Slope = 2.5mV/C
+  const float Avg_Slope = 2.5;
+  float V, T;
   char rot[] = ".oOo";
   int rot_idx = 0;
 
@@ -25,18 +26,18 @@ void adc_task(void *p)
     event_wait(&adc_event);
     // NOTE: T can actually differ up to 45 degrees from one chip to another;
     // it may be useful for relative temp, but not absolute
-    T = ((adc_values[0]-V25)/Avg_Slope) + 25;
+    T = ((adc_values[0]-V25)/Avg_Slope) + 25.0;
 
     // reference value is related to a 1.2V internal band gap (I don't know what this is)
     // the relation to the Vref is:
-    V = (1200*4095)/adc_values[1];
+    V = (1.2 * 4095.0)/adc_values[1];
     // NOTE: this should be close to 3.0V for the F4-discovery
 
-    int v_entier = V / 1000;
-    int v_mant   = V % 1000;
+    //int v_entier = V / 1000;
+    //int v_mant   = V % 1000;
     //double v = V/1000.0;
 
-    task_display_line("Temp: %d C, Vref: %d.%d V %c", T, v_entier, v_mant, rot[rot_idx]);
+    task_display_line("Temp: %.1f C, Vref: %.2f V %c\n", T, V, rot[rot_idx]);
     rot_idx = (rot_idx + 1) % 4;
     task_sleep(200);
   }

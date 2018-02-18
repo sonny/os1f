@@ -14,10 +14,10 @@ void service_call(svcall_t call, void *cxt)
 
 void pend_service_call(svcall_t call, void *cxt)
 {
-  kernel_critical_begin();
-  *pendsv_stack_ptr++ = (uint32_t)call;
-  *pendsv_stack_ptr++ = (uint32_t)cxt;
-  kernel_critical_end();
+  /* kernel_critical_begin(); */
+  /* *pendsv_stack_ptr++ = (uint32_t)call; */
+  /* *pendsv_stack_ptr++ = (uint32_t)cxt; */
+  /* kernel_critical_end(); */
 
   SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }
@@ -34,13 +34,31 @@ void SVC_Handler(void)
   call(args);
 }
 
+__attribute__ ((naked))
 void PendSV_Handler(void)
 {
-  while (pendsv_stack_ptr != &pendsv_stack[0]) {
-    kernel_critical_begin();
-    void * cxt = (void*)*(--pendsv_stack_ptr);
-    svcall_t call = (svcall_t)*(--pendsv_stack_ptr);
-    kernel_critical_end();
-    call(cxt);
-  }
+  uint32_t exc_return;
+  __asm volatile("mov %0, lr \n" : "=r"(exc_return));
+  
+  /* while (pendsv_stack_ptr != &pendsv_stack[0]) { */
+  /*   kernel_critical_begin(); */
+  /*   void * cxt = (void*)*(--pendsv_stack_ptr); */
+  /*   svcall_t call = (svcall_t)*(--pendsv_stack_ptr); */
+  /*   kernel_critical_end(); */
+  /*   //if (cxt == NULL) cxt = (void*)exc_return; // pass exc_return sometimes */
+  /*   call(cxt); */
+  /* } */
+
+  kernel_critical_begin();
+  kernel_task_save_context(exc_return);
+
+  kernel_task_update_local_SP();
+  kernel_task_schedule();
+  kernel_task_wakeup();
+  kernel_task_active_next();
+  kernel_task_update_global_SP();
+
+  exc_return = kernel_task_load_context();
+  kernel_critical_end();
+  __asm volatile("bx %0 \n" :: "r"(exc_return)); 
 }

@@ -25,7 +25,9 @@ static task_t idle_task = {
   .id = -1,
   .state = TASK_ACTIVE,
   .sleep_until = 0,
-  .join = EVENT_STATIC_INIT(idle_task.join)
+  .uses_fpu = false,
+  .join = EVENT_STATIC_INIT(idle_task.join),
+  .exc_return = 0xfffffffd
 };
 
 /* main task */
@@ -37,20 +39,47 @@ static task_t main_task = {
   .id = 0,
   .state = TASK_ACTIVE,
   .sleep_until = 0,
-  .join = EVENT_STATIC_INIT(main_task.join)
+  .uses_fpu = false,
+  .join = EVENT_STATIC_INIT(main_task.join),
+  .exc_return = 0xfffffffd
 };
 
 static void kernel_task_main_hoist(void);
 static void kernel_task_idle_func(void *c) { while (1); }
 
-void kernel_task_save_context(void)
+inline
+void kernel_task_save_context(int exc_return)
 {
   __asm volatile ("stmia %0, {r4-r11} \n" :: "r" (&current_task->sw_context) :);
+  current_task->exc_return = exc_return;
+  
+  #ifdef ENABLE_FPU
+
+  // check to see if task used FPU
+  if ( !(exc_return & (1<<4)) ) {
+    current_task->uses_fpu = true;
+    __asm volatile ( "vstmia %0, {s16-s31} \n" :: "r" (&current_task->sw_fp_context) : );
+  }
+  else
+    current_task->uses_fpu = false;
+
+  #endif
 }
 
-void kernel_task_load_context(void)
+inline
+uint32_t kernel_task_load_context(void)
 {
   __asm volatile ("ldmia %0, {r4-r11} \n" :: "r" (&current_task->sw_context) :);
+
+  #ifdef ENABLE_FPU
+
+  if ( current_task->uses_fpu ) {
+    __asm volatile ( "vldmia %0, {s16-s31} " :: "r" (&current_task->sw_fp_context) : );
+  }
+
+  #endif
+
+  return current_task->exc_return;
 }
 
 void kernel_task_init(void)

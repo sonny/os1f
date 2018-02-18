@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 #include "defs.h"
 #include "os_printf.h"
 #include "display.h"
@@ -30,11 +31,17 @@ int os_vsniprintf(char * buff, size_t size, const char *fmt, va_list va)
   char ch, *bp = buff, *cp;
   int m;
   uint32_t n;
-
+  long dec_precision = 1;
+  
   while ( ch = *fmt++ ) {
     if ('%' == ch) {
-      
+    SCAN:
       switch(ch = *fmt++) {
+      case '.':
+        dec_precision = strtol(fmt, &cp, 10);
+        fmt = cp;
+        goto SCAN;
+        break;
       case 'c':
         *bp++ = (char)va_arg(va, int);
         if ((size_t)(bp - buff) >= size -1) goto DONE;
@@ -60,6 +67,12 @@ int os_vsniprintf(char * buff, size_t size, const char *fmt, va_list va)
         m = os_itoa(n, bp, 16, true);
         bp += m;
         break;
+      case 'f':
+        if ((size_t)((bp - buff) + 16) >= size -1) goto DONE;
+        float f = va_arg(va, double);
+        bp += os_ftoa(f, bp, dec_precision);
+        dec_precision = 1; //default
+        break;
       default:
         *bp++ = ch;
         break;
@@ -74,6 +87,34 @@ int os_vsniprintf(char * buff, size_t size, const char *fmt, va_list va)
  DONE:
   *bp = '\0';
   return (bp - buff);
+}
+
+int os_ftoa(float f, char *bf, int dec_precision)
+{
+  char * p = bf;
+  int mult = (int)pow(10, dec_precision);
+
+  // put mantissa
+  int n = (int)f;
+  int m = os_itoa(n, p, 10, false);
+  p += m;
+
+  // put decimal
+  if (dec_precision > 0) {
+    *p++ = '.';
+    n = (int)(((float)f * mult)) % mult;
+
+    if (n) {
+      m = os_itoa(n, p, 10, false);
+      p += m;
+    }
+    else {
+      while(dec_precision--) {
+        *p++ = '0';
+      }
+    }
+  }    
+  return (p - bf);
 }
 
 int os_itoa(int val, char *bf, int radix, bool is_unsigned)

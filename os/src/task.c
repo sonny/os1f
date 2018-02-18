@@ -34,7 +34,8 @@ task_t * task_create(int stack_size)
   memset(s, 0, stack_size);
   t->sp = s + stack_size;
   t->id = next_task_id++;
-
+  t->exc_return = 0xfffffffd;
+  
   list_init(&t->node);
   event_init(&t->join);
 

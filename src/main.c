@@ -47,7 +47,6 @@ int main(void)
   
   display_line_at(12, "Clock is %d%s\n", clk, clk_str);
   int heap_size = (int)(&_Heap_Limit - &_Heap_Begin);
-  //  display_line_at(11, "Total Heap Space %d\n", heap_size);
     
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]);
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1]);
@@ -63,10 +62,8 @@ int main(void)
   while (1) {
     ++z;
     int heap_current = heap_size_get();
-    int per = heap_current * 10000 / heap_size;
-    int per_entier = per / 100;
-    int per_mant = per % 100;
-    display_line_at(11, "Heap Use %d of %d, %d.%d%%\n", heap_size_get(), heap_size, per_entier, per_mant);
+    float p = ((float)heap_current / heap_size) * 100.0;
+    display_line_at(11, "Heap Use %d of %d, %f%%\n", heap_size_get(), heap_size, p);
     task_display_line("Main Task\tid : %d, counter : %d\n", tid, z);
 
     task_t * tonce =
