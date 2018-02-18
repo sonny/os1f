@@ -3,10 +3,21 @@
 
 #include "stm32f7xx_hal.h"
 #include "defs.h"
+#include "svc.h"
 
 void os_start(void);
-void protected_kernel_context_switch(void * cxt);
-void kernel_context_switch(void);
+
+__attribute__ ((always_inline)) static inline 
+void protected_kernel_context_switch(void * ctx)
+{
+  SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+}
+
+__attribute__ ((always_inline)) static inline 
+void kernel_context_switch(void)
+{
+  service_call(protected_kernel_context_switch, NULL);
+}
 
 __attribute__ ((always_inline)) static inline 
 void kernel_critical_begin(void)

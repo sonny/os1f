@@ -4,6 +4,7 @@
 #include "defs.h"
 #include "svc.h"
 #include "list.h"
+#include "kernel.h"
 #include "kernel_task.h"
 
 struct event {
