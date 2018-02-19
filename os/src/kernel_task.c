@@ -178,12 +178,23 @@ void kernel_task_start_id(int id)
   kernel_task_start_task(task_list[id]);
 }
 
-void kernel_task_start_task(task_t * new)
+void kernel_task_start_task(task_t * t)
 {
-  assert(task_list[new->id] == NULL && "Invalid task list id.");
-  task_list[new->id] = new;
-  new->state = TASK_ACTIVE; 
-  list_addAtRear(&task_active, task_to_list(new));
+  if (!task_list[t->id]) task_list[t->id] = t;
+  t->state = TASK_ACTIVE; 
+  list_addAtRear(&task_active, task_to_list(t));
+}
+
+void kernel_task_stop_id(int id)
+{
+  assert(id >= 0 && task_list[id] && "Invalid task id.");
+  kernel_task_stop_task(task_list[id]);
+}
+
+void kernel_task_stop_task(task_t * t)
+{
+  list_remove(task_to_list(t)); // remove from any list it might be in
+  t->state = TASK_INACTIVE; 
 }
 
 void kernel_task_sleep_current(uint32_t ms)
@@ -285,14 +296,15 @@ static const char *state_names[] = {
 void kernel_task_display_task_stats(void)
 {
   int i;
-  char fmt[] = "%d: %s - %s\n";
-  os_iprintf(fmt, idle_task.id, idle_task.name, state_names[idle_task.state]);
+  char fmt[] = "%d\t%s\t%s\n";
+  os_iprintf("ID\tState\tName\n");
+  os_iprintf(fmt, idle_task.id, state_names[idle_task.state], idle_task.name );
   for (i = 0; i < MAX_TASK_COUNT; ++i) {
     task_t * t = task_list[i];
     if (t) {
       const char * name = default_name;
       if (t->name) name = t->name;
-      os_iprintf(fmt, t->id, name, state_names[t->state]);
+      os_iprintf(fmt, t->id, state_names[t->state], name);
     }
   }
 }

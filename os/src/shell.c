@@ -11,6 +11,7 @@ typedef void (*cmd_t)(void);
 
 typedef struct {
   char * name;
+  char * usage;
   cmd_t call;
 } shell_cmd_t;
 
@@ -25,16 +26,18 @@ static void shell_task(void * ctx);
 static void shell_parse_cmd(int);
 static void shell_process_cmd(void);
 
+static void shell_cmd_help(void);
 static void shell_cmd_echo(void);
 static void shell_cmd_ps(void);
 static void shell_cmd_start(void);
 static void shell_cmd_stop(void);
 
 static shell_cmd_t commands[] = {
-  {"echo", shell_cmd_echo},
-  {"ps", shell_cmd_ps},
-  {"start", shell_cmd_start},
-  {"stop", shell_cmd_stop}
+  {"help", "\t-- print this help", shell_cmd_help},
+  {"echo", "string\t-- echo string to terminal", shell_cmd_echo},
+  {"ps", "\t-- list tasks", shell_cmd_ps},
+  {"start", "task_id\t-- start task", shell_cmd_start},
+  {"stop", "task_id\t-- stop task", shell_cmd_stop}
 };
 
 static int command_count = sizeof(commands)/sizeof(shell_cmd_t);
@@ -46,6 +49,7 @@ void shell_init(void)
 
 static void shell_task(void * ctx)
 {
+  os_iprintf("\n\nSimple SHELL v1.0\n");
   while (1) {
     os_iprintf("\nshell> ");
     int len = os_gets(shell_buffer, SHELL_IO_SIZE);
@@ -71,7 +75,8 @@ static void shell_process_cmd(void)
   }
 
   if (cmd == NULL) {
-    os_iprintf("CMD: [%s : %s] is invalid.\n", argv[0], argv[1]);
+    os_iprintf("CMD: %s is invalid.\n", argv[0]);
+    shell_cmd_help();
   }
   else {
     cmd->call();
@@ -103,6 +108,14 @@ static void shell_parse_cmd(int size)
    shell_buffer[size] = '\0';
 }
 
+static void shell_cmd_help(void)
+{
+  int i;
+  for (i = 0; i < command_count; ++i) {
+    os_iprintf("%s\t%s\n", commands[i].name, commands[i].usage);
+  }
+}
+
 static void shell_cmd_echo(void)
 {
   os_iprintf("%s\n", argv[1]);
@@ -124,5 +137,5 @@ static void shell_cmd_stop(void)
 {
   char *end;
   int id = strtol(argv[1], &end, 10);
-  //  service_call((svcall_t)kernel_task_start_id, (void*)id, true);
+  service_call((svcall_t)kernel_task_stop_id, (void*)id, true);
 }
