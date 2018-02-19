@@ -4,9 +4,8 @@
 #include "defs.h"
 #include "event.h"
 
-extern event_t *VCPCompleteEvent;
-
 void serialInit(void);
 int os_puts_vcp(char *buffer, int len);
+int os_gets_vcp(char *buffer, int len);
 
 #endif  /* __SERIAL_H__ */

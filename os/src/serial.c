@@ -3,10 +3,11 @@
 #include "serial.h"
 #include "event.h"
 #include "mutex.h"
+#include <ctype.h>
 
 static UART_HandleTypeDef VCPHandle;
-static event_t _vcp_complete_event;
-event_t * VCPCompleteEvent = &_vcp_complete_event;
+static event_t VCP_TX_complete = EVENT_STATIC_INIT(VCP_TX_complete);
+static event_t VCP_RX_complete = EVENT_STATIC_INIT(VCP_RX_complete);
 
 void serialInit(void)
 {
@@ -24,7 +25,6 @@ void serialInit(void)
 
   // use unbuffered IO
   setvbuf(stdout,NULL,_IONBF,0);
-  event_init(&_vcp_complete_event);
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
@@ -79,19 +79,48 @@ void VCP_IRQHandler(void)
 /*   return len; */
 /* } */
 
-static mutex_t serial_lock = MUTEX_STATIC_INIT(serial_lock);
+static mutex_t serial_tx_lock = MUTEX_STATIC_INIT(serial_tx_lock);
+static mutex_t serial_rx_lock = MUTEX_STATIC_INIT(serial_rx_lock);
 
 int os_puts_vcp(char *buffer, int len)
 {
-  mutex_lock(&serial_lock);
+  mutex_lock(&serial_tx_lock);
   HAL_UART_Transmit_IT(&VCPHandle, buffer, len); 
-  event_wait(VCPCompleteEvent);
-  mutex_unlock(&serial_lock);
+  event_wait(&VCP_TX_complete);
+  mutex_unlock(&serial_tx_lock);
   return len;
+}
+
+int os_gets_vcp(char *buffer, int len)
+{
+  char *p = buffer;
+  while (p - buffer < len) {
+    mutex_lock(&serial_rx_lock);
+    // eat input one char at a time
+    HAL_UART_Receive_IT(&VCPHandle, p, 1);
+    event_wait(&VCP_RX_complete);
+    mutex_unlock(&serial_rx_lock);
+
+    if (iscntrl(*p)) {
+      if (*p == '\b' && p > buffer + 1) p-=2; // eat both \b and prev char
+      if (*p == 3) return CONTROL_C;
+    }
+
+    if (*p == '\r') break;
+    else p++;
+
+  }
+  *p++ = '\0'; // null terminate result
+  return (p-buffer);
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-  protected_event_notify(VCPCompleteEvent);
+  protected_event_notify(&VCP_TX_complete);
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  protected_event_notify(&VCP_RX_complete);
 }
 

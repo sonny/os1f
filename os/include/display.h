@@ -12,6 +12,8 @@ void display_line_at(int line, const char* fmt, ...);
 #define os_puts os_puts_semihosting
 #define os_putc os_putc_semihosting
 
+#define os_gets(s, n) (void)(s)
+
 #elif defined(OS_USE_VCP)
 
 #include "serial.h"
@@ -22,6 +24,8 @@ void display_line_at(int line, const char* fmt, ...);
 #define os_puts os_puts_vcp
 #define os_putc os_putc_vcp
 
+#define os_gets os_gets_vcp
+
 #elif defined(OS_USE_LCD)
 
 #include "lcd.h"
@@ -31,6 +35,7 @@ void display_line_at(int line, const char* fmt, ...);
 #define vprintf_at lcd_vprintf_at
 
 #define os_puts(s, n) (void)(s)
+#define os_gets(s, n) (void)(s)
 
 #endif
 

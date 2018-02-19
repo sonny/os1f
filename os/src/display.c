@@ -58,7 +58,6 @@ void display_init(void)
   initialise_monitor_handles();  
 #elif defined  OS_USE_VCP
   serialInit();
-  term_init();
 #endif
 }
 

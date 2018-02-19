@@ -16,7 +16,7 @@ void os_start(void)
   #endif /* ENABLE_FP */
   
   kernel_task_init();
-  // after here we are in user mode
+  //NOTE: after here we are in user mode
 }
 
 void SysTick_Handler(void)

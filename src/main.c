@@ -6,6 +6,7 @@
 #include "defs.h"
 #include "task.h"
 #include "display.h"
+#include "shell.h"
 
 
 void printmsg(char *m);
@@ -24,52 +25,54 @@ static struct func_data fdata[4] = {
   {.name = "Task4", .sleep = 500},
 };
 
-extern void adc_task(void*);
-extern void memory_thread_test(void);
-extern uint32_t heap_size_get(void);
-extern char _Heap_Begin, _Heap_Limit,_estack;
+//extern void adc_task(void*);
+//extern void memory_thread_test(void);
+//extern uint32_t heap_size_get(void);
+//extern char _Heap_Begin, _Heap_Limit,_estack;
 
 int main(void)
 {
   // switch modes and make main a normal user task
   os_start();
 
-  int clk = HAL_RCC_GetHCLKFreq();
-  char *clk_str = "Hz";
-  if (clk > 1000000) {
-    clk /= 1000000;
-    clk_str = "MHz";
-  }
-  else if (clk > 10000) {
-    clk /= 1000;
-    clk_str = "KHz";
-  }
+  /* int clk = HAL_RCC_GetHCLKFreq(); */
+  /* char *clk_str = "Hz"; */
+  /* if (clk > 1000000) { */
+  /*   clk /= 1000000; */
+  /*   clk_str = "MHz"; */
+  /* } */
+  /* else if (clk > 10000) { */
+  /*   clk /= 1000; */
+  /*   clk_str = "KHz"; */
+  /* } */
   
-  display_line_at(12, "Clock is %d%s\n", clk, clk_str);
-  int heap_size = (int)(&_Heap_Limit - &_Heap_Begin);
+  /* display_line_at(12, "Clock is %d%s\n", clk, clk_str); */
+  /* int heap_size = (int)(&_Heap_Limit - &_Heap_Begin); */
     
-  task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]);
-  task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1]);
-  task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[2]);
-  task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[3]);
+  /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]); */
+  /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1]); */
+  /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[2]); */
+  /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[3]); */
   
-  // Unocmment to test memory allocation syncronization
-  // memory_thread_test();
-  task_create_schedule(adc_task, 1024, NULL);
+  /* // Unocmment to test memory allocation syncronization */
+  /* // memory_thread_test(); */
+  /* task_create_schedule(adc_task, 1024, NULL); */
+
+  shell_init();
   
   uint32_t z = 0;
   int tid = current_task_id();
   while (1) {
     ++z;
-    int heap_current = heap_size_get();
-    float p = ((float)heap_current / heap_size) * 100.0;
-    display_line_at(11, "Heap Use %d of %d, %f%%\n", heap_size_get(), heap_size, p);
-    task_display_line("Main Task\tid : %d, counter : %d\n", tid, z);
+    /* int heap_current = heap_size_get(); */
+    /* float p = ((float)heap_current / heap_size) * 100.0; */
+    /* display_line_at(11, "Heap Use %d of %d, %f%%\n", heap_size_get(), heap_size, p); */
+    /* task_display_line("Main Task\tid : %d, counter : %d\n", tid, z); */
 
-    task_t * tonce =
-      task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL);
+    /* task_t * tonce = */
+    /*   task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL); */
 
-    task_join(tonce);
+    /* task_join(tonce); */
 
     task_sleep(500);
   }

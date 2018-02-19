@@ -17,7 +17,6 @@
 #define SVC_START         0x00010000
 #define SVC_TASK_START    0x00010001
 #define SVC_TASK_SLEEP    0x00010002
-//#define SVC_TASK_WAIT     0x00010003
 #define SVC_EVENT_WAIT    0x00010004
 #define SVC_EVENT_NOTIFY  0x00010005
 #define SVC_TASK_REMOVE   0x00010006
@@ -28,6 +27,8 @@
 #ifndef VCP_BAUD
 #define VCP_BAUD 115200
 #endif
+
+#define CONTROL_C -1
   
 /* Forward struct declarations */
 typedef struct task  task_t;
