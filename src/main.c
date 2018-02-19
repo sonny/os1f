@@ -25,7 +25,7 @@ static struct func_data fdata[4] = {
   {.name = "Task4", .sleep = 500},
 };
 
-//extern void adc_task(void*);
+extern void adc_task(void*);
 //extern void memory_thread_test(void);
 //extern uint32_t heap_size_get(void);
 //extern char _Heap_Begin, _Heap_Limit,_estack;
@@ -49,19 +49,19 @@ int main(void)
   /* display_line_at(12, "Clock is %d%s\n", clk, clk_str); */
   /* int heap_size = (int)(&_Heap_Limit - &_Heap_Begin); */
     
-  /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0]); */
-  /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1]); */
+  task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0], "Simple 0");
+  task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1], "Simple 1");
   /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[2]); */
   /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[3]); */
   
   /* // Unocmment to test memory allocation syncronization */
   /* // memory_thread_test(); */
-  /* task_create_schedule(adc_task, 1024, NULL); */
+  task_create_schedule(adc_task, 1024, NULL, "ADC");
 
   shell_init();
   
   uint32_t z = 0;
-  int tid = current_task_id();
+  int tid = kernel_task_id_current();
   while (1) {
     ++z;
     /* int heap_current = heap_size_get(); */
@@ -83,11 +83,11 @@ int main(void)
 void task_func(void *context)
 {
   int k = 0;
-  int tid = current_task_id();
+  int tid = kernel_task_id_current();
   struct func_data * fdata = context;
   while (1) {
     ++k;
-    task_display_line("Simple Task\tid : %d, counter : %d\n", tid, k);
+    //task_display_line("Simple Task\tid : %d, counter : %d\n", tid, k);
     task_sleep(fdata->sleep);
 
   };
@@ -96,7 +96,7 @@ void task_func(void *context)
 void task_once(void *context)
 {
   uint32_t tick = HAL_GetTick();
-  int tid = current_task_id();
+  int tid = kernel_task_id_current();
   
   display_line_at(9, "ONCE Task\tid : %d at %d ms\n", tid, tick);
 }

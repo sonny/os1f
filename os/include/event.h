@@ -26,14 +26,14 @@ void event_init(event_t *e)
 static inline
 void event_notify(event_t *e)
 {
-  service_call(protected_event_notify, e);
+  service_call(protected_event_notify, e, false);
 }
 
 
 static inline
 void event_wait(event_t *e)
 {
-  service_call(protected_event_wait, e);
+  service_call(protected_event_wait, e, false);
 }
 
 static inline
@@ -47,7 +47,7 @@ void protected_event_wait(void * cxt)
 {
   event_t *e = cxt;
   kernel_critical_begin();
-  kernel_task_event_wait(e);
+  kernel_task_event_wait_current(e);
   kernel_critical_end();
   protected_kernel_context_switch(NULL);
 }
@@ -57,7 +57,7 @@ void protected_event_notify(void *cxt)
 {
   event_t *e = cxt;
   kernel_critical_begin();
-  kernel_task_event_notify(e);
+  kernel_task_event_notify_all(e);
   kernel_critical_end();
 }
 

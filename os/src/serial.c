@@ -102,14 +102,30 @@ int os_gets_vcp(char *buffer, int len)
     mutex_unlock(&serial_rx_lock);
 
     if (iscntrl(*p)) {
-      if (*p == '\b' && p > buffer + 1) p-=2; // eat both \b and prev char
-      if (*p == 3) return CONTROL_C;
+      switch (*p) {
+      case 3:    // ETX - end of text (^C)
+        return CONTROL_C;
+        break;
+      case '\b': // backspace
+        // eat both \b and prev char
+        if (p > buffer + 1) p -= 2;
+        break;
+      case '\r':
+        goto DONE;
+        break;
+      /* case 0x1B: // ESC */
+      /*   p -= 1; */
+      /*   continue; */
+      /*   break; */
+      default:
+        return CONTROL_C;
+        break;
+      }
     }
-
-    if (*p == '\r') break;
     else p++;
-
   }
+
+ DONE:
   *p++ = '\0'; // null terminate result
   return (p-buffer);
 }

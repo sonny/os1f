@@ -30,12 +30,12 @@ static void report_heap(void * cxt);
   
 void memory_thread_test(void)
 {
-  task_create_schedule(report_heap, DEFAULT_STACK_SIZE, NULL);
-  task_create_schedule(memt_func, DEFAULT_STACK_SIZE, (void*)&task_info[0]);
-  task_create_schedule(memt_func, DEFAULT_STACK_SIZE, (void*)&task_info[1]);
-  task_create_schedule(memt_func, DEFAULT_STACK_SIZE, (void*)&task_info[2]);
-  task_create_schedule(memt_func, DEFAULT_STACK_SIZE, (void*)&task_info[3]);
-  task_create_schedule(memt_func_fast, DEFAULT_STACK_SIZE, (void*)&task_info[4]);
+  task_create_schedule(report_heap, DEFAULT_STACK_SIZE, NULL, "Mem Heap");
+  task_create_schedule(memt_func, DEFAULT_STACK_SIZE, (void*)&task_info[0], "Mem Func 0");
+  task_create_schedule(memt_func, DEFAULT_STACK_SIZE, (void*)&task_info[1], "Mem Func 1");
+  task_create_schedule(memt_func, DEFAULT_STACK_SIZE, (void*)&task_info[2], "Mem Func 2");
+  task_create_schedule(memt_func, DEFAULT_STACK_SIZE, (void*)&task_info[3], "Mem Func 3");
+  task_create_schedule(memt_func_fast, DEFAULT_STACK_SIZE, (void*)&task_info[4], "Mem Func Fast");
 }
 
 void report_heap(void * cxt)

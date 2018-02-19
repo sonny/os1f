@@ -5,19 +5,28 @@
 #include "defs.h"
 
 void kernel_task_init(void);
-void kernel_task_schedule(void);
-void kernel_task_active_next(void);
-void kernel_task_wakeup(void);
-void kernel_task_start(task_t *);
-void kernel_task_sleep(uint32_t);
-void kernel_task_wait(uint32_t);
-void kernel_task_update_global_SP(void);
-void kernel_task_update_local_SP(void);
-void kernel_task_event_wait(event_t *);
-void kernel_task_event_notify(event_t *);
-void kernel_task_save_context(int);
-uint32_t kernel_task_load_context(void);
+int32_t kernel_task_next_id(void);
+void kernel_task_display_task_stats(void);
+void kernel_task_event_notify_all(event_t *);
+void kernel_task_wakeup_all(void);
 
-uint32_t current_task_id(void);
+void kernel_task_active_next_current(void);
+void kernel_task_schedule_current(void);
+void kernel_task_sleep_current(uint32_t);
+void kernel_task_wait_current(uint32_t);
+void kernel_task_event_wait_current(event_t *);
+void kernel_task_save_context_current(int);
+uint32_t kernel_task_load_context_current(void);
+uint32_t kernel_task_id_current(void);
+
+void kernel_task_start_id(int);
+void kernel_task_stop_id(int);
+
+void kernel_task_start_task(task_t *);
+void kernel_task_stop_task(task_t *);
+void kernel_task_destroy_task(task_t *t);
+
+void kernel_task_load_PSP_current(void);
+void kernel_task_save_PSP_current(void);
 
 #endif  /* __KERNEL_TASK_H__ */

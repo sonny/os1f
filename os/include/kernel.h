@@ -16,7 +16,7 @@ void protected_kernel_context_switch(void * ctx)
 __attribute__ ((always_inline)) static inline 
 void kernel_context_switch(void)
 {
-  service_call(protected_kernel_context_switch, NULL);
+  service_call(protected_kernel_context_switch, NULL, false);
 }
 
 __attribute__ ((always_inline)) static inline 

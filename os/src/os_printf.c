@@ -138,6 +138,7 @@ int os_itoa(int val, char *bf, int radix, bool is_unsigned)
   }
   
   p += num_digits;
+  int result = p - bf;
   do {
     int digit = val % radix;
     *(--p) = (digit < 10) ? '0' + digit : 'a' + digit - 10;
@@ -145,7 +146,7 @@ int os_itoa(int val, char *bf, int radix, bool is_unsigned)
       
   } while (val > 0);
   
-  return num_digits;
+  return result;
 }
 
 

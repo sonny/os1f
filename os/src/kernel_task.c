@@ -7,10 +7,14 @@
 #include "svc.h"
 #include <string.h>
 #include <assert.h>
+#include "os_printf.h"
 
+#define MAX_TASK_COUNT  32
 #define IDLE_STACK_SIZE 128
 #define MAIN_STACK_SIZE 1024  // default size of main stack
 #define IDLE_TASK_ID    -1
+
+static task_t *task_list[MAX_TASK_COUNT] = {0};
 
 static task_t * current_task = NULL;
 static list_t task_active = LIST_STATIC_INIT(task_active);
@@ -20,6 +24,7 @@ static list_t task_sleeping = LIST_STATIC_INIT(task_sleeping);
 static uint8_t idle_task_stack[IDLE_STACK_SIZE] __attribute__((aligned (8)));
 static task_t idle_task = {
   .node = LIST_STATIC_INIT(idle_task.node),
+  .name = "Idle",
   .sp = &idle_task_stack[0] + IDLE_STACK_SIZE,
   .stack_free = 0,
   .id = -1,
@@ -34,6 +39,7 @@ static task_t idle_task = {
 static uint8_t main_task_stack[MAIN_STACK_SIZE] __attribute__((aligned (8)));
 static task_t main_task = {
   .node = LIST_STATIC_INIT(main_task.node),
+  .name = "Main",
   .sp = &main_task_stack[0] + MAIN_STACK_SIZE,
   .stack_free = 0,
   .id = 0,
@@ -48,7 +54,7 @@ static void kernel_task_main_hoist(void);
 static void kernel_task_idle_func(void *c) { while (1); }
 
 inline
-void kernel_task_save_context(int exc_return)
+void kernel_task_save_context_current(int exc_return)
 {
   __asm volatile ("stmia %0, {r4-r11} \n" :: "r" (&current_task->sw_context) :);
   current_task->exc_return = exc_return;
@@ -67,7 +73,7 @@ void kernel_task_save_context(int exc_return)
 }
 
 inline
-uint32_t kernel_task_load_context(void)
+uint32_t kernel_task_load_context_current(void)
 {
   __asm volatile ("ldmia %0, {r4-r11} \n" :: "r" (&current_task->sw_context) :);
 
@@ -87,19 +93,6 @@ void kernel_task_init(void)
   task_stack_init(&idle_task, kernel_task_idle_func, NULL);
   kernel_task_main_hoist();
 }
-
-static
-void protected_start(void * cxt)
-{
-  protected_kernel_context_switch(NULL);
-}
-
-static inline
-void service_start(void)
-{
-  service_call(protected_start, NULL);
-}
-
 
 // NOTE: Do Not Call from inside an IRQ
 // This function switches modes from privileged to user
@@ -133,6 +126,7 @@ static void kernel_task_main_hoist(void)
   frame->xpsr = 0x01000000;
 
   current_task = &main_task;
+  task_list[0] = &main_task;
   
   // Set PSP to our new stack and Change mode to unprivileged
   kernel_sync_barrier();
@@ -144,11 +138,11 @@ static void kernel_task_main_hoist(void)
   kernel_sync_barrier();
 
   // need to call start here in order to keep the SP valid
-  service_start();
+  kernel_context_switch();
   __asm volatile("main_return_point: \n");
 }
 
-void kernel_task_schedule(void)
+void kernel_task_schedule_current(void)
 {
   switch(current_task->state) {
   case TASK_END:
@@ -170,7 +164,7 @@ void kernel_task_schedule(void)
   }
 }
 
-void kernel_task_active_next(void)
+void kernel_task_active_next_current(void)
 {
   if (!list_empty(&task_active))
     current_task = list_to_task(list_removeFront(&task_active));
@@ -178,13 +172,21 @@ void kernel_task_active_next(void)
     current_task = &idle_task;
 }
 
-void kernel_task_start(task_t * new)
+void kernel_task_start_id(int id)
 {
+  assert(id >= 0 && task_list[id] && "Invalid task id.");
+  kernel_task_start_task(task_list[id]);
+}
+
+void kernel_task_start_task(task_t * new)
+{
+  assert(task_list[new->id] == NULL && "Invalid task list id.");
+  task_list[new->id] = new;
   new->state = TASK_ACTIVE; 
   list_addAtRear(&task_active, task_to_list(new));
 }
 
-void kernel_task_sleep(uint32_t ms)
+void kernel_task_sleep_current(uint32_t ms)
 {
   assert(current_task && "Current Task is NULL");
   current_task->state = TASK_SLEEP;
@@ -192,7 +194,7 @@ void kernel_task_sleep(uint32_t ms)
   list_addAtRear(&task_sleeping, task_to_list(current_task)); 
 }
 
-void kernel_task_event_wait(event_t * e)
+void kernel_task_event_wait_current(event_t * e)
 {
   assert(current_task && "Cannot Task is NULL");
   current_task->state = TASK_WAIT;
@@ -215,13 +217,13 @@ void kernel_task_wakeup_task(list_t *node, const void * context)
   }
 }
 
-void kernel_task_wakeup(void)
+void kernel_task_wakeup_all(void)
 {
   uint32_t tick = HAL_GetTick(); 
   list_each_do(&task_sleeping, kernel_task_wakeup_task, (void*)tick);
 }
 
-void kernel_task_event_notify(event_t * e)
+void kernel_task_event_notify_all(event_t * e)
 {
   while(!list_empty(&e->waiting)) {
     task_t * task = list_to_task(list_removeFront(&e->waiting));
@@ -231,19 +233,19 @@ void kernel_task_event_notify(event_t * e)
   }
 }
 
-void kernel_task_update_global_SP(void)
+void kernel_task_load_PSP_current(void)
 {
   assert(current_task && "Current task cannot be null");
   kernel_PSP_set((uint32_t)current_task->sp);
 }
 
-void kernel_task_update_local_SP(void)
+void kernel_task_save_PSP_current(void)
 {
   assert(current_task && "Current task cannot be null");
   current_task->sp = (void*)kernel_PSP_get();
 }
 
-uint32_t current_task_id(void)
+uint32_t kernel_task_id_current(void)
 {
   return current_task->id;
 }
@@ -255,3 +257,42 @@ void kernel_task_end(void)
   task_yield();
 }
 
+int32_t kernel_task_next_id(void)
+{
+  int i = 1;
+  while (i < MAX_TASK_COUNT) {
+    if (task_list[i] == NULL) return i;
+    ++i;
+  }
+  return -1;
+}
+
+void kernel_task_destroy_task(task_t *t)
+{
+  assert(task_list[t->id] == t && "Invalid Task Entry");
+  task_list[t->id] = NULL;
+}
+
+static const char default_name[] = "unnamed";
+static const char *state_names[] = {
+  "Inactive",
+  "Active",
+  "Sleep",
+  "Wait",
+  "End"
+};
+
+void kernel_task_display_task_stats(void)
+{
+  int i;
+  char fmt[] = "%d: %s - %s\n";
+  os_iprintf(fmt, idle_task.id, idle_task.name, state_names[idle_task.state]);
+  for (i = 0; i < MAX_TASK_COUNT; ++i) {
+    task_t * t = task_list[i];
+    if (t) {
+      const char * name = default_name;
+      if (t->name) name = t->name;
+      os_iprintf(fmt, t->id, name, state_names[t->state]);
+    }
+  }
+}

@@ -19,8 +19,8 @@ task_t * task_stack_init(task_t *t, void (*func)(void*), void *context)
   return t;
 }
 
-static int32_t next_task_id = 1;
-task_t * task_create(int stack_size)
+//static int32_t next_task_id = 1;
+task_t * task_create(int stack_size, const char * name)
 {
   task_t *t = malloc(sizeof(task_t));
   memset(t, 0, sizeof(task_t));
@@ -33,8 +33,9 @@ task_t * task_create(int stack_size)
 
   memset(s, 0, stack_size);
   t->sp = s + stack_size;
-  t->id = next_task_id++;
+  t->id = kernel_task_next_id();
   t->exc_return = 0xfffffffd;
+  t->name = name;
   
   list_init(&t->node);
   event_init(&t->join);
@@ -46,7 +47,7 @@ static void protected_task_start(void * cxt)
 {
   task_t * new = cxt;
   kernel_critical_begin();
-  kernel_task_start(new);
+  kernel_task_start_task(new);
   kernel_critical_end();
 }
 
@@ -54,31 +55,26 @@ static void protected_task_sleep(void *cxt)
 {
   uint32_t ms = (uint32_t)cxt;
   kernel_critical_begin();
-  kernel_task_sleep(ms);
+  kernel_task_sleep_current(ms);
   kernel_critical_end();
-  protected_kernel_context_switch(NULL);
-}
-
-static void protected_task_yield(void *cxt)
-{
   protected_kernel_context_switch(NULL);
 }
 
 inline
 void task_schedule(task_t *task)
 {
-  service_call(protected_task_start, task);
+  service_call(protected_task_start, task, false);
 }
 
 inline
 void task_sleep(uint32_t ms) 
 {
-  service_call(protected_task_sleep, (void*)ms);
+  service_call(protected_task_sleep, (void*)ms, false);
 }
 
 inline
 void task_yield(void) 
 {
-  service_call(protected_task_yield, NULL);
+  kernel_context_switch();
 }
 

@@ -2,6 +2,8 @@
 #include "task.h"
 #include "os_printf.h"
 #include "display.h"
+#include "kernel_task.h"
+#include "svc.h"
 #include <ctype.h>
 #include <string.h>
 
@@ -14,10 +16,10 @@ typedef struct {
 
 
 #define SHELL_IO_SIZE 2048
-#define MAX_CARGS 16
+#define MAX_ARGC 16
 static char shell_buffer[SHELL_IO_SIZE];
-static char *vargs[MAX_CARGS];
-static int cargs = 0;
+static char *argv[MAX_ARGC];
+static int argc = 0;
 
 static void shell_task(void * ctx);
 static void shell_parse_cmd(int);
@@ -25,17 +27,21 @@ static void shell_process_cmd(void);
 
 static void shell_cmd_echo(void);
 static void shell_cmd_ps(void);
+static void shell_cmd_start(void);
+static void shell_cmd_stop(void);
 
 static shell_cmd_t commands[] = {
   {"echo", shell_cmd_echo},
-  {"ps", shell_cmd_ps}
+  {"ps", shell_cmd_ps},
+  {"start", shell_cmd_start},
+  {"stop", shell_cmd_stop}
 };
 
 static int command_count = sizeof(commands)/sizeof(shell_cmd_t);
 
 void shell_init(void)
 {
-  task_create_schedule(shell_task, DEFAULT_STACK_SIZE, NULL);
+  task_create_schedule(shell_task, DEFAULT_STACK_SIZE, NULL, "Shell");
 }
 
 static void shell_task(void * ctx)
@@ -58,14 +64,14 @@ static void shell_process_cmd(void)
   int i;
   shell_cmd_t * cmd = NULL;
   for (i = 0; i < command_count; ++i) {
-    if (strcmp(vargs[0], commands[i].name) == 0) {
+    if (strcmp(argv[0], commands[i].name) == 0) {
       cmd = &commands[i];
       break;
     }
   }
 
   if (cmd == NULL) {
-    os_iprintf("CMD: [%s : %s] is invalid.\n", vargs[0], vargs[1]);
+    os_iprintf("CMD: [%s : %s] is invalid.\n", argv[0], argv[1]);
   }
   else {
     cmd->call();
@@ -77,13 +83,13 @@ static void shell_parse_cmd(int size)
   char *p = shell_buffer;
   
   bool in_word = false;
-  cargs = 0;
+  argc = 0;
   while (p - shell_buffer < size) {
     if (!isspace(*p)) {
       if (!in_word) { 
         in_word = true; 
-        vargs[cargs++] = p;
-        if (cargs == 2 ) break; 
+        argv[argc++] = p;
+        if (argc == 2 ) break; 
       } 
     } 
     else {
@@ -99,11 +105,24 @@ static void shell_parse_cmd(int size)
 
 static void shell_cmd_echo(void)
 {
-  os_iprintf("%s\n", vargs[1]);
+  os_iprintf("%s\n", argv[1]);
 }
 
 static void shell_cmd_ps(void)
 {
-  //  kernel_task_display_task_stats(void);
-  os_iprintf("PS: implement me\n");
+  kernel_task_display_task_stats();
+}
+
+static void shell_cmd_start(void)
+{
+  char *end;
+  int id = strtol(argv[1], &end, 10);
+  service_call((svcall_t)kernel_task_start_id, (void*)id, true);
+}
+
+static void shell_cmd_stop(void)
+{
+  char *end;
+  int id = strtol(argv[1], &end, 10);
+  //  service_call((svcall_t)kernel_task_start_id, (void*)id, true);
 }

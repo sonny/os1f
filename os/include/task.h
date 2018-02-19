@@ -43,21 +43,22 @@ typedef struct {
 
 struct task {
   list_t node;
+  const char * name;
   void * sp;
   void * stack_free;
   int32_t  id;
   uint32_t state;
   uint32_t sleep_until;
-  bool uses_fpu;
   sw_stack_frame_t sw_context;
 #ifdef ENABLE_FPU
   sw_fp_stack_frame_t sw_fp_context;
+  bool uses_fpu;
 #endif
   event_t join;
   uint32_t exc_return;
 };
 
-task_t * task_create(int stack_size);
+task_t * task_create(int stack_size, const char *);
 task_t * task_stack_init(task_t *t, void (*func)(void*), void *context);
 void task_schedule(task_t *task);
 void task_sleep(uint32_t ms);
@@ -66,14 +67,15 @@ void task_yield(void);
 __attribute__((always_inline)) static inline
 void task_free(task_t * t)
 {
+  kernel_task_destroy_task(t);
   free(t->stack_free);
   free(t);
 }
 
 __attribute__((always_inline)) static inline
-task_t * task_create_schedule(void (*func)(void*), int stack_size, void *context)
+task_t * task_create_schedule(void (*func)(void*), int stack_size, void *context, const char * name)
 {
-  task_t * t = task_create(stack_size);
+  task_t * t = task_create(stack_size, name);
   task_stack_init(t, func, context);
   task_schedule(t);
   return t;

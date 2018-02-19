@@ -37,7 +37,7 @@ void adc_task(void *p)
     //int v_mant   = V % 1000;
     //double v = V/1000.0;
 
-    task_display_line("Temp: %.1f C, Vref: %.2f V %c\n", T, V, rot[rot_idx]);
+    //task_display_line("Temp: %.1f C, Vref: %.2f V %c\n", T, V, rot[rot_idx]);
     rot_idx = (rot_idx + 1) % 4;
     task_sleep(200);
   }
@@ -121,7 +121,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
   /* NVIC configuration for DMA transfer complete interrupt */
   //  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
   //  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
-  service_call(adc_nvic_init, NULL);
+  service_call(adc_nvic_init, NULL, false);
 }
 
 

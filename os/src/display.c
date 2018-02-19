@@ -44,7 +44,7 @@ void task_display_line(const char *fmt, ...)
 {
   va_list args;
   va_start(args, fmt);
-  __display_line_at(current_task_id(), fmt, args);
+  __display_line_at(kernel_task_id_current(), fmt, args);
   va_end(args);
 }
 
