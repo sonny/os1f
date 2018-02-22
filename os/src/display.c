@@ -3,23 +3,14 @@
 #include "display.h"
 #include "kernel_task.h"
 
-
 static void __display_line_at(int line, const char* fmt, va_list args)
 {
-  int ypos, xpos;
+  int ypos = 0, xpos = line;
 
 #ifdef OS_USE_SEMIHOSTING
   vprintf(fmt, args);
   
 #elif OS_USE_LCD
-  ypos = (line)*(BSP_LCD_GetFont()->Height + 4) + 5;
-  xpos = 5;
-
-  char *p = (char*)fmt;
-  while(*p) {
-    if (*p == '\n' || *p == '\t') *p = ' ';
-    p++;
-  }
 
   vprintf_at(xpos, ypos, fmt, args);
 
@@ -54,9 +45,13 @@ void display_init(void)
 {
 #ifdef OS_USE_LCD
   lcdInit();
-#elif defined OS_USE_SEMIHOSTING
+#endif
+  
+#if defined OS_USE_SEMIHOSTING
   initialise_monitor_handles();  
-#elif defined  OS_USE_VCP
+#endif
+  
+#if defined  OS_USE_VCP
   serialInit();
 #endif
 }

@@ -1,6 +1,7 @@
 #if defined(BOARD_DISCOVERY)
 
 #include <stdarg.h>
+#include <ctype.h>
 #include "stm32746g_discovery_lcd.h"
 #include "defs.h"
 #include "mutex.h"
@@ -48,6 +49,15 @@ void lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args)
 void lcd_printf_at(int xpos, int ypos, const char *fmt, ...)
 {
   va_list args;
+
+  char *p = (char*)fmt;
+  while(*p) {
+    //if (*p == '\n' || *p == '\t') *p = ' ';
+    if (iscntrl(*p)) *p = ' ';
+    p++;
+  }
+
+  ypos = (ypos)*(BSP_LCD_GetFont()->Height + 4) + 5;
 
   va_start(args, fmt);	
   lcd_vprintf_at(xpos, ypos, fmt, args);

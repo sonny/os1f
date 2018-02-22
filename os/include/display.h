@@ -25,17 +25,18 @@ void display_line_at(int line, const char* fmt, ...);
 #define os_putc os_putc_vcp
 
 #define os_gets os_gets_vcp
+#endif
 
-#elif defined(OS_USE_LCD)
+#if defined(OS_USE_LCD)
 
 #include "lcd.h"
 #include "stm32746g_discovery_lcd.h"
 
-#define printf_at lcd_printf_at
-#define vprintf_at lcd_vprintf_at
+/* #define printf_at lcd_printf_at */
+/* #define vprintf_at lcd_vprintf_at */
 
-#define os_puts(s, n) (void)(s)
-#define os_gets(s, n) (void)(s)
+/* #define os_puts(s, n) (void)(s) */
+/* #define os_gets(s, n) (void)(s) */
 
 #endif
 

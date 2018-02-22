@@ -64,10 +64,7 @@ int main(void)
   int tid = kernel_task_id_current();
   while (1) {
     ++z;
-    /* int heap_current = heap_size_get(); */
-    /* float p = ((float)heap_current / heap_size) * 100.0; */
-    /* display_line_at(11, "Heap Use %d of %d, %f%%\n", heap_size_get(), heap_size, p); */
-    /* task_display_line("Main Task\tid : %d, counter : %d\n", tid, z); */
+    lcd_printf_at(0, tid, "Main Task\tid : %d, counter : %d\n", tid, z);
 
     /* task_t * tonce = */
     /*   task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL); */
@@ -87,7 +84,7 @@ void task_func(void *context)
   struct func_data * fdata = context;
   while (1) {
     ++k;
-    //task_display_line("Simple Task\tid : %d, counter : %d\n", tid, k);
+    lcd_printf_at(0, tid, "Simple Task\tid : %d, counter : %d\n", tid, k);
     task_sleep(fdata->sleep);
 
   };

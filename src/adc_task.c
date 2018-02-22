@@ -37,7 +37,8 @@ void adc_task(void *p)
     //int v_mant   = V % 1000;
     //double v = V/1000.0;
 
-    //task_display_line("Temp: %.1f C, Vref: %.2f V %c\n", T, V, rot[rot_idx]);
+    int tid = kernel_task_id_current();
+    lcd_printf_at(0, tid, "Temp: %.1f C, Vref: %.2f V %c\n", T, V, rot[rot_idx]);
     rot_idx = (rot_idx + 1) % 4;
     task_sleep(200);
   }

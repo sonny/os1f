@@ -174,7 +174,7 @@ void kernel_task_active_next_current(void)
 
 void kernel_task_start_id(int id)
 {
-  assert(id >= 0 && task_list[id] && "Invalid task id.");
+  if ( id < 0 || id >= MAX_TASK_COUNT ) return;
   kernel_task_start_task(task_list[id]);
 }
 
@@ -187,7 +187,7 @@ void kernel_task_start_task(task_t * t)
 
 void kernel_task_stop_id(int id)
 {
-  assert(id >= 0 && task_list[id] && "Invalid task id.");
+  if ( id < 0 || id >= MAX_TASK_COUNT || !task_list[id] ) return;
   kernel_task_stop_task(task_list[id]);
 }
 
