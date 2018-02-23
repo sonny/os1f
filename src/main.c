@@ -66,10 +66,10 @@ int main(void)
     ++z;
     lcd_printf_at(0, tid, "Main Task\tid : %d, counter : %d\n", tid, z);
 
-    /* task_t * tonce = */
-    /*   task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL); */
+    task_t * tonce =
+      task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL, "Once");
 
-    /* task_join(tonce); */
+    task_join(tonce);
 
     task_sleep(500);
   }
@@ -95,6 +95,6 @@ void task_once(void *context)
   uint32_t tick = HAL_GetTick();
   int tid = kernel_task_id_current();
   
-  display_line_at(9, "ONCE Task\tid : %d at %d ms\n", tid, tick);
+  lcd_printf_at(0, 9, "ONCE Task\tid : %d at %d ms\n", tid, tick);
 }
 

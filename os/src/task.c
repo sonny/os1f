@@ -3,6 +3,7 @@
 #include "task.h"
 #include "defs.h"
 #include "kernel_task.h"
+#include "memory.h"
 
 // implemented in kernel_task
 extern void kernel_task_end(void);
@@ -25,13 +26,10 @@ task_t * task_create(int stack_size, const char * name)
   task_t *t = malloc(sizeof(task_t));
   memset(t, 0, sizeof(task_t));
 
-  // We need to ensure that the stack is 8-byte aligned
-  // We allocate 7 more bytes and round up the address
-  void * s = malloc(stack_size + 7);
-  t->stack_free = s;
-  s = (void*)((uintptr_t)s & ~(uintptr_t)0x7);
-
+  void * s = malloc_aligned(stack_size, 8);
+  
   memset(s, 0, stack_size);
+  t->stack_base = s;
   t->sp = s + stack_size;
   t->id = kernel_task_next_id();
   t->exc_return = 0xfffffffd;

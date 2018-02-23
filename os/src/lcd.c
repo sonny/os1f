@@ -31,7 +31,7 @@ void lcdInit(void)
 
   BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
   BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
-  BSP_LCD_SetFont(&Font16);
+  BSP_LCD_SetFont(&Font12);
 }
 
 void lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args)

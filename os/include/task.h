@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <malloc.h>
+#include "memory.h"
 #include "svc.h"
 #include "event.h"
 #include "list.h"
@@ -45,7 +45,7 @@ struct task {
   list_t node;
   const char * name;
   void * sp;
-  void * stack_free;
+  void * stack_base;
   int32_t  id;
   uint32_t state;
   uint32_t sleep_until;
@@ -56,7 +56,7 @@ struct task {
 #endif
   event_t join;
   uint32_t exc_return;
-};
+} __attribute__((aligned(4)));
 
 task_t * task_create(int stack_size, const char *);
 task_t * task_stack_init(task_t *t, void (*func)(void*), void *context);
@@ -68,7 +68,7 @@ __attribute__((always_inline)) static inline
 void task_free(task_t * t)
 {
   kernel_task_destroy_task(t);
-  free(t->stack_free);
+  free_aligned(t->stack_base);
   free(t);
 }
 
