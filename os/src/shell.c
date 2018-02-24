@@ -4,6 +4,7 @@
 #include "display.h"
 #include "kernel_task.h"
 #include "svc.h"
+#include "usec_timer.h"
 #include <ctype.h>
 #include <string.h>
 
@@ -32,6 +33,7 @@ static void shell_cmd_ps(void);
 static void shell_cmd_start(void);
 static void shell_cmd_stop(void);
 static void shell_cmd_mem(void);
+static void shell_cmd_time(void);
 
 static shell_cmd_t commands[] = {
   {"help", "\t-- print this help", shell_cmd_help},
@@ -40,6 +42,7 @@ static shell_cmd_t commands[] = {
   {"start", "task_id\t-- start task", shell_cmd_start},
   {"stop", "task_id\t-- stop task", shell_cmd_stop},
   {"mem", "\t-- display memory usage", shell_cmd_mem},
+  {"time", "\t-- display system timer values", shell_cmd_time},
 };
 
 static int command_count = sizeof(commands)/sizeof(shell_cmd_t);
@@ -171,3 +174,13 @@ static void shell_cmd_mem(void)
   os_iprintf("Total free space (fordblks):           %d\n", mi.fordblks);
   os_iprintf("Topmost releasable block (keepcost):   %d\n", mi.keepcost);
 }
+
+static void shell_cmd_time(void)
+{
+  uint32_t mstime = HAL_GetTick();
+  uint32_t ustime = usec_time();
+
+  os_iprintf("SysTick      time %d ms\n", mstime);
+  os_iprintf("uSec counter time %d us\n", ustime);
+}
+
