@@ -26,7 +26,7 @@ static task_t idle_task = {
   .node = LIST_STATIC_INIT(idle_task.node),
   .name = "Idle",
   .sp = &idle_task_stack[0] + IDLE_STACK_SIZE,
-  .stack_base = &idle_task_stack[0],
+  .stack_top = &idle_task_stack[0] + IDLE_STACK_SIZE,
   .id = -1,
   .state = TASK_ACTIVE,
   .sleep_until = 0,
@@ -41,7 +41,7 @@ static task_t main_task = {
   .node = LIST_STATIC_INIT(main_task.node),
   .name = "Main",
   .sp = &main_task_stack[0] + MAIN_STACK_SIZE,
-  .stack_base = &main_task_stack[0],
+  .stack_top = &main_task_stack[0] + MAIN_STACK_SIZE,
   .id = 0,
   .state = TASK_ACTIVE,
   .sleep_until = 0,
@@ -90,7 +90,7 @@ uint32_t kernel_task_load_context_current(void)
 
 void kernel_task_init(void)
 {
-  task_stack_init(&idle_task, kernel_task_idle_func, NULL);
+  task_frame_init(&idle_task, kernel_task_idle_func, NULL);
   kernel_task_main_hoist();
 }
 
@@ -296,15 +296,25 @@ static const char *state_names[] = {
 void kernel_task_display_task_stats(void)
 {
   int i;
-  char fmt[] = "%d\t%s\t%s\n";
-  os_iprintf("ID\tState\tName\n");
-  os_iprintf(fmt, idle_task.id, state_names[idle_task.state], idle_task.name );
+  char fmt[] = "%d\t%s\t%s\t%d/%d\n";
+  os_iprintf("ID\tState\tName\tStack\n");
+  int stack_size = IDLE_STACK_SIZE;
+  int stack_usage = idle_task.stack_top - idle_task.sp;
+  os_iprintf(fmt, idle_task.id,
+             state_names[idle_task.state],
+             idle_task.name,
+             stack_usage, stack_size );
   for (i = 0; i < MAX_TASK_COUNT; ++i) {
     task_t * t = task_list[i];
     if (t) {
       const char * name = default_name;
       if (t->name) name = t->name;
-      os_iprintf(fmt, t->id, state_names[t->state], name);
+      if (i == 0) stack_size = MAIN_STACK_SIZE;
+      else stack_size = t->stack_top - ((void*)t + sizeof(task_t));
+      stack_usage = t->stack_top - t->sp;
+      os_iprintf(fmt, t->id,
+                 state_names[t->state], name,
+                 stack_usage, stack_size);
     }
   }
 }

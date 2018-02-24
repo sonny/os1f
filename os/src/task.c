@@ -8,7 +8,7 @@
 // implemented in kernel_task
 extern void kernel_task_end(void);
 
-task_t * task_stack_init(task_t *t, void (*func)(void*), void *context)
+task_t * task_frame_init(task_t *t, void (*func)(void*), void *context)
 {
   hw_stack_frame_t *frame = t->sp - sizeof(hw_stack_frame_t);
   frame->r0 = (uint32_t)context;
@@ -17,27 +17,6 @@ task_t * task_stack_init(task_t *t, void (*func)(void*), void *context)
   frame->xpsr = 0x01000000;   // thumb mode enabled (required);
 
   t->sp = frame;
-  return t;
-}
-
-//static int32_t next_task_id = 1;
-task_t * task_create(int stack_size, const char * name)
-{
-  task_t *t = malloc(sizeof(task_t));
-  memset(t, 0, sizeof(task_t));
-
-  void * s = malloc_aligned(stack_size, 8);
-  
-  memset(s, 0, stack_size);
-  t->stack_base = s;
-  t->sp = s + stack_size;
-  t->id = kernel_task_next_id();
-  t->exc_return = 0xfffffffd;
-  t->name = name;
-  
-  list_init(&t->node);
-  event_init(&t->join);
-
   return t;
 }
 
