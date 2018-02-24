@@ -56,7 +56,7 @@ int main(void)
   
   /* // Unocmment to test memory allocation syncronization */
   /* // memory_thread_test(); */
-  task_create_schedule(adc_task, 1024, NULL, "ADC");
+  task_create_schedule(adc_task, 512, NULL, "ADC");
 
   shell_init();
   

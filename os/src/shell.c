@@ -31,13 +31,15 @@ static void shell_cmd_echo(void);
 static void shell_cmd_ps(void);
 static void shell_cmd_start(void);
 static void shell_cmd_stop(void);
+static void shell_cmd_mem(void);
 
 static shell_cmd_t commands[] = {
   {"help", "\t-- print this help", shell_cmd_help},
   {"echo", "string\t-- echo string to terminal", shell_cmd_echo},
   {"ps", "\t-- list tasks", shell_cmd_ps},
   {"start", "task_id\t-- start task", shell_cmd_start},
-  {"stop", "task_id\t-- stop task", shell_cmd_stop}
+  {"stop", "task_id\t-- stop task", shell_cmd_stop},
+  {"mem", "\t-- display memory usage", shell_cmd_mem},
 };
 
 static int command_count = sizeof(commands)/sizeof(shell_cmd_t);
@@ -138,4 +140,34 @@ static void shell_cmd_stop(void)
   char *end;
   int id = strtol(argv[1], &end, 10);
   service_call((svcall_t)kernel_task_stop_id, (void*)id, true);
+}
+
+extern char __data_start__; // Bottom of RAM ???
+extern char _Heap_Begin;
+extern char __stack; // top of RAM
+extern uint32_t heap_size_get(void);
+
+static void shell_cmd_mem(void)
+{
+  struct mallinfo mi;
+  int total_ram = &__stack - &__data_start__;
+  int static_used = &_Heap_Begin - &__data_start__;
+  int heap_used = heap_size_get();
+  
+  os_iprintf("Total Ram                              %d\n", total_ram);
+  os_iprintf("Static allocation                      %d\n", static_used);
+  os_iprintf("Heap allocation                        %d\n", heap_used);
+  
+  mi = mallinfo();
+
+  os_iprintf("Total non-mmapped bytes (arena):       %d\n", mi.arena);
+  os_iprintf("# of free chunks (ordblks):            %d\n", mi.ordblks);
+  os_iprintf("# of free fastbin blocks (smblks):     %d\n", mi.smblks);
+  os_iprintf("# of mapped regions (hblks):           %d\n", mi.hblks);
+  os_iprintf("Bytes in mapped regions (hblkhd):      %d\n", mi.hblkhd);
+  os_iprintf("Max. total allocated space (usmblks):  %d\n", mi.usmblks);
+  os_iprintf("Free bytes held in fastbins (fsmblks): %d\n", mi.fsmblks);
+  os_iprintf("Total allocated space (uordblks):      %d\n", mi.uordblks);
+  os_iprintf("Total free space (fordblks):           %d\n", mi.fordblks);
+  os_iprintf("Topmost releasable block (keepcost):   %d\n", mi.keepcost);
 }
