@@ -1,15 +1,17 @@
 #include "stm32f7xx_hal.h"
 
-static uint32_t usec_timer = 0;
+#include "usec_timer.h"
+
+static uint64_t usec_timer = 0;
 static TIM_HandleTypeDef    TimHandle;
-static int period = 0xffff;
+static const int period = 0xffff;
 
 void usec_timer_init(void)
 {
 
   TimHandle.Instance = TIM7;
   TimHandle.Init.Period            = period;
-  TimHandle.Init.Prescaler         = ((SystemCoreClock / 2) / 1000000) - 1;
+  TimHandle.Init.Prescaler         = ((SystemCoreClock / 2) / ONE_MILLION) - 1;
   TimHandle.Init.ClockDivision     = 0;
   TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
 
@@ -20,12 +22,13 @@ void usec_timer_init(void)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  usec_timer++;
+  usec_timer += period;
 }
 
 uint64_t usec_time(void)
 {
-  return (uint64_t)usec_timer * period + __HAL_TIM_GetCounter(&TimHandle);
+  uint16_t tim_counter = __HAL_TIM_GetCounter(&TimHandle);
+  return usec_timer + tim_counter;
 }
 
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
@@ -36,7 +39,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
   
   /*##-2- Configure the NVIC for TIMx ########################################*/
   /* Set the TIMx priority */
-  HAL_NVIC_SetPriority(TIM7_IRQn, 3, 0);
+  HAL_NVIC_SetPriority(TIM7_IRQn, 15, 0);
 
   /* Enable the TIMx global Interrupt */
   HAL_NVIC_EnableIRQ(TIM7_IRQn);
