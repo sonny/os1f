@@ -42,13 +42,15 @@ void PendSV_Handler(void)
   
   kernel_critical_begin();
   kernel_task_save_context_current(exc_return);
-
+  kernel_task_update_runtime_current();
+  
   kernel_task_save_PSP_current();
   kernel_task_schedule_current();
   kernel_task_wakeup_all();
   kernel_task_active_next_current();
   kernel_task_load_PSP_current();
 
+  kernel_task_update_lasttime_current();
   exc_return = kernel_task_load_context_current();
   kernel_critical_end();
   __asm volatile("bx %0 \n" :: "r"(exc_return)); 

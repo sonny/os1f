@@ -16,7 +16,7 @@ typedef struct {
   cmd_t call;
 } shell_cmd_t;
 
-
+#define SHELL_STACK_SIZE 512
 #define SHELL_IO_SIZE 2048
 #define MAX_ARGC 16
 static char shell_buffer[SHELL_IO_SIZE];
@@ -49,7 +49,7 @@ static int command_count = sizeof(commands)/sizeof(shell_cmd_t);
 
 void shell_init(void)
 {
-  task_create_schedule(shell_task, DEFAULT_STACK_SIZE, NULL, "Shell");
+  task_create_schedule(shell_task, SHELL_STACK_SIZE, NULL, "Shell");
 }
 
 static void shell_task(void * ctx)

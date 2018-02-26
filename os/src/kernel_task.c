@@ -88,6 +88,17 @@ uint32_t kernel_task_load_context_current(void)
   return current_task->exc_return;
 }
 
+void kernel_task_update_lasttime_current(void)
+{
+  current_task->lasttime = usec_time();
+}
+
+void kernel_task_update_runtime_current(void)
+{
+  uint64_t diff = usec_time() - current_task->lasttime;
+  current_task->runtime += diff;
+}
+
 void kernel_task_init(void)
 {
   task_frame_init(&idle_task, kernel_task_idle_func, NULL);
@@ -296,14 +307,20 @@ static const char *state_names[] = {
 void kernel_task_display_task_stats(void)
 {
   int i;
-  char fmt[] = "%d\t%s\t%s\t%d/%d\n";
-  os_iprintf("ID\tState\tName\tStack\n");
+  char fmt[] = "%d\t%s\t%d/%d\t%.2f\t%s\n";
+  os_iprintf("ID\tState\tStack\tTime\tName\n");
   int stack_size = IDLE_STACK_SIZE;
   int stack_usage = idle_task.stack_top - idle_task.sp;
+  uint32_t usecs = usec_time();
+  uint32_t runtime = idle_task.runtime;
+  float runper = (((float)runtime / (float)usecs) * 100); 
   os_iprintf(fmt, idle_task.id,
              state_names[idle_task.state],
-             idle_task.name,
-             stack_usage, stack_size );
+             stack_usage, stack_size,
+             runper,
+             idle_task.name
+             );
+
   for (i = 0; i < MAX_TASK_COUNT; ++i) {
     task_t * t = task_list[i];
     if (t) {
@@ -311,10 +328,17 @@ void kernel_task_display_task_stats(void)
       if (t->name) name = t->name;
       if (i == 0) stack_size = MAIN_STACK_SIZE;
       else stack_size = t->stack_top - ((void*)t + sizeof(task_t));
+      runtime = t->runtime;
       stack_usage = t->stack_top - t->sp;
+
+      runtime = t->runtime;
+      runper = (((float)runtime / (float)usecs) * 100); 
+
       os_iprintf(fmt, t->id,
-                 state_names[t->state], name,
-                 stack_usage, stack_size);
+                 state_names[t->state],
+                 stack_usage, stack_size,
+                 runper, name
+                 );
     }
   }
 }

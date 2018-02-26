@@ -18,6 +18,8 @@ void kernel_task_event_wait_current(event_t *);
 void kernel_task_save_context_current(int);
 uint32_t kernel_task_load_context_current(void);
 uint32_t kernel_task_id_current(void);
+void kernel_task_update_lasttime_current(void);
+void kernel_task_update_runtime_current(void);
 
 void kernel_task_start_id(int);
 void kernel_task_stop_id(int);

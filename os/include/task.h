@@ -9,7 +9,7 @@
 #include "svc.h"
 #include "event.h"
 #include "list.h"
-
+#include "usec_timer.h"
 
 typedef struct {
   uint32_t r0;
@@ -51,6 +51,8 @@ struct task {
   int32_t  id;
   uint32_t state;
   uint32_t sleep_until;
+  uint64_t runtime;
+  uint64_t lasttime;
   sw_stack_frame_t sw_context;
 #ifdef ENABLE_FPU
   sw_fp_stack_frame_t sw_fp_context;
