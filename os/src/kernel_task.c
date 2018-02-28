@@ -8,6 +8,7 @@
 #include <string.h>
 #include <assert.h>
 #include "os_printf.h"
+#include "heap.h"
 
 #define MAX_TASK_COUNT  32
 #define IDLE_STACK_SIZE 128
@@ -18,7 +19,12 @@ static task_t *task_list[MAX_TASK_COUNT] = {0};
 
 static task_t * current_task = NULL;
 static list_t task_active = LIST_STATIC_INIT(task_active);
-static list_t task_sleeping = LIST_STATIC_INIT(task_sleeping);
+//static list_t task_sleeping = LIST_STATIC_INIT(task_sleeping);
+
+static __attribute__((const))
+heap_key_t sleeping_heap_key(const void * cxt);
+
+HEAP_MIN_STATIC_CREATE(sleeping, MAX_TASK_COUNT, sleeping_heap_key);
 
 /* idle task */
 static uint8_t idle_task_stack[IDLE_STACK_SIZE] __attribute__((aligned (8)));
@@ -213,7 +219,8 @@ void kernel_task_sleep_current(uint32_t ms)
   assert(current_task && "Current Task is NULL");
   current_task->state = TASK_SLEEP;
   current_task->sleep_until = HAL_GetTick() + ms;
-  list_addAtRear(&task_sleeping, task_to_list(current_task)); 
+  //list_addAtRear(&task_sleeping, task_to_list(current_task));
+  Heap.insert(&sleeping.heap, current_task);
 }
 
 void kernel_task_event_wait_current(event_t * e)
@@ -223,26 +230,35 @@ void kernel_task_event_wait_current(event_t * e)
   list_addAtRear(&e->waiting, task_to_list(current_task));
 }
 
-static inline
-void kernel_task_wakeup_task(list_t *node, const void * context)
-{
-  task_t *t = list_to_task(node);
-  const uint32_t tick = (uint32_t)context;
-  assert(t->state == TASK_SLEEP && "Tasks in sleeping queue must be asleep.");
+/* static inline */
+/* void kernel_task_wakeup_task(list_t *node, const void * context) */
+/* { */
+/*   task_t *t = list_to_task(node); */
+/*   const uint32_t tick = (uint32_t)context; */
+/*   assert(t->state == TASK_SLEEP && "Tasks in sleeping queue must be asleep."); */
 
-  if (t->sleep_until < tick) {
-    t->sleep_until = 0;
-    t->state = TASK_ACTIVE;
+/*   if (t->sleep_until < tick) { */
+/*     t->sleep_until = 0; */
+/*     t->state = TASK_ACTIVE; */
 
-    list_remove(node);
-    list_addAtRear(&task_active, node);
-  }
-}
+/*     list_remove(node); */
+/*     list_addAtRear(&task_active, node); */
+/*   } */
+/* } */
 
 void kernel_task_wakeup_all(void)
 {
   uint32_t tick = HAL_GetTick(); 
-  list_each_do(&task_sleeping, kernel_task_wakeup_task, (void*)tick);
+  //list_each_do(&task_sleeping, kernel_task_wakeup_task, (void*)tick);
+  task_t * t = Heap.head(&sleeping.heap);
+  while (t && t->sleep_until <= tick) {
+    t = Heap.remove_head(&sleeping.heap);
+    t->sleep_until = 0;
+    t->state = TASK_ACTIVE;
+    list_addAtRear(&task_active, task_to_list(t));
+
+    t = Heap.head(&sleeping.heap);
+  }
 }
 
 void kernel_task_event_notify_all(event_t * e)
@@ -303,6 +319,13 @@ static const char *state_names[] = {
   "Wait",
   "End"
 };
+
+static inline  __attribute__((const))
+heap_key_t sleeping_heap_key(const void * cxt)
+{
+  const task_t * t = cxt;
+  return t->sleep_until;
+}
 
 void kernel_task_display_task_stats(void)
 {

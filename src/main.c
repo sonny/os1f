@@ -12,6 +12,7 @@
 void printmsg(char *m);
 static void task_func(void *);
 static void task_once(void *);
+static void task_greedy(void *);
 
 struct func_data {
   char * name;
@@ -34,25 +35,11 @@ int main(void)
 {
   // switch modes and make main a normal user task
   os_start();
-
-  /* int clk = HAL_RCC_GetHCLKFreq(); */
-  /* char *clk_str = "Hz"; */
-  /* if (clk > 1000000) { */
-  /*   clk /= 1000000; */
-  /*   clk_str = "MHz"; */
-  /* } */
-  /* else if (clk > 10000) { */
-  /*   clk /= 1000; */
-  /*   clk_str = "KHz"; */
-  /* } */
-  
-  /* display_line_at(12, "Clock is %d%s\n", clk, clk_str); */
-  /* int heap_size = (int)(&_Heap_Limit - &_Heap_Begin); */
     
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[0], "Simple 0");
   task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[1], "Simple 1");
-  /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[2]); */
-  /* task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*)&fdata[3]); */
+  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 0");
+  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 1");
   
   /* // Unocmment to test memory allocation syncronization */
   /* // memory_thread_test(); */
@@ -98,3 +85,15 @@ void task_once(void *context)
   lcd_printf_at(0, 9, "ONCE Task\tid : %d at %d ms\n", tid, tick);
 }
 
+static void task_greedy(void *ctx)
+{
+  volatile int k = 0;
+  int tid = kernel_task_id_current();
+
+  while (1) {
+    ++k;
+    if ((k % 10000000) == 0) {
+      lcd_printf_at(0, tid, "[%d] Simple Greedy counter [%d]\n", tid, k);
+    }
+  }
+}
