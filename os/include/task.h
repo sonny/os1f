@@ -135,12 +135,31 @@ list_t * task_to_list(task_t * task)
   return (list_t *)task;
 }
 
-
 typedef struct {
   sw_stack_frame_t sw_frame;
   hw_stack_frame_t hw_frame;
 } stack_frame_t;
 
+#define TASK_STATIC_ALLOCATE(name, size)                \
+  struct {                                              \
+    task_t task;                                        \
+    uint8_t stack[size] __attribute((aligned(8)));            \
+  } name                                          
 
+#define TASK_STATIC_INIT(_name, _name_str, _id) {                \
+    { .node = LIST_STATIC_INIT(_name.task.node),                 \
+        .name = _name_str,                                       \
+        .sp = &_name.stack[0] + sizeof(_name.stack),              \
+        .stack_top = &_name.stack[0] + sizeof(_name.stack),       \
+        .id = _id,                                                \
+        .state = TASK_ACTIVE,                                     \
+        .sleep_until = 0,                                         \
+        .uses_fpu = false,                                        \
+        .join = EVENT_STATIC_INIT(_name.task.join),               \
+        .exc_return = 0xfffffffd }, {0}                           \
+  }
+
+#define TASK_STATIC_CREATE(name, name_str, size, id) \
+  TASK_STATIC_ALLOCATE(name, size) = TASK_STATIC_INIT(name, name_str, id)
 
 #endif /* __TASK_H__ */

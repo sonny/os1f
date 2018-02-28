@@ -215,7 +215,7 @@ void heap_init(heap_t *heap,
   for (i = 0; i < data_size; i++)
     heap->data[i] = NULL;
 
-  assert(heap_valid(heap) && "Heap invalid");
+  //assert(heap_valid(heap) && "Heap invalid");
 }
 
 /**
@@ -233,7 +233,7 @@ bool heap_insert(heap_t * restrict heap, void * restrict new)
     heap->data[index] = new;
     heap_heapify_up(heap, index);
 
-    assert(heap_valid(heap) && "Heap invalid");
+    //assert(heap_valid(heap) && "Heap invalid");
 
     return true;
   }
@@ -257,7 +257,7 @@ void *heap_remove_head(heap_t *heap)
     heap_heapify(heap, 0);
   }
 
-  assert(heap_valid(heap) && "Heap invalid");
+  //assert(heap_valid(heap) && "Heap invalid");
   return result;
 }
 

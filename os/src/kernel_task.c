@@ -24,37 +24,10 @@ static list_t task_active = LIST_STATIC_INIT(task_active);
 static __attribute__((const))
 heap_key_t sleeping_heap_key(const void * cxt);
 
-HEAP_MIN_STATIC_CREATE(sleeping, MAX_TASK_COUNT, sleeping_heap_key);
+static HEAP_MIN_STATIC_CREATE(sleeping, MAX_TASK_COUNT, sleeping_heap_key);
 
-/* idle task */
-static uint8_t idle_task_stack[IDLE_STACK_SIZE] __attribute__((aligned (8)));
-static task_t idle_task = {
-  .node = LIST_STATIC_INIT(idle_task.node),
-  .name = "Idle",
-  .sp = &idle_task_stack[0] + IDLE_STACK_SIZE,
-  .stack_top = &idle_task_stack[0] + IDLE_STACK_SIZE,
-  .id = -1,
-  .state = TASK_ACTIVE,
-  .sleep_until = 0,
-  .uses_fpu = false,
-  .join = EVENT_STATIC_INIT(idle_task.join),
-  .exc_return = 0xfffffffd
-};
-
-/* main task */
-static uint8_t main_task_stack[MAIN_STACK_SIZE] __attribute__((aligned (8)));
-static task_t main_task = {
-  .node = LIST_STATIC_INIT(main_task.node),
-  .name = "Main",
-  .sp = &main_task_stack[0] + MAIN_STACK_SIZE,
-  .stack_top = &main_task_stack[0] + MAIN_STACK_SIZE,
-  .id = 0,
-  .state = TASK_ACTIVE,
-  .sleep_until = 0,
-  .uses_fpu = false,
-  .join = EVENT_STATIC_INIT(main_task.join),
-  .exc_return = 0xfffffffd
-};
+static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID);
+static TASK_STATIC_CREATE(main_task, "Main", MAIN_STACK_SIZE, 0);
 
 static void kernel_task_main_hoist(void);
 static void kernel_task_idle_func(void *c) { while (1); }
@@ -107,7 +80,7 @@ void kernel_task_update_runtime_current(void)
 
 void kernel_task_init(void)
 {
-  task_frame_init(&idle_task, kernel_task_idle_func, NULL);
+  task_frame_init(&idle_task.task, kernel_task_idle_func, NULL);
   kernel_task_main_hoist();
 }
 
@@ -122,7 +95,8 @@ static void kernel_task_main_hoist(void)
   uint32_t stack_base = *((uint32_t*)SCB->VTOR);
   uint32_t stack_ptr  = kernel_SP_get();
   uint32_t stack_size = stack_base - stack_ptr;
-  void *main_task_sp = &main_task_stack[0] + MAIN_STACK_SIZE - stack_size;
+  //  void *main_task_sp = &main_task_stack[0] + MAIN_STACK_SIZE - stack_size;
+  void *main_task_sp = &main_task.stack[0] + sizeof(main_task.stack) - stack_size;
   memcpy(main_task_sp, (void*)stack_ptr, stack_size);
 
   // Note: this is where the stack pointer will be once
@@ -135,15 +109,15 @@ static void kernel_task_main_hoist(void)
   }
   
   // Init main task object
-  main_task.sp = adjusted_main_task_sp;
+  main_task.task.sp = adjusted_main_task_sp;
 
   // Setup return HW frame
   hw_stack_frame_t * frame = adjusted_main_task_sp;
   frame->pc = main_return_point;
   frame->xpsr = 0x01000000;
 
-  current_task = &main_task;
-  task_list[0] = &main_task;
+  current_task = &main_task.task;
+  task_list[0] = &main_task.task;
   
   // Set PSP to our new stack and Change mode to unprivileged
   kernel_sync_barrier();
@@ -186,7 +160,7 @@ void kernel_task_active_next_current(void)
   if (!list_empty(&task_active))
     current_task = list_to_task(list_removeFront(&task_active));
   else
-    current_task = &idle_task;
+    current_task = &idle_task.task;
 }
 
 void kernel_task_start_id(int id)
@@ -333,15 +307,15 @@ void kernel_task_display_task_stats(void)
   char fmt[] = "%d\t%s\t%d/%d\t%.2f\t%s\n";
   os_iprintf("ID\tState\tStack\tTime\tName\n");
   int stack_size = IDLE_STACK_SIZE;
-  int stack_usage = idle_task.stack_top - idle_task.sp;
+  int stack_usage = idle_task.task.stack_top - idle_task.task.sp;
   uint32_t usecs = usec_time();
-  uint32_t runtime = idle_task.runtime;
+  uint32_t runtime = idle_task.task.runtime;
   float runper = (((float)runtime / (float)usecs) * 100); 
-  os_iprintf(fmt, idle_task.id,
-             state_names[idle_task.state],
+  os_iprintf(fmt, idle_task.task.id,
+             state_names[idle_task.task.state],
              stack_usage, stack_size,
              runper,
-             idle_task.name
+             idle_task.task.name
              );
 
   for (i = 0; i < MAX_TASK_COUNT; ++i) {
