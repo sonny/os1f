@@ -25,8 +25,7 @@
 #define VCPClockSelection            Usart3ClockSelection
 #define RCC_PERIPHCLK_VCP            RCC_PERIPHCLK_USART3
 #define RCC_VCPCLKSOURCE_SYSCLK      RCC_USART3CLKSOURCE_SYSCLK
-  
-#endif
 
+#endif
 
 #endif /*  __BOARD_NUCLEO_H__ */

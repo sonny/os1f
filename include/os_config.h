@@ -14,5 +14,4 @@
 //#define VCP_BAUD 1000000
 #define VCP_BAUD 38400
 
-
 #endif  /* __OS_CONFIG_H__ */

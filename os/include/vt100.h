@@ -5,8 +5,7 @@
  *  Author: Greg Cook
  *
  * Configurable terminal display with default layout
- */ 
-
+ */
 
 #ifndef VT100_H_
 #define VT100_H_
@@ -15,8 +14,8 @@
 #include <stdarg.h>
 
 typedef struct {
-  uint16_t start;
-  uint16_t end;
+	uint16_t start;
+	uint16_t end;
 } scroll_t;
 
 #define ESC           "\x1b"

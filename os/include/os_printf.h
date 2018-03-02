@@ -17,5 +17,4 @@ int os_ftoa(float f, char *bf, int);
 int os_putc_semihosting(char c);
 int os_puts_semihosting(const char *str, int len);
 
-
 #endif /* __OS_PRINTF_H__ */

@@ -1,7 +1,1 @@
-BUILD
-*.map
-openocd.log
-itm.fifo
-historic
-.gdb_history
-*~
+/Debug/

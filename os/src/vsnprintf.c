@@ -98,8 +98,9 @@ int os_snprintf(char *buffer, size_t size, const char * fmt, ...)
 {
   va_list args;
   va_start(args, fmt);
-  os_vsnprintf(buffer, size, fmt, args);
+  int len = os_vsnprintf(buffer, size, fmt, args);
   va_end(args);
+  return len;
 }
 
 

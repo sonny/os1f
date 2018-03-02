@@ -23,48 +23,43 @@ extern char _Heap_Limit; // Defined by the linker.
 
 static char* current_heap_end;
 
-caddr_t
-_sbrk(int incr)
-{
-  char* current_block_address;
+caddr_t _sbrk(int incr) {
+	char* current_block_address;
 
-  if (current_heap_end == 0)
-    {
-      current_heap_end = &_Heap_Begin;
-    }
+	if (current_heap_end == 0) {
+		current_heap_end = &_Heap_Begin;
+	}
 
-  current_block_address = current_heap_end;
+	current_block_address = current_heap_end;
 
-  // Need to align heap to word boundary, else will get
-  // hard faults on Cortex-M0. So we assume that heap starts on
-  // word boundary, hence make sure we always add a multiple of
-  // 4 to it.
-  incr = (incr + 3) & (~3); // align value to 4
-  if (current_heap_end + incr > &_Heap_Limit)
-    {
-      // Some of the libstdc++-v3 tests rely upon detecting
-      // out of memory errors, so do not abort here.
+	// Need to align heap to word boundary, else will get
+	// hard faults on Cortex-M0. So we assume that heap starts on
+	// word boundary, hence make sure we always add a multiple of
+	// 4 to it.
+	incr = (incr + 3) & (~3); // align value to 4
+	if (current_heap_end + incr > &_Heap_Limit) {
+		// Some of the libstdc++-v3 tests rely upon detecting
+		// out of memory errors, so do not abort here.
 #if 0
-      extern void abort (void);
+		extern void abort (void);
 
-      _write (1, "_sbrk: Heap and stack collision\n", 32);
+		_write (1, "_sbrk: Heap and stack collision\n", 32);
 
-      abort ();
+		abort ();
 #else
-      // Heap has overflowed
-      errno = ENOMEM;
-      return (caddr_t) - 1;
+		// Heap has overflowed
+		errno = ENOMEM;
+		return (caddr_t) -1;
 #endif
-    }
+	}
 
-  current_heap_end += incr;
+	current_heap_end += incr;
 
-  return (caddr_t) current_block_address;
+	return (caddr_t) current_block_address;
 }
 
-uint32_t heap_size_get(void)
-{
-  return current_heap_end - &_Heap_Begin;
+uint32_t heap_size_get(void) {
+	return current_heap_end - &_Heap_Begin;
 }
 
 // ----------------------------------------------------------------------------

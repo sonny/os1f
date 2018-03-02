@@ -4,8 +4,7 @@
 #include <stdarg.h>
 
 void lcdInit(void);
-void lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args);
-void lcd_printf_at(int xpos, int ypos, const char *fmt, ...);
-
+int lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args);
+int lcd_printf_at(int xpos, int ypos, const char *fmt, ...);
 
 #endif  /* __LCD_H__ */

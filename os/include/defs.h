@@ -29,11 +29,11 @@
 #endif
 
 #define CONTROL_C -1
-  
+
 /* Forward struct declarations */
-typedef struct task  task_t;
+typedef struct task task_t;
 typedef struct event event_t;
-typedef struct list  list_t;
+typedef struct list list_t;
 typedef struct mutex mutex_t;
 
 #endif  /*__DEFS_H__ */

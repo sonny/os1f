@@ -5,7 +5,7 @@
  *  Author: Greg Cook
  *
  * Heap data structure
- */ 
+ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,10 +24,8 @@ static bool heap_valid(const heap_t *heap);
  * @param index Index of current node in internal array
  * @return index of parent node in internal array
  */
-static inline
-heap_index_t heap_node_parent(heap_index_t index)
-{
-  return (index - 1) / 2;
+static inline heap_index_t heap_node_parent(heap_index_t index) {
+	return (index - 1) / 2;
 }
 
 /**
@@ -35,10 +33,8 @@ heap_index_t heap_node_parent(heap_index_t index)
  * @param index Index of current node in internal array
  * @return index of left child node in internal array
  */
-static inline
-heap_index_t heap_node_left_child(heap_index_t index)
-{
-  return index * 2 + 1;
+static inline heap_index_t heap_node_left_child(heap_index_t index) {
+	return index * 2 + 1;
 }
 
 /**
@@ -46,10 +42,8 @@ heap_index_t heap_node_left_child(heap_index_t index)
  * @param index Index of current node in internal array
  * @return index of right child node in internal array
  */
-static inline
-heap_index_t heap_node_right_child(heap_index_t index)
-{
-  return index * 2 + 2;
+static inline heap_index_t heap_node_right_child(heap_index_t index) {
+	return index * 2 + 2;
 }
 
 /**
@@ -58,10 +52,8 @@ heap_index_t heap_node_right_child(heap_index_t index)
  * @param index Index of node
  * @return key value from data object contained by node
  */
-static inline
-heap_key_t heap_get_key(const heap_t *heap, heap_index_t index)
-{
-  return ( heap->get_key(heap->data[index]) );
+static inline heap_key_t heap_get_key(const heap_t *heap, heap_index_t index) {
+	return (heap->get_key(heap->data[index]));
 }
 
 /**
@@ -72,9 +64,8 @@ heap_key_t heap_get_key(const heap_t *heap, heap_index_t index)
  * @return True if key(a) > key(b)
  */
 inline
-bool heap_cmp_max(const heap_t *heap, heap_index_t a, heap_index_t b)
-{
-  return ( heap_get_key(heap, a) > heap_get_key(heap, b) );
+bool heap_cmp_max(const heap_t *heap, heap_index_t a, heap_index_t b) {
+	return (heap_get_key(heap, a) > heap_get_key(heap, b));
 }
 
 /**
@@ -85,9 +76,8 @@ bool heap_cmp_max(const heap_t *heap, heap_index_t a, heap_index_t b)
  * @return True if key(a) < key(b)
  */
 inline
-bool heap_cmp_min(const heap_t *heap, heap_index_t a, heap_index_t b)
-{
-  return ( heap_get_key(heap, a) < heap_get_key(heap, b) );
+bool heap_cmp_min(const heap_t *heap, heap_index_t a, heap_index_t b) {
+	return (heap_get_key(heap, a) < heap_get_key(heap, b));
 }
 
 /**
@@ -98,11 +88,10 @@ bool heap_cmp_min(const heap_t *heap, heap_index_t a, heap_index_t b)
  * @return void
  */
 static inline
-void heap_swap(heap_t *heap, heap_index_t a, heap_index_t b)
-{
-  void *temp = heap->data[a];
-  heap->data[a] = heap->data[b];
-  heap->data[b] = temp;
+void heap_swap(heap_t *heap, heap_index_t a, heap_index_t b) {
+	void *temp = heap->data[a];
+	heap->data[a] = heap->data[b];
+	heap->data[b] = temp;
 }
 
 /**
@@ -112,16 +101,15 @@ void heap_swap(heap_t *heap, heap_index_t a, heap_index_t b)
  * @return void
  */
 static
-void heap_heapify_up(heap_t *heap, heap_index_t index)
-{
-  heap_index_t current = index;
-  heap_index_t parent = heap_node_parent(current);
-  while (current > 0 && !(heap->cmp(heap, parent, current))) {
-    heap_swap(heap, parent, current);
+void heap_heapify_up(heap_t *heap, heap_index_t index) {
+	heap_index_t current = index;
+	heap_index_t parent = heap_node_parent(current);
+	while (current > 0 && !(heap->cmp(heap, parent, current))) {
+		heap_swap(heap, parent, current);
 
-    current = parent;
-    parent = heap_node_parent(current);
-  }
+		current = parent;
+		parent = heap_node_parent(current);
+	}
 }
 
 /**
@@ -131,24 +119,23 @@ void heap_heapify_up(heap_t *heap, heap_index_t index)
  * @return void
  */
 static
-void heap_heapify(heap_t *heap, heap_index_t index)
-{
-  heap_index_t left  = heap_node_left_child(index);
-  heap_index_t right = heap_node_right_child(index);
-  heap_index_t minmax = index;
+void heap_heapify(heap_t *heap, heap_index_t index) {
+	heap_index_t left = heap_node_left_child(index);
+	heap_index_t right = heap_node_right_child(index);
+	heap_index_t minmax = index;
 
-  if (left < heap->size && heap->cmp(heap, left, index))
-    minmax = left;
-  else
-    minmax = index;
+	if (left < heap->size && heap->cmp(heap, left, index))
+		minmax = left;
+	else
+		minmax = index;
 
-  if (right < heap->size && heap->cmp(heap, right, minmax))
-    minmax = right;
+	if (right < heap->size && heap->cmp(heap, right, minmax))
+		minmax = right;
 
-  if (minmax != index) {
-    heap_swap(heap, index, minmax);
-    heap_heapify(heap, minmax);
-  }
+	if (minmax != index) {
+		heap_swap(heap, index, minmax);
+		heap_heapify(heap, minmax);
+	}
 }
 
 /**
@@ -157,9 +144,8 @@ void heap_heapify(heap_t *heap, heap_index_t index)
  * @return Head node of heap
  */
 static inline
-void *heap_head(const heap_t *heap)
-{
-  return heap->data[0];
+void *heap_head(const heap_t *heap) {
+	return heap->data[0];
 }
 
 /**
@@ -168,9 +154,8 @@ void *heap_head(const heap_t *heap)
  * @return True if heap has no elements
  */
 static inline
-bool heap_is_empty(const heap_t *heap)
-{
-  return (heap->size == 0);
+bool heap_is_empty(const heap_t *heap) {
+	return (heap->size == 0);
 }
 
 /**
@@ -179,9 +164,8 @@ bool heap_is_empty(const heap_t *heap)
  * @return True if no more elements can be inserted
  */
 static inline
-bool heap_is_full(const heap_t *heap)
-{
-  return (heap->size == heap->max_size);
+bool heap_is_full(const heap_t *heap) {
+	return (heap->size == heap->max_size);
 }
 
 /**
@@ -194,28 +178,24 @@ bool heap_is_full(const heap_t *heap)
  * @return void
  */
 static
-void heap_init(heap_t *heap,
-               heap_type_t type,
-               int data_size,
-               void *data,
-               heap_get_key_fp get_key)
-{	
-  heap->size = 0;
-  heap->max_size = data_size;
-  heap->data = data;
+void heap_init(heap_t *heap, heap_type_t type, int data_size, void *data,
+		heap_get_key_fp get_key) {
+	heap->size = 0;
+	heap->max_size = data_size;
+	heap->data = data;
 
-  if (type == HEAP_MAX)
-    heap->cmp = heap_cmp_max;
-  else
-    heap->cmp = heap_cmp_min;
-	
-  heap->get_key = get_key;
+	if (type == HEAP_MAX)
+		heap->cmp = heap_cmp_max;
+	else
+		heap->cmp = heap_cmp_min;
 
-  int i;
-  for (i = 0; i < data_size; i++)
-    heap->data[i] = NULL;
+	heap->get_key = get_key;
 
-  //assert(heap_valid(heap) && "Heap invalid");
+	int i;
+	for (i = 0; i < data_size; i++)
+		heap->data[i] = NULL;
+
+	//assert(heap_valid(heap) && "Heap invalid");
 }
 
 /**
@@ -225,19 +205,18 @@ void heap_init(heap_t *heap,
  * @return True if object was inserted, false if heap was full
  */
 static
-bool heap_insert(heap_t * restrict heap, void * restrict new)
-{
-  if (!heap_is_full(heap)) {
-    int index = heap->size;
-    heap->size++;
-    heap->data[index] = new;
-    heap_heapify_up(heap, index);
+bool heap_insert(heap_t * restrict heap, void * restrict new) {
+	if (!heap_is_full(heap)) {
+		int index = heap->size;
+		heap->size++;
+		heap->data[index] = new;
+		heap_heapify_up(heap, index);
 
-    //assert(heap_valid(heap) && "Heap invalid");
+		//assert(heap_valid(heap) && "Heap invalid");
 
-    return true;
-  }
-  return false;
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -246,32 +225,26 @@ bool heap_insert(heap_t * restrict heap, void * restrict new)
  * @return Object from head of heap, or NULL if heap is empty
  */
 static
-void *heap_remove_head(heap_t *heap)
-{
-  void *result = NULL;
-  if (!heap_is_empty(heap)) {
-    result = heap->data[0];
-    heap->data[0] = heap->data[heap->size - 1]; // last element
-    heap->data[heap->size - 1] = NULL;
-    heap->size--;
-    heap_heapify(heap, 0);
-  }
+void *heap_remove_head(heap_t *heap) {
+	void *result = NULL;
+	if (!heap_is_empty(heap)) {
+		result = heap->data[0];
+		heap->data[0] = heap->data[heap->size - 1]; // last element
+		heap->data[heap->size - 1] = NULL;
+		heap->size--;
+		heap_heapify(heap, 0);
+	}
 
-  //assert(heap_valid(heap) && "Heap invalid");
-  return result;
+	//assert(heap_valid(heap) && "Heap invalid");
+	return result;
 }
 
 /**
  * Heap class interface
  */
-heap_class_t Heap = {
-  .init = heap_init,
-  .insert = heap_insert,
-  .remove_head = heap_remove_head,
-  .head = heap_head,
-  .is_empty = heap_is_empty,
-  .is_full = heap_is_full
-};
+heap_class_t Heap = { .init = heap_init, .insert = heap_insert, .remove_head =
+		heap_remove_head, .head = heap_head, .is_empty = heap_is_empty,
+		.is_full = heap_is_full };
 
 /************************************************************************/
 /*  Debug/Validation Code                                               */
@@ -284,8 +257,8 @@ heap_class_t Heap = {
  * @return true if max heap property holds for node
  */
 static inline bool heap_max_heap_property(const heap_t *heap, int index) {
-  int parent = heap_node_parent(index);
-  return (heap_get_key(heap, parent) >= heap_get_key(heap, index));
+	int parent = heap_node_parent(index);
+	return (heap_get_key(heap, parent) >= heap_get_key(heap, index));
 }
 
 /**
@@ -295,8 +268,8 @@ static inline bool heap_max_heap_property(const heap_t *heap, int index) {
  * @return true if max heap property holds for node
  */
 static inline bool heap_min_heap_property(const heap_t *heap, int index) {
-  int parent = heap_node_parent(index);
-  return (heap_get_key(heap, parent) <= heap_get_key(heap, index));
+	int parent = heap_node_parent(index);
+	return (heap_get_key(heap, parent) <= heap_get_key(heap, index));
 }
 
 /**
@@ -305,61 +278,62 @@ static inline bool heap_min_heap_property(const heap_t *heap, int index) {
  * @return True if the heap is valid
  */
 static bool heap_valid(const heap_t *heap) {
-  bool error = false;
+	bool error = false;
 
-  // heap is not null
-  error |= (heap == NULL);
-  assert(!error && "heap ptr is null");
+	// heap is not null
+	error |= (heap == NULL);
+	assert(!error && "heap ptr is null");
 
-  // cannot continue if error
-  if (error) return !error;
+	// cannot continue if error
+	if (error)
+		return !error;
 
-  // size >= 0
-  error |= (heap->size < 0);
-  assert(!error && "heap size is negative");
+	// size >= 0
+	error |= (heap->size < 0);
+	assert(!error && "heap size is negative");
 
-  // size <= max_size
-  error |= (heap->size > heap->max_size);
-  assert(!error && "heap size is larger than max size");
-	
-  // cmp is not null
-  error |= (heap->cmp == NULL);
-  assert(!error && "heap cmp function ptr is null");
+	// size <= max_size
+	error |= (heap->size > heap->max_size);
+	assert(!error && "heap size is larger than max size");
 
-  // get_key is not null
-  error |= (heap->get_key == NULL);
-  assert(!error && "heap get_key function ptr is null");
+	// cmp is not null
+	error |= (heap->cmp == NULL);
+	assert(!error && "heap cmp function ptr is null");
 
-  int i;
-  for (i = 0; i < heap->max_size; i++) {
-    if (i < heap->size) {
-      error |= (heap->data[i] == NULL);
-      assert(!error && "valid data space is NULL");
-    }
-    else {
-      // data entry must be NULL
-      error |= (heap->data[i] != NULL);
-      assert(!error && "empty data space not NULL");
-    }
-  }
+	// get_key is not null
+	error |= (heap->get_key == NULL);
+	assert(!error && "heap get_key function ptr is null");
 
-  // cannot continue if error
-  if (error) return !error;
+	int i;
+	for (i = 0; i < heap->max_size; i++) {
+		if (i < heap->size) {
+			error |= (heap->data[i] == NULL);
+			assert(!error && "valid data space is NULL");
+		} else {
+			// data entry must be NULL
+			error |= (heap->data[i] != NULL);
+			assert(!error && "empty data space not NULL");
+		}
+	}
 
-  // determine heap type
-  bool (*heap_property)(const heap_t*, int);
-	
-  if (heap->cmp == heap_cmp_max)
-    heap_property = heap_max_heap_property;
-  else
-    heap_property = heap_min_heap_property;
+	// cannot continue if error
+	if (error)
+		return !error;
 
-  for (i = 1; i < heap->size; i++) {
-    error |= (!heap_property(heap, i));
-    assert(!error && "heap property not maintained");
-  }
+	// determine heap type
+	bool (*heap_property)(const heap_t*, int);
 
-  return !error;
+	if (heap->cmp == heap_cmp_max)
+		heap_property = heap_max_heap_property;
+	else
+		heap_property = heap_min_heap_property;
+
+	for (i = 1; i < heap->size; i++) {
+		error |= (!heap_property(heap, i));
+		assert(!error && "heap property not maintained");
+	}
+
+	return !error;
 }
 
 /**
@@ -368,14 +342,13 @@ static bool heap_valid(const heap_t *heap) {
  * @return void
  */
 static void heap_display(const heap_t *heap) {
-  int i;
-  for (i = 0; i < heap->max_size; i++) {
-    if (i < heap->size) {
-      printf("%d:%d ", i, (int)(heap->get_key(heap->data[i])));
-    }
-    else {
-      printf("%d:%p ", i, heap->data[i]);
-    }
-  }
-  printf("\n");
+	int i;
+	for (i = 0; i < heap->max_size; i++) {
+		if (i < heap->size) {
+			printf("%d:%d ", i, (int) (heap->get_key(heap->data[i])));
+		} else {
+			printf("%d:%p ", i, heap->data[i]);
+		}
+	}
+	printf("\n");
 }

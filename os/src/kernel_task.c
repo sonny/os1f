@@ -30,7 +30,7 @@ static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID);
 static TASK_STATIC_CREATE(main_task, "Main", MAIN_STACK_SIZE, 0);
 
 static void kernel_task_main_hoist(void);
-static void kernel_task_idle_func(void *c) { while (1); }
+static void kernel_task_idle_func(void *c) { (void)c; while (1); }
 
 inline
 void kernel_task_save_context_current(int exc_return)
@@ -96,23 +96,23 @@ static void kernel_task_main_hoist(void)
   uint32_t stack_ptr  = kernel_SP_get();
   uint32_t stack_size = stack_base - stack_ptr;
   //  void *main_task_sp = &main_task_stack[0] + MAIN_STACK_SIZE - stack_size;
-  void *main_task_sp = &main_task.stack[0] + sizeof(main_task.stack) - stack_size;
+  uint8_t *main_task_sp = &main_task.stack[0] + sizeof(main_task.stack) - stack_size;
   memcpy(main_task_sp, (void*)stack_ptr, stack_size);
 
   // Note: this is where the stack pointer will be once
   // we enter the context switching handler.
   // Advance main_task_sp to account for stacked/pushed regs
-  void * adjusted_main_task_sp = main_task_sp - sizeof(hw_stack_frame_t);
+  uint8_t * adjusted_main_task_sp = main_task_sp - sizeof(hw_stack_frame_t);
   // Ensure that result stack is aligned on 8 byte boundary
   if ((uint32_t)adjusted_main_task_sp % 8) {
-    adjusted_main_task_sp -= 4;
+    adjusted_main_task_sp = adjusted_main_task_sp - 4;
   }
   
   // Init main task object
   main_task.task.sp = adjusted_main_task_sp;
 
   // Setup return HW frame
-  hw_stack_frame_t * frame = adjusted_main_task_sp;
+  hw_stack_frame_t * frame = (hw_stack_frame_t*)adjusted_main_task_sp;
   frame->pc = main_return_point;
   frame->xpsr = 0x01000000;
 
@@ -254,7 +254,7 @@ void kernel_task_load_PSP_current(void)
 void kernel_task_save_PSP_current(void)
 {
   assert(current_task && "Current task cannot be null");
-  current_task->sp = (void*)kernel_PSP_get();
+  current_task->sp = (uint8_t*)kernel_PSP_get();
 }
 
 uint32_t kernel_task_id_current(void)
@@ -307,7 +307,7 @@ void kernel_task_display_task_stats(void)
   char fmt[] = "%d\t%s\t%d/%d\t%.2f\t%s\n";
   os_iprintf("ID\tState\tStack\tTime\tName\n");
   int stack_size = IDLE_STACK_SIZE;
-  int stack_usage = idle_task.task.stack_top - idle_task.task.sp;
+  int stack_usage = (char*)idle_task.task.stack_top - (char*)idle_task.task.sp;
   uint32_t usecs = usec_time();
   uint32_t runtime = idle_task.task.runtime;
   float runper = (((float)runtime / (float)usecs) * 100); 
@@ -324,9 +324,9 @@ void kernel_task_display_task_stats(void)
       const char * name = default_name;
       if (t->name) name = t->name;
       if (i == 0) stack_size = MAIN_STACK_SIZE;
-      else stack_size = t->stack_top - ((void*)t + sizeof(task_t));
+      else stack_size = (char*)(t->stack_top) - ((char*)t + sizeof(task_t));
       runtime = t->runtime;
-      stack_usage = t->stack_top - t->sp;
+      stack_usage = (char*)t->stack_top - (char*)t->sp;
 
       runtime = t->runtime;
       runper = (((float)runtime / (float)usecs) * 100); 

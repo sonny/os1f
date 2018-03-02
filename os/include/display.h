@@ -40,5 +40,4 @@ void display_line_at(int line, const char* fmt, ...);
 
 #endif
 
-
 #endif  /* __OS_DISPLAY_H__ */

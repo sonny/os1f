@@ -25,8 +25,7 @@
 #define VCPClockSelection            Usart1ClockSelection
 #define RCC_PERIPHCLK_VCP            RCC_PERIPHCLK_USART1
 #define RCC_VCPCLKSOURCE_SYSCLK      RCC_USART1CLKSOURCE_SYSCLK
-  
-#endif
 
+#endif
 
 #endif /*  __BOARD_DISCOVERY_H__ */

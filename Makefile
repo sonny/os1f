@@ -23,14 +23,12 @@ DEPS :=
 
 -include sources_auto.mk
 
-FINAL := $(OUT)/$(PROJ)
-ELF   := $(FINAL).elf
+FINAL  := $(OUT)/$(PROJ)
+ELF    := $(FINAL).elf
 
-CFLAGS := -mcpu=cortex-m7 -mthumb -Og -g3 -Wextra -std=c11
-CFLAGS += -fsigned-char -ffunction-sections
-CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants
-##CFLAGS += -flto
-
+##==================================================
+## DEFINES
+##==================================================
 # TODO: implement non-printf trace functions
 DEFINES := -DSTM32F746xx 
 #DEFINEs += -DOS_USE_TRACE_ITM
@@ -39,24 +37,38 @@ DEFINES += -DDEBUG -DTRACE
 DEFINES += -DOS_USE_VCP
 DEFINES += -DOS_USE_LCD
 
-ifeq ($(FPU),ENABLED)
-CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
-DEFINES += -DENABLE_FPU
-else
-CFLAGS += -mfloat-abi=soft
-endif
-
 ifeq ($(BOARD),DISCOVERY)
 DEFINES += -DBOARD_DISCOVERY
 else
 DEFINES += -DBOARD_NUCLEO
 endif
 
+ARCH := -mcpu=cortex-m7 -mthumb
+ifeq ($(FPU),ENABLED)
+#ARCH += -mfloat-abi=hard -mfpu=fpv4-sp-d16
+ARCH += -mfloat-abi=hard -mfpu=fpv5-sp-d16
+DEFINES += -DENABLE_FPU
+else
+ARCH += -mfloat-abi=soft
+endif
+
+##==================================================
+## CFLAGS
+##==================================================
+CFLAGS := $(ARCH) -Og -g3 -Wextra -std=c11
+CFLAGS += -fsigned-char -ffunction-sections
+CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants
+##CFLAGS += -flto
+
+##==================================================
+## INCLUDES
+##==================================================
 INCLUDES := $(addprefix -I, $(INC_DIRS))
-LDFLAGS += -Wl,--gc-sections,--print-memory-usage -z defs 
+LDFLAGS += $(ARCH) -Wl,--gc-sections,--print-memory-usage
+#-z defs 
 LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs -lc -lg -lm
 ## for semihosting
-LDFLAGS += --specs=rdimon.specs -lrdimon
+#LDFLAGS += --specs=rdimon.specs -lrdimon
 
 vpath %.c $(SRC_DIRS)
 vpath %.S $(SRC_DIRS)
@@ -82,7 +94,7 @@ link-check: $(OBJS)
 
 ## Build ELF file
 $(OUT)/%.elf: $(OBJS)
-	$(CC) $(CFLAGS) -Wl,-Map,$*.map -o $@ $(OBJS) $(LDFLAGS) 
+	$(CC) -Wl,-Map,$*.map -o $@ $(OBJS) $(LDFLAGS) 
 
 ## Build Object files from S files
 $(OUT)/%.o: %.S 

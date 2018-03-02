@@ -10,13 +10,13 @@ extern void kernel_task_end(void);
 
 task_t * task_frame_init(task_t *t, void (*func)(void*), void *context)
 {
-  hw_stack_frame_t *frame = t->sp - sizeof(hw_stack_frame_t);
+  hw_stack_frame_t *frame = (hw_stack_frame_t*)(t->sp - sizeof(hw_stack_frame_t));
   frame->r0 = (uint32_t)context;
   frame->pc = (uint32_t)func & 0xfffffffe;
   frame->lr = (uint32_t)&kernel_task_end;
   frame->xpsr = 0x01000000;   // thumb mode enabled (required);
 
-  t->sp = frame;
+  t->sp = (uint8_t*)frame;
   return t;
 }
 
