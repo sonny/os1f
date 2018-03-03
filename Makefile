@@ -12,7 +12,6 @@ GDB     := $(ARM-PATH)/bin/arm-none-eabi-gdb-py
 OBJDUMP := $(ARM-PATH)/bin/arm-none-eabi-objdump
 SIZE    := $(ARM-PATH)/bin/arm-none-eabi-size
 OPENOCD := openocd #$(OOCD-PATH)/bin/openocd
-XTERM   := xterm
 
 OUT := BUILD
 INC_DIRS :=
@@ -45,7 +44,6 @@ endif
 
 ARCH := -mcpu=cortex-m7 -mthumb
 ifeq ($(FPU),ENABLED)
-#ARCH += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 ARCH += -mfloat-abi=hard -mfpu=fpv5-sp-d16
 DEFINES += -DENABLE_FPU
 else
@@ -55,18 +53,29 @@ endif
 ##==================================================
 ## CFLAGS
 ##==================================================
-CFLAGS := $(ARCH) -Og -g3 -Wextra -std=c11
-CFLAGS += -fsigned-char -ffunction-sections
-CFLAGS += -fdata-sections -ffreestanding -fno-move-loop-invariants
+CFLAGS := $(ARCH) -Og -g3 -std=c11
+CFLAGS += -Wall -Wextra -Wfatal-errors -pedantic -Wno-unused-parameter
+CFLAGS += -fsigned-char -ffunction-sections -fdata-sections -ffreestanding 
 ##CFLAGS += -flto
 
 ##==================================================
 ## INCLUDES
 ##==================================================
 INCLUDES := $(addprefix -I, $(INC_DIRS))
-LDFLAGS += $(ARCH) -Wl,--gc-sections,--print-memory-usage
+
+##==================================================
+## PREPROC -- preprocessor flags
+##==================================================
+PREPROC = $(DEFINES) -MMD -MP -MF$(@:%.o=%.d) -MT$(@)
+
+##==================================================
+## LDFLAGS
+##==================================================
+## NOTE: use deferred assignment here
+LDFLAGS = $(ARCH) -Wl,-Map,$(OUT)/$*.map -Wl,--gc-sections,--print-memory-usage
 #-z defs 
-LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs -lc -lg -lm
+#LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs -lc -lg -lm
+LDFLAGS += -TDebug_STM32F746NG_FLASH.ld -nostartfiles --specs=nano.specs -lc -lg -lm
 ## for semihosting
 #LDFLAGS += --specs=rdimon.specs -lrdimon
 
@@ -94,17 +103,17 @@ link-check: $(OBJS)
 
 ## Build ELF file
 $(OUT)/%.elf: $(OBJS)
-	$(CC) -Wl,-Map,$*.map -o $@ $(OBJS) $(LDFLAGS) 
+	$(CC) -o $@ $(OBJS) $(LDFLAGS) 
 
 ## Build Object files from S files
 $(OUT)/%.o: %.S 
 	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c -o $@ $<
+	$(CC) $(CFLAGS) $(PREPROC) $(INCLUDES) -c -o $@ $<
 
 ## Build Object files from C files
 $(OUT)/%.o: %.c 
 	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MP -MF$(@:%.o=%.d) -MT$(@) -c -o $@ $<
+	$(CC) $(CFLAGS) $(PREPROC) $(INCLUDES) -c -o $@ $<
 
 JUNK := `find . | grep '\~'`
 clean:
