@@ -20,7 +20,7 @@ SRCS :=
 OBJS :=
 DEPS := 
 
--include sources_auto.mk
+-include make/sources_auto.mk
 
 FINAL  := $(OUT)/$(PROJ)
 ELF    := $(FINAL).elf
@@ -124,7 +124,7 @@ clean:
 stuff:
 	@echo "$(OBJS)"
 
--include openocd.mk
+-include make/openocd.mk
 -include $(DEPS)
 
 .SECONDARY:
