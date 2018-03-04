@@ -23,9 +23,9 @@ void SVC_Handler(void) {
 	bool protected = (bool) frame[2];
 
 	if (protected) {
-		kernel_critical_begin();
+		__disable_irq();
 		call(args);
-		kernel_critical_end();
+		__enable_irq();
 	} else {
 		call(args);
 	}
@@ -36,7 +36,7 @@ void PendSV_Handler(void) {
 	uint32_t exc_return;
 	__asm volatile("mov %0, lr \n" : "=r"(exc_return));
 
-	kernel_critical_begin();
+	__disable_irq();
 	kernel_task_save_context_current(exc_return);
 	kernel_task_update_runtime_current();
 
@@ -48,6 +48,6 @@ void PendSV_Handler(void) {
 
 	kernel_task_update_lasttime_current();
 	exc_return = kernel_task_load_context_current();
-	kernel_critical_end();
+	__enable_irq();
 	__asm volatile("bx %0 \n" :: "r"(exc_return));
 }

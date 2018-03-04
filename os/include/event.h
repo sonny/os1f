@@ -39,18 +39,18 @@ bool event_task_waiting(event_t *e) {
 static inline
 void protected_event_wait(void * cxt) {
 	event_t *e = cxt;
-	kernel_critical_begin();
+	__disable_irq();
 	kernel_task_event_wait_current(e);
-	kernel_critical_end();
+	__enable_irq();
 	protected_kernel_context_switch(NULL);
 }
 
 static inline
 void protected_event_notify(void *cxt) {
 	event_t *e = cxt;
-	kernel_critical_begin();
+	__disable_irq();
 	kernel_task_event_notify_all(e);
-	kernel_critical_end();
+	__enable_irq();
 }
 
 #endif  /* __EVENT_H__ */

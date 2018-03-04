@@ -1,8 +1,6 @@
 #include <string.h>
-//#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "stm32f7xx_hal.h"
 #include "kernel.h"
 #include "kernel_task.h"
 #include "defs.h"
@@ -10,7 +8,6 @@
 #include "display.h"
 #include "shell.h"
 
-//void printmsg(char *m);
 static void task_func(void *);
 static void task_once(void *);
 static void task_greedy(void *);

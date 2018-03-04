@@ -126,13 +126,13 @@ static void kernel_task_main_hoist(void)
   task_list[0] = &main_task.task;
   
   // Set PSP to our new stack and Change mode to unprivileged
-  kernel_sync_barrier();
-  kernel_PSP_set((uint32_t)main_task_sp);
+  __ISB();
+  __set_PSP((uint32_t)main_task_sp);
   // Recover MSP for interrupt handles -- has to happen before mode change
-  kernel_MSP_set(stack_base);
-  kernel_sync_barrier();
-  kernel_CONTROL_set(0x01 << 1 | 0x01 << 0); // use PSP with unprivileged thread mode
-  kernel_sync_barrier();
+  __set_MSP(stack_base);
+  __ISB();
+  __set_CONTROL(0x01 << 1 | 0x01 << 0);
+  __ISB();
 
   // need to call start here in order to keep the SP valid
   kernel_context_switch();
@@ -199,7 +199,6 @@ void kernel_task_sleep_current(uint32_t ms)
   assert(current_task && "Current Task is NULL");
   current_task->state = TASK_SLEEP;
   current_task->sleep_until = HAL_GetTick() + ms;
-  //list_addAtRear(&task_sleeping, task_to_list(current_task));
   Heap.insert(&sleeping.heap, current_task);
 }
 
@@ -210,26 +209,10 @@ void kernel_task_event_wait_current(event_t * e)
   list_addAtRear(&e->waiting, task_to_list(current_task));
 }
 
-/* static inline */
-/* void kernel_task_wakeup_task(list_t *node, const void * context) */
-/* { */
-/*   task_t *t = list_to_task(node); */
-/*   const uint32_t tick = (uint32_t)context; */
-/*   assert(t->state == TASK_SLEEP && "Tasks in sleeping queue must be asleep."); */
-
-/*   if (t->sleep_until < tick) { */
-/*     t->sleep_until = 0; */
-/*     t->state = TASK_ACTIVE; */
-
-/*     list_remove(node); */
-/*     list_addAtRear(&task_active, node); */
-/*   } */
-/* } */
-
 void kernel_task_wakeup_all(void)
 {
   uint32_t tick = HAL_GetTick(); 
-  //list_each_do(&task_sleeping, kernel_task_wakeup_task, (void*)tick);
+
   task_t * t = Heap.head(&sleeping.heap);
   while (t && t->sleep_until <= tick) {
     t = Heap.remove_head(&sleeping.heap);
@@ -254,13 +237,13 @@ void kernel_task_event_notify_all(event_t * e)
 void kernel_task_load_PSP_current(void)
 {
   assert(current_task && "Current task cannot be null");
-  kernel_PSP_set((uint32_t)current_task->sp);
+  __set_PSP((uint32_t)current_task->sp);
 }
 
 void kernel_task_save_PSP_current(void)
 {
   assert(current_task && "Current task cannot be null");
-  current_task->sp = (uint8_t*)kernel_PSP_get();
+  current_task->sp = (uint8_t*)__get_PSP();
 }
 
 uint32_t kernel_task_id_current(void)

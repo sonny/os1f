@@ -23,17 +23,17 @@ task_t * task_frame_init(task_t *t, void (*func)(void*), void *context)
 static void protected_task_start(void * cxt)
 {
   task_t * new = cxt;
-  kernel_critical_begin();
+  __disable_irq();
   kernel_task_start_task(new);
-  kernel_critical_end();
+  __enable_irq();
 }
 
 static void protected_task_sleep(void *cxt)
 {
   uint32_t ms = (uint32_t)cxt;
-  kernel_critical_begin();
+  __disable_irq();
   kernel_task_sleep_current(ms);
-  kernel_critical_end();
+  __enable_irq();
   protected_kernel_context_switch(NULL);
 }
 

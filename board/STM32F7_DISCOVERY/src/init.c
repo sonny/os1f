@@ -1,5 +1,5 @@
-#include "stm32f7xx.h"
-#include "stm32f7xx_hal.h"
+#include "stm32746g_discovery.h"
+//#include "stm32f7xx_hal.h"
 
 static void
 CPU_CACHE_Enable(void);

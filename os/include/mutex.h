@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdatomic.h>
-#include "stm32f746xx.h"
+#include "stm32f7xx.h"
 #include "kernel_task.h"
 #include "task.h"
 #include "event.h"
