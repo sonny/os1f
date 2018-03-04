@@ -42,11 +42,11 @@ void kernel_task_save_context_current(int exc_return)
 
   // check to see if task used FPU
   if ( !(exc_return & (1<<4)) ) {
-    current_task->uses_fpu = true;
+    current_task->flags |= TASK_FLAG_FPU;
     __asm volatile ( "vstmia %0, {s16-s31} \n" :: "r" (&current_task->sw_fp_context) : );
   }
   else
-    current_task->uses_fpu = false;
+    current_task->flags &= ~TASK_FLAG_FPU;
 
   #endif
 }
@@ -58,7 +58,7 @@ uint32_t kernel_task_load_context_current(void)
 
   #ifdef ENABLE_FPU
 
-  if ( current_task->uses_fpu ) {
+  if ( current_task->flags & TASK_FLAG_FPU ) {
     __asm volatile ( "vldmia %0, {s16-s31} " :: "r" (&current_task->sw_fp_context) : );
   }
 

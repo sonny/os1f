@@ -50,13 +50,14 @@ struct task {
 	uint8_t * sp;
 	int32_t id;
 	uint32_t state;
+	uint32_t flags;
 	uint32_t sleep_until;
 	uint64_t runtime;
 	uint64_t lasttime;
 	sw_stack_frame_t sw_context;
 #ifdef ENABLE_FPU
 	sw_fp_stack_frame_t sw_fp_context;
-	bool uses_fpu;
+	//bool uses_fpu;
 #endif
 	event_t join;
 	uint32_t exc_return;
@@ -96,7 +97,8 @@ __attribute__((always_inline)) static inline
 void task_free(task_t * t) {
 	assert(t->id > 0 && "Cannot free idle or main task.");
 	kernel_task_destroy_task(t);
-	free_aligned(t);
+	if (! (t->flags & TASK_FLAG_STATIC) )
+	  free_aligned(t);
 }
 
 __attribute__((always_inline))  static inline task_t * task_create_schedule(
@@ -129,20 +131,20 @@ typedef struct {
 #define TASK_STATIC_ALLOCATE(name, size)                \
   struct {                                              \
     task_t task;                                        \
-    uint8_t stack[size] __attribute((aligned(8)));            \
+    uint8_t stack[size] __attribute((aligned(8)));      \
   } name                                          
 
-#define TASK_STATIC_INIT(_name, _name_str, _id) {                \
-    { .node = LIST_STATIC_INIT(_name.task.node),                 \
-        .name = _name_str,                                       \
-        .sp = &_name.stack[0] + sizeof(_name.stack),              \
-        .stack_top = &_name.stack[0] + sizeof(_name.stack),       \
-        .id = _id,                                                \
-        .state = TASK_ACTIVE,                                     \
-        .sleep_until = 0,                                         \
-        .uses_fpu = false,                                        \
-        .join = EVENT_STATIC_INIT(_name.task.join),               \
-        .exc_return = 0xfffffffd }, {0}                           \
+#define TASK_STATIC_INIT(_name, _name_str, _id) {            \
+    { .node = LIST_STATIC_INIT(_name.task.node),             \
+        .name = _name_str,                                   \
+        .sp = &_name.stack[0] + sizeof(_name.stack),         \
+        .stack_top = &_name.stack[0] + sizeof(_name.stack),  \
+        .id = _id,                                           \
+        .state = TASK_ACTIVE,                                \
+	.flags = (TASK_FLAG_STATIC),                         \
+	.sleep_until = 0,                                    \
+        .join = EVENT_STATIC_INIT(_name.task.join),          \
+        .exc_return = 0xfffffffd }, {0}                      \
   }
 
 #define TASK_STATIC_CREATE(name, name_str, size, id) \

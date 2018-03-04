@@ -18,6 +18,7 @@ void adc_task(void *p) {
 	int rot_idx = 0;
 
 	adc_task_init();
+	task_sleep(1000);
 
 	while (1) {
 		//HAL_ADC_Start_IT(&AdcHandle);
@@ -92,10 +93,8 @@ static void adc_nvic_init(void *p) {
 static DMA_HandleTypeDef hdma_adc;
 void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc) {
 	/*## Enable peripherals and GPIO Clocks #################################*/
-	__HAL_RCC_ADC1_CLK_ENABLE()
-	;
-	__HAL_RCC_DMA2_CLK_ENABLE()
-	;
+	__HAL_RCC_ADC1_CLK_ENABLE();
+	__HAL_RCC_DMA2_CLK_ENABLE();
 
 	/*## Configure the DMA streams ##########################################*/
 	/* Set the parameters to be configured */
