@@ -6,6 +6,7 @@
 #include "svc.h"
 
 void os_start(void);
+bool os_started(void);
 
 __attribute__ ((always_inline)) static inline
 void protected_kernel_context_switch(void * ctx) {

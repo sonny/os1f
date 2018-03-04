@@ -6,6 +6,8 @@
 #include "task.h"
 #include "usec_timer.h"
 
+static bool __os_started = false;
+
 void os_start(void) {
 	HAL_Init();
 	display_init();
@@ -17,15 +19,14 @@ void os_start(void) {
 
 	kernel_task_init();
 	//NOTE: after here we are in user mode
+
+	__os_started = true;
 }
 
-void SysTick_Handler(void) {
-	HAL_IncTick();
-	static int counter = 0;
-
-	if (++counter > TIME_SLICE) {
-		counter = 0;
-		protected_kernel_context_switch(NULL);
-	}
+inline
+bool os_started(void)
+{
+	return __os_started;
 }
+
 

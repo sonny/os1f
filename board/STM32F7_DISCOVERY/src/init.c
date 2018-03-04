@@ -35,12 +35,14 @@ static void SystemClock_Config(void)
 
 	ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
 	if (ret != HAL_OK)
-		while (1) ;
+		while (1)
+			;
 
 	/* Activate the OverDrive to reach the 216 MHz Frequency */
 	ret = HAL_PWREx_EnableOverDrive();
 	if (ret != HAL_OK)
-		while (1);
+		while (1)
+			;
 
 	/* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers */
 	RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK
@@ -52,7 +54,8 @@ static void SystemClock_Config(void)
 
 	ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7);
 	if (ret != HAL_OK)
-		while (1);
+		while (1)
+			;
 
 }
 
