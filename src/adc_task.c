@@ -6,7 +6,7 @@
 
 static event_t adc_event = EVENT_STATIC_INIT(adc_event);
 static ADC_HandleTypeDef AdcHandle;
-static uint32_t adc_values[2];
+static uint32_t adc_values[2] = {0};
 static void adc_task_init(void);
 
 void adc_task(void *p) {
@@ -18,7 +18,7 @@ void adc_task(void *p) {
 	int rot_idx = 0;
 
 	adc_task_init();
-	task_sleep(1000);
+	//task_sleep(1000);
 
 	while (1) {
 		//HAL_ADC_Start_IT(&AdcHandle);

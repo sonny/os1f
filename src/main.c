@@ -10,10 +10,11 @@
 #include "display.h"
 #include "shell.h"
 
-void printmsg(char *m);
+//void printmsg(char *m);
 static void task_func(void *);
 static void task_once(void *);
 static void task_greedy(void *);
+static void display_system_clock(void);
 
 struct func_data {
 	char * name;
@@ -46,8 +47,10 @@ int main(void) {
 
 	shell_init();
 
-	uint32_t z = 0;
+	display_system_clock();
+
 	int tid = kernel_task_id_current();
+	uint32_t z = 0;
 	while (1) {
 		++z;
 		lcd_printf_at(0, tid, "[%d] Main Task counter : %d", tid, z);
@@ -62,6 +65,23 @@ int main(void) {
 
 	return 0;
 }
+
+extern uint32_t SystemCoreClock;
+static void display_system_clock(void)
+{
+	uint32_t clk = SystemCoreClock;
+	char * clk_str = "Hz";
+	if (clk > 1000000) {
+		clk /= 1000000;
+		clk_str = "MHz";
+	}
+	else if (clk > 1000) {
+		clk /= 1000;
+		clk_str = "KHz";
+	}
+	lcd_printf_at(0, 15, "System Clock : %d %s", clk, clk_str);
+}
+
 
 void task_func(void *context) {
 	int k = 0;

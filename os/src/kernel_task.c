@@ -30,7 +30,13 @@ static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID);
 static TASK_STATIC_CREATE(main_task, "Main", MAIN_STACK_SIZE, 0);
 
 static void kernel_task_main_hoist(void);
-static void kernel_task_idle_func(void *c) { (void)c; while (1); }
+static void kernel_task_idle_func(void *c)
+{
+    (void)c;
+    while (1) {
+	__WFI();
+    }
+}
 
 inline
 void kernel_task_save_context_current(int exc_return)
