@@ -522,7 +522,7 @@ HAL_StatusTypeDef HAL_UART_DeInit(UART_HandleTypeDef *huart)
   * @param huart: uart handle
   * @retval None
   */
- __weak void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+ __weak void HAL_UART_MspInit( __attribute__((unused)) UART_HandleTypeDef *huart)
 {
   /* NOTE : This function should not be modified, when the callback is needed,
             the HAL_UART_MspInit can be implemented in the user file
@@ -534,7 +534,7 @@ HAL_StatusTypeDef HAL_UART_DeInit(UART_HandleTypeDef *huart)
   * @param huart: uart handle
   * @retval None
   */
- __weak void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
+ __weak void HAL_UART_MspDeInit( __attribute__((unused)) UART_HandleTypeDef *huart)
 {
   /* NOTE : This function should not be modified, when the callback is needed,
             the HAL_UART_MspDeInit can be implemented in the user file
@@ -1362,7 +1362,7 @@ static void UART_DMAError(DMA_HandleTypeDef *hdma)
   * @param huart: uart handle
   * @retval None
   */
- __weak void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+ __weak void HAL_UART_TxCpltCallback( __attribute__((unused)) UART_HandleTypeDef *huart)
 {
   /* NOTE : This function should not be modified, when the callback is needed,
             the HAL_UART_TxCpltCallback can be implemented in the user file
@@ -1374,7 +1374,7 @@ static void UART_DMAError(DMA_HandleTypeDef *hdma)
   * @param  huart: UART handle
   * @retval None
   */
- __weak void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart)
+ __weak void HAL_UART_TxHalfCpltCallback( __attribute__((unused)) UART_HandleTypeDef *huart)
 {
   /* NOTE: This function should not be modified, when the callback is needed,
            the HAL_UART_TxHalfCpltCallback can be implemented in the user file
@@ -1386,7 +1386,7 @@ static void UART_DMAError(DMA_HandleTypeDef *hdma)
   * @param huart: uart handle
   * @retval None
   */
-__weak void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+__weak void HAL_UART_RxCpltCallback( __attribute__((unused)) UART_HandleTypeDef *huart)
 {
   /* NOTE : This function should not be modified, when the callback is needed,
             the HAL_UART_RxCpltCallback can be implemented in the user file
@@ -1398,7 +1398,7 @@ __weak void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   * @param  huart: UART handle
   * @retval None
   */
-__weak void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
+__weak void HAL_UART_RxHalfCpltCallback( __attribute__((unused)) UART_HandleTypeDef *huart)
 {
   /* NOTE: This function should not be modified, when the callback is needed,
            the HAL_UART_RxHalfCpltCallback can be implemented in the user file
@@ -1410,7 +1410,7 @@ __weak void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
   * @param huart: uart handle
   * @retval None
   */
- __weak void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+ __weak void HAL_UART_ErrorCallback( __attribute__((unused)) UART_HandleTypeDef *huart)
 {
   /* NOTE : This function should not be modified, when the callback is needed,
             the HAL_UART_ErrorCallback can be implemented in the user file

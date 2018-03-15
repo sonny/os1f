@@ -1150,7 +1150,7 @@ void BSP_LCD_DisplayOff(void) {
  * @param  Params
  * @retval None
  */
-__weak void BSP_LCD_MspInit(LTDC_HandleTypeDef *hltdc, void *Params) {
+__weak void BSP_LCD_MspInit( __attribute__((unused)) LTDC_HandleTypeDef *hltdc,  __attribute__((unused)) void *Params) {
 	GPIO_InitTypeDef gpio_init_structure;
 
 	/* Enable the LTDC and DMA2D clocks */
@@ -1232,7 +1232,7 @@ __weak void BSP_LCD_MspInit(LTDC_HandleTypeDef *hltdc, void *Params) {
  * @param  Params
  * @retval None
  */
-__weak void BSP_LCD_MspDeInit(LTDC_HandleTypeDef *hltdc, void *Params) {
+__weak void BSP_LCD_MspDeInit(LTDC_HandleTypeDef *hltdc, __attribute__((unused)) void *Params) {
 	GPIO_InitTypeDef gpio_init_structure;
 
 	/* Disable LTDC block */
@@ -1283,7 +1283,7 @@ __weak void BSP_LCD_MspDeInit(LTDC_HandleTypeDef *hltdc, void *Params) {
  *         Being __weak it can be overwritten by the application
  * @retval None
  */
-__weak void BSP_LCD_ClockConfig(LTDC_HandleTypeDef *hltdc, void *Params) {
+__weak void BSP_LCD_ClockConfig( __attribute__((unused)) LTDC_HandleTypeDef *hltdc,  __attribute__((unused)) void *Params) {
 	static RCC_PeriphCLKInitTypeDef periph_clk_init_struct;
 
 	/* RK043FN48H LCD clock configuration */

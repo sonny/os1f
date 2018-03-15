@@ -342,7 +342,7 @@ HAL_StatusTypeDef HAL_ADC_DeInit(ADC_HandleTypeDef* hadc) {
  *         the configuration information for the specified ADC.  
  * @retval None
  */
-__weak void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc) {
+__weak void HAL_ADC_MspInit( __attribute__((unused)) ADC_HandleTypeDef* hadc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_ADC_MspInit could be implemented in the user file
 	 */
@@ -354,7 +354,7 @@ __weak void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc) {
  *         the configuration information for the specified ADC.  
  * @retval None
  */
-__weak void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc) {
+__weak void HAL_ADC_MspDeInit( __attribute__((unused)) ADC_HandleTypeDef* hadc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_ADC_MspDeInit could be implemented in the user file
 	 */
@@ -906,7 +906,7 @@ uint32_t HAL_ADC_GetValue(ADC_HandleTypeDef* hadc) {
  *         the configuration information for the specified ADC.
  * @retval None
  */
-__weak void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
+__weak void HAL_ADC_ConvCpltCallback( __attribute__((unused)) ADC_HandleTypeDef* hadc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_ADC_ConvCpltCallback could be implemented in the user file
 	 */
@@ -918,7 +918,7 @@ __weak void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
  *         the configuration information for the specified ADC.
  * @retval None
  */
-__weak void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
+__weak void HAL_ADC_ConvHalfCpltCallback( __attribute__((unused)) ADC_HandleTypeDef* hadc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_ADC_ConvHalfCpltCallback could be implemented in the user file
 	 */
@@ -930,7 +930,7 @@ __weak void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
  *         the configuration information for the specified ADC.
  * @retval None
  */
-__weak void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef* hadc) {
+__weak void HAL_ADC_LevelOutOfWindowCallback( __attribute__((unused)) ADC_HandleTypeDef* hadc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_ADC_LevelOoutOfWindowCallback could be implemented in the user file
 	 */
@@ -942,7 +942,7 @@ __weak void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef* hadc) {
  *         the configuration information for the specified ADC.
  * @retval None
  */
-__weak void HAL_ADC_ErrorCallback(ADC_HandleTypeDef *hadc) {
+__weak void HAL_ADC_ErrorCallback( __attribute__((unused)) ADC_HandleTypeDef *hadc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_ADC_ErrorCallback could be implemented in the user file
 	 */

@@ -26,25 +26,22 @@ void serialInit(void) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 }
 
-void HAL_UART_MspInit(UART_HandleTypeDef *huart) {
+void HAL_UART_MspInit( __attribute__((unused)) UART_HandleTypeDef *huart) {
 	GPIO_InitTypeDef GPIO_InitStruct;
 
 	RCC_PeriphCLKInitTypeDef RCC_PeriphClkInit;
 
 	/*##-1- Enable peripherals and GPIO Clocks #################################*/
 	/* Enable GPIO TX/RX clock */
-	VCP_TX_GPIO_CLK_ENABLE()
-	;
-	VCP_RX_GPIO_CLK_ENABLE()
-	;
+	VCP_TX_GPIO_CLK_ENABLE();
+	VCP_RX_GPIO_CLK_ENABLE();
 
 	RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_VCP;
 	RCC_PeriphClkInit.VCPClockSelection = RCC_VCPCLKSOURCE_SYSCLK;
 	HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphClkInit);
 
 	/* Enable USARTx clock */
-	VCP_CLK_ENABLE()
-	;
+	VCP_CLK_ENABLE();
 
 	/*##-2- Configure peripheral GPIO ##########################################*/
 	/* UART TX GPIO pin configuration  */
@@ -128,11 +125,11 @@ int os_gets_vcp(char *buffer, int len) {
 	return (p - buffer);
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UART_TxCpltCallback( __attribute__((unused)) UART_HandleTypeDef *huart) {
 	protected_event_notify(&VCP_TX_complete);
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UART_RxCpltCallback( __attribute__((unused)) UART_HandleTypeDef *huart) {
 	protected_event_notify(&VCP_RX_complete);
 }
 

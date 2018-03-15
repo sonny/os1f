@@ -529,7 +529,7 @@ HAL_StatusTypeDef FMC_NAND_Init(FMC_NAND_TypeDef *Device,
  * @retval HAL status
  */
 HAL_StatusTypeDef FMC_NAND_CommonSpace_Timing_Init(FMC_NAND_TypeDef *Device,
-		FMC_NAND_PCC_TimingTypeDef *Timing, uint32_t Bank) {
+		FMC_NAND_PCC_TimingTypeDef *Timing,  __attribute__((unused)) uint32_t Bank) {
 	uint32_t tmpr = 0;
 
 	/* Check the parameters */
@@ -570,7 +570,7 @@ HAL_StatusTypeDef FMC_NAND_CommonSpace_Timing_Init(FMC_NAND_TypeDef *Device,
  * @retval HAL status
  */
 HAL_StatusTypeDef FMC_NAND_AttributeSpace_Timing_Init(FMC_NAND_TypeDef *Device,
-		FMC_NAND_PCC_TimingTypeDef *Timing, uint32_t Bank) {
+		FMC_NAND_PCC_TimingTypeDef *Timing, __attribute__((unused))  uint32_t Bank) {
 	uint32_t tmpr = 0;
 
 	/* Check the parameters */
@@ -608,7 +608,7 @@ HAL_StatusTypeDef FMC_NAND_AttributeSpace_Timing_Init(FMC_NAND_TypeDef *Device,
  * @param  Bank: NAND bank number
  * @retval HAL status
  */
-HAL_StatusTypeDef FMC_NAND_DeInit(FMC_NAND_TypeDef *Device, uint32_t Bank) {
+HAL_StatusTypeDef FMC_NAND_DeInit(FMC_NAND_TypeDef *Device, __attribute__((unused))  uint32_t Bank) {
 	/* Check the parameters */
 	assert_param(IS_FMC_NAND_DEVICE(Device));
 	assert_param(IS_FMC_NAND_BANK(Bank));
@@ -650,7 +650,7 @@ HAL_StatusTypeDef FMC_NAND_DeInit(FMC_NAND_TypeDef *Device, uint32_t Bank) {
  * @param  Bank: NAND bank number
  * @retval HAL status
  */
-HAL_StatusTypeDef FMC_NAND_ECC_Enable(FMC_NAND_TypeDef *Device, uint32_t Bank) {
+HAL_StatusTypeDef FMC_NAND_ECC_Enable(FMC_NAND_TypeDef *Device,  __attribute__((unused)) uint32_t Bank) {
 	/* Check the parameters */
 	assert_param(IS_FMC_NAND_DEVICE(Device));
 	assert_param(IS_FMC_NAND_BANK(Bank));
@@ -667,7 +667,7 @@ HAL_StatusTypeDef FMC_NAND_ECC_Enable(FMC_NAND_TypeDef *Device, uint32_t Bank) {
  * @param  Bank: NAND bank number
  * @retval HAL status
  */
-HAL_StatusTypeDef FMC_NAND_ECC_Disable(FMC_NAND_TypeDef *Device, uint32_t Bank) {
+HAL_StatusTypeDef FMC_NAND_ECC_Disable(FMC_NAND_TypeDef *Device,  __attribute__((unused)) uint32_t Bank) {
 	/* Check the parameters */
 	assert_param(IS_FMC_NAND_DEVICE(Device));
 	assert_param(IS_FMC_NAND_BANK(Bank));
@@ -687,7 +687,7 @@ HAL_StatusTypeDef FMC_NAND_ECC_Disable(FMC_NAND_TypeDef *Device, uint32_t Bank) 
  * @retval HAL status
  */
 HAL_StatusTypeDef FMC_NAND_GetECC(FMC_NAND_TypeDef *Device, uint32_t *ECCval,
-		uint32_t Bank, uint32_t Timeout) {
+		 __attribute__((unused)) uint32_t Bank, uint32_t Timeout) {
 	uint32_t tickstart = 0;
 
 	/* Check the parameters */

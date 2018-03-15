@@ -476,7 +476,7 @@ uint8_t BSP_QSPI_MemoryMappedMode(void) {
  *           - NVIC configuration for QSPI interrupt
  * @retval None
  */
-__weak void BSP_QSPI_MspInit(QSPI_HandleTypeDef *hqspi, void *Params) {
+__weak void BSP_QSPI_MspInit( __attribute__((unused)) QSPI_HandleTypeDef *hqspi,  __attribute__((unused)) void *Params) {
 	GPIO_InitTypeDef gpio_init_structure;
 
 	/*##-1- Enable peripherals and GPIO Clocks #################################*/
@@ -548,7 +548,7 @@ __weak void BSP_QSPI_MspInit(QSPI_HandleTypeDef *hqspi, void *Params) {
  *          - Revert GPIO and NVIC configuration to their default state
  * @retval None
  */
-__weak void BSP_QSPI_MspDeInit(QSPI_HandleTypeDef *hqspi, void *Params) {
+__weak void BSP_QSPI_MspDeInit( __attribute__((unused)) QSPI_HandleTypeDef *hqspi,  __attribute__((unused)) void *Params) {
 	/*##-1- Disable the NVIC for QSPI ###########################################*/
 	HAL_NVIC_DisableIRQ(QUADSPI_IRQn);
 

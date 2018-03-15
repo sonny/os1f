@@ -412,7 +412,7 @@ HAL_StatusTypeDef HAL_SD_DeInit(SD_HandleTypeDef *hsd) {
  * @param  hsd: SD handle
  * @retval None
  */
-__weak void HAL_SD_MspInit(SD_HandleTypeDef *hsd) {
+__weak void HAL_SD_MspInit( __attribute__((unused)) SD_HandleTypeDef *hsd) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SD_MspInit could be implemented in the user file
 	 */
@@ -423,7 +423,7 @@ __weak void HAL_SD_MspInit(SD_HandleTypeDef *hsd) {
  * @param  hsd: SD handle
  * @retval None
  */
-__weak void HAL_SD_MspDeInit(SD_HandleTypeDef *hsd) {
+__weak void HAL_SD_MspDeInit( __attribute__((unused)) SD_HandleTypeDef *hsd) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SD_MspDeInit could be implemented in the user file
 	 */
@@ -1282,7 +1282,7 @@ void HAL_SD_IRQHandler(SD_HandleTypeDef *hsd) {
  * @param  hsd: SD handle 
  * @retval None
  */
-__weak void HAL_SD_XferCpltCallback(SD_HandleTypeDef *hsd) {
+__weak void HAL_SD_XferCpltCallback( __attribute__((unused)) SD_HandleTypeDef *hsd) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SD_XferCpltCallback could be implemented in the user file
 	 */
@@ -1293,7 +1293,7 @@ __weak void HAL_SD_XferCpltCallback(SD_HandleTypeDef *hsd) {
  * @param  hsd: SD handle
  * @retval None
  */
-__weak void HAL_SD_XferErrorCallback(SD_HandleTypeDef *hsd) {
+__weak void HAL_SD_XferErrorCallback( __attribute__((unused)) SD_HandleTypeDef *hsd) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SD_XferErrorCallback could be implemented in the user file
 	 */
@@ -1305,7 +1305,7 @@ __weak void HAL_SD_XferErrorCallback(SD_HandleTypeDef *hsd) {
  *                the configuration information for the specified DMA module.
  * @retval None
  */
-__weak void HAL_SD_DMA_RxCpltCallback(DMA_HandleTypeDef *hdma) {
+__weak void HAL_SD_DMA_RxCpltCallback( __attribute__((unused)) DMA_HandleTypeDef *hdma) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SD_DMA_RxCpltCallback could be implemented in the user file
 	 */
@@ -1317,7 +1317,7 @@ __weak void HAL_SD_DMA_RxCpltCallback(DMA_HandleTypeDef *hdma) {
  *                the configuration information for the specified DMA module.
  * @retval None
  */
-__weak void HAL_SD_DMA_RxErrorCallback(DMA_HandleTypeDef *hdma) {
+__weak void HAL_SD_DMA_RxErrorCallback( __attribute__((unused)) DMA_HandleTypeDef *hdma) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SD_DMA_RxErrorCallback could be implemented in the user file
 	 */
@@ -1329,7 +1329,7 @@ __weak void HAL_SD_DMA_RxErrorCallback(DMA_HandleTypeDef *hdma) {
  *                the configuration information for the specified DMA module.
  * @retval None
  */
-__weak void HAL_SD_DMA_TxCpltCallback(DMA_HandleTypeDef *hdma) {
+__weak void HAL_SD_DMA_TxCpltCallback( __attribute__((unused)) DMA_HandleTypeDef *hdma) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SD_DMA_TxCpltCallback could be implemented in the user file
 	 */
@@ -1341,7 +1341,7 @@ __weak void HAL_SD_DMA_TxCpltCallback(DMA_HandleTypeDef *hdma) {
  *                the configuration information for the specified DMA module.
  * @retval None
  */
-__weak void HAL_SD_DMA_TxErrorCallback(DMA_HandleTypeDef *hdma) {
+__weak void HAL_SD_DMA_TxErrorCallback( __attribute__((unused)) DMA_HandleTypeDef *hdma) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SD_DMA_TxErrorCallback could be implemented in the user file
 	 */

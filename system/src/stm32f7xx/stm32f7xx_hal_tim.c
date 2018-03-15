@@ -261,7 +261,7 @@ HAL_StatusTypeDef HAL_TIM_Base_DeInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_Base_MspInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_Base_MspInit could be implemented in the user file
 	 */
@@ -273,7 +273,7 @@ __weak void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_Base_MspDeInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_Base_MspDeInit could be implemented in the user file
 	 */
@@ -524,7 +524,7 @@ HAL_StatusTypeDef HAL_TIM_OC_DeInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_OC_MspInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_OC_MspInit could be implemented in the user file
 	 */
@@ -536,7 +536,7 @@ __weak void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_OC_MspDeInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_OC_MspDeInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_OC_MspDeInit could be implemented in the user file
 	 */
@@ -998,7 +998,7 @@ HAL_StatusTypeDef HAL_TIM_PWM_DeInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_PWM_MspInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_PWM_MspInit could be implemented in the user file
 	 */
@@ -1010,7 +1010,7 @@ __weak void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_PWM_MspDeInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_PWM_MspDeInit could be implemented in the user file
 	 */
@@ -1477,7 +1477,7 @@ HAL_StatusTypeDef HAL_TIM_IC_DeInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_IC_MspInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_IC_MspInit could be implemented in the user file
 	 */
@@ -1489,7 +1489,7 @@ __weak void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_IC_MspDeInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_IC_MspDeInit could be implemented in the user file
 	 */
@@ -1930,7 +1930,7 @@ HAL_StatusTypeDef HAL_TIM_OnePulse_DeInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_OnePulse_MspInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_OnePulse_MspInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_OnePulse_MspInit could be implemented in the user file
 	 */
@@ -1942,7 +1942,7 @@ __weak void HAL_TIM_OnePulse_MspInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_OnePulse_MspDeInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_OnePulse_MspDeInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_OnePulse_MspDeInit could be implemented in the user file
 	 */
@@ -1959,7 +1959,7 @@ __weak void HAL_TIM_OnePulse_MspDeInit(TIM_HandleTypeDef *htim) {
  * @retval HAL status
  */
 HAL_StatusTypeDef HAL_TIM_OnePulse_Start(TIM_HandleTypeDef *htim,
-		uint32_t OutputChannel) {
+		 __attribute__((unused)) uint32_t OutputChannel) {
 	/* Enable the Capture compare and the Input Capture channels 
 	 (in the OPM Mode the two possible channels that can be used are TIM_CHANNEL_1 and TIM_CHANNEL_2)
 	 if TIM_CHANNEL_1 is used as output, the TIM_CHANNEL_2 will be used as input and
@@ -1992,7 +1992,7 @@ HAL_StatusTypeDef HAL_TIM_OnePulse_Start(TIM_HandleTypeDef *htim,
  * @retval HAL status
  */
 HAL_StatusTypeDef HAL_TIM_OnePulse_Stop(TIM_HandleTypeDef *htim,
-		uint32_t OutputChannel) {
+		 __attribute__((unused)) uint32_t OutputChannel) {
 	/* Disable the Capture compare and the Input Capture channels 
 	 (in the OPM Mode the two possible channels that can be used are TIM_CHANNEL_1 and TIM_CHANNEL_2)
 	 if TIM_CHANNEL_1 is used as output, the TIM_CHANNEL_2 will be used as input and
@@ -2025,7 +2025,7 @@ HAL_StatusTypeDef HAL_TIM_OnePulse_Stop(TIM_HandleTypeDef *htim,
  * @retval HAL status
  */
 HAL_StatusTypeDef HAL_TIM_OnePulse_Start_IT(TIM_HandleTypeDef *htim,
-		uint32_t OutputChannel) {
+		 __attribute__((unused)) uint32_t OutputChannel) {
 	/* Enable the Capture compare and the Input Capture channels 
 	 (in the OPM Mode the two possible channels that can be used are TIM_CHANNEL_1 and TIM_CHANNEL_2)
 	 if TIM_CHANNEL_1 is used as output, the TIM_CHANNEL_2 will be used as input and
@@ -2064,7 +2064,7 @@ HAL_StatusTypeDef HAL_TIM_OnePulse_Start_IT(TIM_HandleTypeDef *htim,
  * @retval HAL status
  */
 HAL_StatusTypeDef HAL_TIM_OnePulse_Stop_IT(TIM_HandleTypeDef *htim,
-		uint32_t OutputChannel) {
+		 __attribute__((unused)) uint32_t OutputChannel) {
 	/* Disable the TIM Capture/Compare 1 interrupt */
 	__HAL_TIM_DISABLE_IT(htim, TIM_IT_CC1);
 
@@ -2237,7 +2237,7 @@ HAL_StatusTypeDef HAL_TIM_Encoder_DeInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_Encoder_MspInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_Encoder_MspInit could be implemented in the user file
 	 */
@@ -2249,7 +2249,7 @@ __weak void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_Encoder_MspDeInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_Encoder_MspDeInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_Encoder_MspDeInit could be implemented in the user file
 	 */
@@ -4095,7 +4095,7 @@ uint32_t HAL_TIM_ReadCapturedValue(TIM_HandleTypeDef *htim, uint32_t Channel) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_PeriodElapsedCallback( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the __HAL_TIM_PeriodElapsedCallback could be implemented in the user file
 	 */
@@ -4107,7 +4107,7 @@ __weak void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_OC_DelayElapsedCallback( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the __HAL_TIM_OC_DelayElapsedCallback could be implemented in the user file
 	 */
@@ -4118,7 +4118,7 @@ __weak void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_IC_CaptureCallback( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the __HAL_TIM_IC_CaptureCallback could be implemented in the user file
 	 */
@@ -4130,7 +4130,7 @@ __weak void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_PWM_PulseFinishedCallback( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the __HAL_TIM_PWM_PulseFinishedCallback could be implemented in the user file
 	 */
@@ -4142,7 +4142,7 @@ __weak void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_TriggerCallback(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_TriggerCallback( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_TriggerCallback could be implemented in the user file
 	 */
@@ -4154,7 +4154,7 @@ __weak void HAL_TIM_TriggerCallback(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIM_ErrorCallback(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIM_ErrorCallback( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIM_ErrorCallback could be implemented in the user file
 	 */

@@ -374,7 +374,7 @@ void BSP_SDRAM_DMA_IRQHandler(void)
   * @param  Params
   * @retval None
   */
-__weak void BSP_SDRAM_MspInit(SDRAM_HandleTypeDef  *hsdram, void *Params)
+__weak void BSP_SDRAM_MspInit(SDRAM_HandleTypeDef  *hsdram,  __attribute__((unused)) void *Params)
 {  
   static DMA_HandleTypeDef dma_handle;
   GPIO_InitTypeDef gpio_init_structure;
@@ -465,7 +465,7 @@ __weak void BSP_SDRAM_MspInit(SDRAM_HandleTypeDef  *hsdram, void *Params)
   * @param  Params
   * @retval None
   */
-__weak void BSP_SDRAM_MspDeInit(SDRAM_HandleTypeDef  *hsdram, void *Params)
+__weak void BSP_SDRAM_MspDeInit( __attribute__((unused)) SDRAM_HandleTypeDef  *hsdram,  __attribute__((unused)) void *Params)
 {  
     static DMA_HandleTypeDef dma_handle;
   

@@ -9,7 +9,7 @@ static ADC_HandleTypeDef AdcHandle;
 static uint32_t adc_values[2] = {0};
 static void adc_task_init(void);
 
-void adc_task(void *p) {
+void adc_task( __attribute__((unused)) void *p) {
 	const uint16_t V25 = 943; // V25 = 0.76V, Vref = 3.3V
 	//const uint16_t Avg_Slope = 3; // Avg_Slope = 2.5mV/C
 	const float Avg_Slope = 2.5;
@@ -83,7 +83,7 @@ static void adc_task_init(void) {
 	HAL_ADC_ConfigChannel(&AdcHandle, &sConfig[1]);
 }
 
-static void adc_nvic_init(void *p) {
+static void adc_nvic_init( __attribute__((unused)) void *p) {
 	/*## Configure the NVIC for DMA #########################################*/
 	/* NVIC configuration for DMA transfer complete interrupt */
 	HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);

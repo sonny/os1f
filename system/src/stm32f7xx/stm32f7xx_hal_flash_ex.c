@@ -394,7 +394,7 @@ void HAL_FLASHEx_OBGetConfig(FLASH_OBProgramInitTypeDef *pOBInit) {
  *
  * @retval HAL Status
  */
-static void FLASH_MassErase(uint8_t VoltageRange) {
+static void FLASH_MassErase( __attribute__((unused)) uint8_t VoltageRange) {
 	uint32_t tmp_psize = 0;
 
 	/* Check the parameters */

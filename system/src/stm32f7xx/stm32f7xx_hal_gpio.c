@@ -495,7 +495,7 @@ void HAL_GPIO_EXTI_IRQHandler(uint16_t GPIO_Pin) {
  * @param  GPIO_Pin: Specifies the pins connected EXTI line
  * @retval None
  */
-__weak void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+__weak void HAL_GPIO_EXTI_Callback( __attribute__((unused)) uint16_t GPIO_Pin) {
 	/* NOTE: This function Should not be modified, when the callback is needed,
 	 the HAL_GPIO_EXTI_Callback could be implemented in the user file
 	 */

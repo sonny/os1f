@@ -350,7 +350,7 @@ HAL_StatusTypeDef HAL_QSPI_DeInit(QSPI_HandleTypeDef *hqspi) {
  * @param hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_MspInit(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_MspInit( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE : This function should not be modified, when the callback is needed,
 	 the HAL_QSPI_MspInit can be implemented in the user file
 	 */
@@ -361,7 +361,7 @@ __weak void HAL_QSPI_MspInit(QSPI_HandleTypeDef *hqspi) {
  * @param hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_MspDeInit(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_MspDeInit( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE : This function should not be modified, when the callback is needed,
 	 the HAL_QSPI_MspDeInit can be implemented in the user file
 	 */
@@ -1338,7 +1338,7 @@ HAL_StatusTypeDef HAL_QSPI_MemoryMapped(QSPI_HandleTypeDef *hqspi,
  * @param  hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_ErrorCallback(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_ErrorCallback( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_QSPI_ErrorCallback could be implemented in the user file
 	 */
@@ -1349,7 +1349,7 @@ __weak void HAL_QSPI_ErrorCallback(QSPI_HandleTypeDef *hqspi) {
  * @param  hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_CmdCpltCallback(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_CmdCpltCallback( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE: This function Should not be modified, when the callback is needed,
 	 the HAL_QSPI_CmdCpltCallback could be implemented in the user file
 	 */
@@ -1360,7 +1360,7 @@ __weak void HAL_QSPI_CmdCpltCallback(QSPI_HandleTypeDef *hqspi) {
  * @param  hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_RxCpltCallback(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_RxCpltCallback( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE: This function Should not be modified, when the callback is needed,
 	 the HAL_QSPI_RxCpltCallback could be implemented in the user file
 	 */
@@ -1371,7 +1371,7 @@ __weak void HAL_QSPI_RxCpltCallback(QSPI_HandleTypeDef *hqspi) {
  * @param  hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_TxCpltCallback(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_TxCpltCallback( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE: This function Should not be modified, when the callback is needed,
 	 the HAL_QSPI_TxCpltCallback could be implemented in the user file
 	 */
@@ -1382,7 +1382,7 @@ __weak void HAL_QSPI_TxCpltCallback(QSPI_HandleTypeDef *hqspi) {
  * @param  hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_RxHalfCpltCallback(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_RxHalfCpltCallback( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE: This function Should not be modified, when the callback is needed,
 	 the HAL_QSPI_RxHalfCpltCallback could be implemented in the user file
 	 */
@@ -1393,7 +1393,7 @@ __weak void HAL_QSPI_RxHalfCpltCallback(QSPI_HandleTypeDef *hqspi) {
  * @param  hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_TxHalfCpltCallback(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_TxHalfCpltCallback( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE: This function Should not be modified, when the callback is needed,
 	 the HAL_QSPI_TxHalfCpltCallback could be implemented in the user file
 	 */
@@ -1404,7 +1404,7 @@ __weak void HAL_QSPI_TxHalfCpltCallback(QSPI_HandleTypeDef *hqspi) {
  * @param  hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_FifoThresholdCallback(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_FifoThresholdCallback( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_QSPI_FIFOThresholdCallback could be implemented in the user file
 	 */
@@ -1415,7 +1415,7 @@ __weak void HAL_QSPI_FifoThresholdCallback(QSPI_HandleTypeDef *hqspi) {
  * @param  hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_StatusMatchCallback(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_StatusMatchCallback( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_QSPI_StatusMatchCallback could be implemented in the user file
 	 */
@@ -1426,7 +1426,7 @@ __weak void HAL_QSPI_StatusMatchCallback(QSPI_HandleTypeDef *hqspi) {
  * @param  hqspi: QSPI handle
  * @retval None
  */
-__weak void HAL_QSPI_TimeOutCallback(QSPI_HandleTypeDef *hqspi) {
+__weak void HAL_QSPI_TimeOutCallback( __attribute__((unused)) QSPI_HandleTypeDef *hqspi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_QSPI_TimeOutCallback could be implemented in the user file
 	 */

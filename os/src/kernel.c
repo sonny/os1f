@@ -37,7 +37,7 @@ void assert_os_started(void)
 	assert(__os_started && "OS has not started quite yet.");
 }
 
-void _exit(int code)
+void _exit( __attribute__((unused)) int code)
 {
 #if defined(DEBUG)
 	__asm volatile ("bkpt 0");

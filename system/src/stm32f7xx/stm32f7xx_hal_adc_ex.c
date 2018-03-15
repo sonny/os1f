@@ -546,7 +546,7 @@ HAL_StatusTypeDef HAL_ADCEx_MultiModeStop_DMA(ADC_HandleTypeDef* hadc) {
  *         the configuration information for the specified ADC.
  * @retval The converted data value.
  */
-uint32_t HAL_ADCEx_MultiModeGetValue(ADC_HandleTypeDef* hadc) {
+uint32_t HAL_ADCEx_MultiModeGetValue( __attribute__((unused)) ADC_HandleTypeDef* hadc) {
 	/* Return the multi mode conversion value */
 	return ADC->CDR;
 }
@@ -557,7 +557,7 @@ uint32_t HAL_ADCEx_MultiModeGetValue(ADC_HandleTypeDef* hadc) {
  *         the configuration information for the specified ADC.
  * @retval None
  */
-__weak void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc) {
+__weak void HAL_ADCEx_InjectedConvCpltCallback( __attribute__((unused)) ADC_HandleTypeDef* hadc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_ADC_InjectedConvCpltCallback could be implemented in the user file
 	 */

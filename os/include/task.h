@@ -100,7 +100,7 @@ void task_yield(void);
 __attribute__((always_inline)) static inline
 void task_free(task_t * t) {
 	assert(t->id > 0 && "Cannot free idle or main task.");
-	service_call(kernel_task_destroy_task, t, true);
+	service_call((svcall_t)kernel_task_destroy_task, t, true);
 	if (! (t->flags & TASK_FLAG_STATIC) )
 	  free_aligned(t);
 }
@@ -109,7 +109,7 @@ typedef struct {
 	void (*func)(void*);
 	int stack_size;
 	void *context;
-	char * name;
+	const char * name;
 	task_t *task;
 } task_init_t;
 

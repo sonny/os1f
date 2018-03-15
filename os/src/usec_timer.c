@@ -19,7 +19,7 @@ void usec_timer_init(void) {
 	HAL_TIM_Base_Start_IT(&TimHandle);
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+void HAL_TIM_PeriodElapsedCallback( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	usec_timer += period;
 }
 
@@ -28,7 +28,7 @@ uint64_t usec_time(void) {
 	return usec_timer + tim_counter;
 }
 
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim) {
+void HAL_TIM_Base_MspInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/*##-1- Enable peripheral clock #################################*/
 	/* TIMx Peripheral clock enable */
 	__HAL_RCC_TIM7_CLK_ENABLE()

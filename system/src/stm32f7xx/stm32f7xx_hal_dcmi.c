@@ -241,7 +241,7 @@ HAL_StatusTypeDef HAL_DCMI_DeInit(DCMI_HandleTypeDef *hdcmi) {
  *                the configuration information for DCMI.
  * @retval None
  */
-__weak void HAL_DCMI_MspInit(DCMI_HandleTypeDef* hdcmi) {
+__weak void HAL_DCMI_MspInit( __attribute__((unused)) DCMI_HandleTypeDef* hdcmi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_DCMI_MspInit could be implemented in the user file
 	 */
@@ -253,7 +253,7 @@ __weak void HAL_DCMI_MspInit(DCMI_HandleTypeDef* hdcmi) {
  *                the configuration information for DCMI.
  * @retval None
  */
-__weak void HAL_DCMI_MspDeInit(DCMI_HandleTypeDef* hdcmi) {
+__weak void HAL_DCMI_MspDeInit( __attribute__((unused)) DCMI_HandleTypeDef* hdcmi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_DCMI_MspDeInit could be implemented in the user file
 	 */
@@ -517,7 +517,7 @@ void HAL_DCMI_IRQHandler(DCMI_HandleTypeDef *hdcmi) {
  *                the configuration information for DCMI.
  * @retval None
  */
-__weak void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi) {
+__weak void HAL_DCMI_ErrorCallback( __attribute__((unused)) DCMI_HandleTypeDef *hdcmi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_DCMI_ErrorCallback could be implemented in the user file
 	 */
@@ -529,7 +529,7 @@ __weak void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi) {
  *                the configuration information for DCMI.
  * @retval None
  */
-__weak void HAL_DCMI_LineEventCallback(DCMI_HandleTypeDef *hdcmi) {
+__weak void HAL_DCMI_LineEventCallback( __attribute__((unused)) DCMI_HandleTypeDef *hdcmi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_DCMI_LineEventCallback could be implemented in the user file
 	 */
@@ -541,7 +541,7 @@ __weak void HAL_DCMI_LineEventCallback(DCMI_HandleTypeDef *hdcmi) {
  *                the configuration information for DCMI.
  * @retval None
  */
-__weak void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi) {
+__weak void HAL_DCMI_VsyncEventCallback( __attribute__((unused)) DCMI_HandleTypeDef *hdcmi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_DCMI_VsyncEventCallback could be implemented in the user file
 	 */
@@ -553,7 +553,7 @@ __weak void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi) {
  *                the configuration information for DCMI.
  * @retval None
  */
-__weak void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi) {
+__weak void HAL_DCMI_FrameEventCallback( __attribute__((unused)) DCMI_HandleTypeDef *hdcmi) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_DCMI_FrameEventCallback could be implemented in the user file
 	 */

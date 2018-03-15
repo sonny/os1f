@@ -491,7 +491,7 @@ uint32_t wm8994_ReadID(uint16_t DeviceAddr) {
  * @param DeviceAddr: Device address on communication Bus.   
  * @retval 0 if correct communication, else wrong communication
  */
-uint32_t wm8994_Play(uint16_t DeviceAddr, uint16_t* pBuffer, uint16_t Size) {
+uint32_t wm8994_Play(uint16_t DeviceAddr,  __attribute__((unused)) uint16_t* pBuffer,  __attribute__((unused)) uint16_t Size) {
 	uint32_t counter = 0;
 
 	/* Resumes the audio file playing */

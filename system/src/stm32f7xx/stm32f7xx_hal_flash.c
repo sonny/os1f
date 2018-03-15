@@ -367,6 +367,7 @@ void HAL_FLASH_IRQHandler(void) {
 			__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP);
 			break;
 		}
+		case FLASH_PROC_NONE:
 		default:
 			break;
 		}
@@ -393,6 +394,7 @@ void HAL_FLASH_IRQHandler(void) {
 			temp = pFlash.Address;
 			break;
 		}
+		case FLASH_PROC_NONE:
 		default:
 			break;
 		}
@@ -431,7 +433,7 @@ void HAL_FLASH_IRQHandler(void) {
  *                 - Mass Erase   : No return value expected
  * @retval None
  */
-__weak void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue) {
+__weak void HAL_FLASH_EndOfOperationCallback(__attribute__((unused)) uint32_t ReturnValue) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_FLASH_EndOfOperationCallback could be implemented in the user file
 	 */
@@ -446,7 +448,7 @@ __weak void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue) {
  *                 - Mass Erase   : No return value expected
  * @retval None
  */
-__weak void HAL_FLASH_OperationErrorCallback(uint32_t ReturnValue) {
+__weak void HAL_FLASH_OperationErrorCallback(__attribute__((unused)) uint32_t ReturnValue) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_FLASH_OperationErrorCallback could be implemented in the user file
 	 */

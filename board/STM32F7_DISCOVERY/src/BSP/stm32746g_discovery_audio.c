@@ -416,7 +416,7 @@ void BSP_AUDIO_OUT_DeInit(void) {
  * @param  hsai: SAI handle
  * @retval None
  */
-void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai) {
+void HAL_SAI_TxCpltCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* Manage the remaining file size and new address offset: This function 
 	 should be coded by user (its prototype is already declared in stm32746g_discovery_audio.h) */
 	BSP_AUDIO_OUT_TransferComplete_CallBack();
@@ -427,7 +427,7 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai) {
  * @param  hsai: SAI handle
  * @retval None
  */
-void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
+void HAL_SAI_TxHalfCpltCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* Manage the remaining file size and new address offset: This function 
 	 should be coded by user (its prototype is already declared in stm32746g_discovery_audio.h) */
 	BSP_AUDIO_OUT_HalfTransfer_CallBack();
@@ -438,7 +438,7 @@ void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
  * @param  hsai: SAI handle
  * @retval None
  */
-void HAL_SAI_ErrorCallback(SAI_HandleTypeDef *hsai) {
+void HAL_SAI_ErrorCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	HAL_SAI_StateTypeDef audio_out_state;
 	HAL_SAI_StateTypeDef audio_in_state;
 
@@ -488,7 +488,7 @@ __weak void BSP_AUDIO_OUT_Error_CallBack(void) {
  * @param  Params
  * @retval None
  */
-__weak void BSP_AUDIO_OUT_MspInit(SAI_HandleTypeDef *hsai, void *Params) {
+__weak void BSP_AUDIO_OUT_MspInit(SAI_HandleTypeDef *hsai,  __attribute__((unused)) void *Params) {
 	static DMA_HandleTypeDef hdma_sai_tx;
 	GPIO_InitTypeDef gpio_init_structure;
 
@@ -575,7 +575,7 @@ __weak void BSP_AUDIO_OUT_MspInit(SAI_HandleTypeDef *hsai, void *Params) {
  * @param  Params
  * @retval None
  */
-__weak void BSP_AUDIO_OUT_MspDeInit(SAI_HandleTypeDef *hsai, void *Params) {
+__weak void BSP_AUDIO_OUT_MspDeInit(SAI_HandleTypeDef *hsai,  __attribute__((unused)) void *Params) {
 	GPIO_InitTypeDef gpio_init_structure;
 
 	/* SAI DMA IRQ Channel deactivation */
@@ -618,8 +618,8 @@ __weak void BSP_AUDIO_OUT_MspDeInit(SAI_HandleTypeDef *hsai, void *Params) {
  *         Being __weak it can be overwritten by the application     
  * @retval None
  */
-__weak void BSP_AUDIO_OUT_ClockConfig(SAI_HandleTypeDef *hsai,
-		uint32_t AudioFreq, void *Params) {
+__weak void BSP_AUDIO_OUT_ClockConfig( __attribute__((unused)) SAI_HandleTypeDef *hsai,
+		uint32_t AudioFreq,  __attribute__((unused)) void *Params) {
 	RCC_PeriphCLKInitTypeDef rcc_ex_clk_init_struct;
 
 	HAL_RCCEx_GetPeriphCLKConfig(&rcc_ex_clk_init_struct);
@@ -975,7 +975,7 @@ void BSP_AUDIO_IN_DeInit(void) {
  * @param  hsai: SAI handle
  * @retval None
  */
-void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) {
+void HAL_SAI_RxCpltCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* Call the record update function to get the next buffer to fill and its size (size is ignored) */
 	BSP_AUDIO_IN_TransferComplete_CallBack();
 }
@@ -985,7 +985,7 @@ void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) {
  * @param  hsai: SAI handle
  * @retval None
  */
-void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
+void HAL_SAI_RxHalfCpltCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* Manage the remaining file size and new address offset: This function 
 	 should be coded by user (its prototype is already declared in stm32746g_discovery_audio.h) */
 	BSP_AUDIO_IN_HalfTransfer_CallBack();
@@ -1026,7 +1026,7 @@ __weak void BSP_AUDIO_IN_Error_CallBack(void) {
  * @param  Params
  * @retval None
  */
-__weak void BSP_AUDIO_IN_MspInit(SAI_HandleTypeDef *hsai, void *Params) {
+__weak void BSP_AUDIO_IN_MspInit(SAI_HandleTypeDef *hsai,  __attribute__((unused)) void *Params) {
 	static DMA_HandleTypeDef hdma_sai_rx;
 	GPIO_InitTypeDef gpio_init_structure;
 
@@ -1102,7 +1102,7 @@ __weak void BSP_AUDIO_IN_MspInit(SAI_HandleTypeDef *hsai, void *Params) {
  * @param  Params
  * @retval None
  */
-__weak void BSP_AUDIO_IN_MspDeInit(SAI_HandleTypeDef *hsai, void *Params) {
+__weak void BSP_AUDIO_IN_MspDeInit(SAI_HandleTypeDef *hsai,  __attribute__((unused)) void *Params) {
 	GPIO_InitTypeDef gpio_init_structure;
 
 	static DMA_HandleTypeDef hdma_sai_rx;

@@ -261,7 +261,7 @@ HAL_StatusTypeDef HAL_LTDC_DeInit(LTDC_HandleTypeDef *hltdc) {
  *                the configuration information for the LTDC.
  * @retval None
  */
-__weak void HAL_LTDC_MspInit(LTDC_HandleTypeDef* hltdc) {
+__weak void HAL_LTDC_MspInit( __attribute__((unused)) LTDC_HandleTypeDef* hltdc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_LTDC_MspInit could be implemented in the user file
 	 */
@@ -273,7 +273,7 @@ __weak void HAL_LTDC_MspInit(LTDC_HandleTypeDef* hltdc) {
  *                the configuration information for the LTDC.
  * @retval None
  */
-__weak void HAL_LTDC_MspDeInit(LTDC_HandleTypeDef* hltdc) {
+__weak void HAL_LTDC_MspDeInit( __attribute__((unused)) LTDC_HandleTypeDef* hltdc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_LTDC_MspDeInit could be implemented in the user file
 	 */
@@ -374,7 +374,7 @@ void HAL_LTDC_IRQHandler(LTDC_HandleTypeDef *hltdc) {
  *                the configuration information for the LTDC.
  * @retval None
  */
-__weak void HAL_LTDC_ErrorCallback(LTDC_HandleTypeDef *hltdc) {
+__weak void HAL_LTDC_ErrorCallback( __attribute__((unused)) LTDC_HandleTypeDef *hltdc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_LTDC_ErrorCallback could be implemented in the user file
 	 */
@@ -386,7 +386,7 @@ __weak void HAL_LTDC_ErrorCallback(LTDC_HandleTypeDef *hltdc) {
  *                the configuration information for the LTDC.
  * @retval None
  */
-__weak void HAL_LTDC_LineEvenCallback(LTDC_HandleTypeDef *hltdc) {
+__weak void HAL_LTDC_LineEvenCallback( __attribute__((unused)) LTDC_HandleTypeDef *hltdc) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_LTDC_LineEvenCallback could be implemented in the user file
 	 */

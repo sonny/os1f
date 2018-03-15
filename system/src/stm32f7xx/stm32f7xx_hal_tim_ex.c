@@ -264,7 +264,7 @@ HAL_StatusTypeDef HAL_TIMEx_HallSensor_DeInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIMEx_HallSensor_MspInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIMEx_HallSensor_MspInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIMEx_HallSensor_MspInit could be implemented in the user file
 	 */
@@ -276,7 +276,7 @@ __weak void HAL_TIMEx_HallSensor_MspInit(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIMEx_HallSensor_MspDeInit(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIMEx_HallSensor_MspDeInit( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIMEx_HallSensor_MspDeInit could be implemented in the user file
 	 */
@@ -2164,7 +2164,7 @@ HAL_StatusTypeDef HAL_TIMEx_GroupChannel5(TIM_HandleTypeDef *htim,
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIMEx_CommutationCallback(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIMEx_CommutationCallback( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIMEx_CommutationCallback could be implemented in the user file
 	 */
@@ -2176,7 +2176,7 @@ __weak void HAL_TIMEx_CommutationCallback(TIM_HandleTypeDef *htim) {
  *                the configuration information for TIM module.
  * @retval None
  */
-__weak void HAL_TIMEx_BreakCallback(TIM_HandleTypeDef *htim) {
+__weak void HAL_TIMEx_BreakCallback( __attribute__((unused)) TIM_HandleTypeDef *htim) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_TIMEx_BreakCallback could be implemented in the user file
 	 */

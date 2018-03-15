@@ -58,7 +58,7 @@ void memt_func(void *context) {
 			printf("%s - allocated %u at %u ms\n", ti->name, ti->alloc_size,
 					ticks);
 		} else {
-			printf("%s - FAILED to alloc %d at %u ms\n", ti->name,
+			printf("%s - FAILED to alloc %u at %u ms\n", ti->name,
 					ti->alloc_size, ticks);
 		}
 
@@ -85,7 +85,7 @@ void memt_func_fast(void *context) {
 				printf("%s - fast allocated %u, %d times at %u ms\n", ti->name,
 						ti->alloc_size, repeat, ticks);
 			} else {
-				printf("%s - FAILED to allocate %d at %d ms\n", ti->name,
+				printf("%s - FAILED to allocate %u at %u ms\n", ti->name,
 						ti->alloc_size, ticks);
 			}
 

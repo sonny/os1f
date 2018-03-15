@@ -352,7 +352,7 @@ uint8_t BSP_SD_Erase(uint64_t StartAddr, uint64_t EndAddr) {
  * @param  Params
  * @retval None
  */
-__weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params) {
+__weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd,  __attribute__((unused)) void *Params) {
 	static DMA_HandleTypeDef dma_rx_handle;
 	static DMA_HandleTypeDef dma_tx_handle;
 	GPIO_InitTypeDef gpio_init_structure;
@@ -455,7 +455,7 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params) {
  * @param  Params
  * @retval None
  */
-__weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params) {
+__weak void BSP_SD_Detect_MspInit( __attribute__((unused)) SD_HandleTypeDef *hsd,  __attribute__((unused)) void *Params) {
 	GPIO_InitTypeDef gpio_init_structure;
 
 	SD_DETECT_GPIO_CLK_ENABLE()
@@ -475,7 +475,7 @@ __weak void BSP_SD_Detect_MspInit(SD_HandleTypeDef *hsd, void *Params) {
  * @param  Params
  * @retval None
  */
-__weak void BSP_SD_MspDeInit(SD_HandleTypeDef *hsd, void *Params) {
+__weak void BSP_SD_MspDeInit( __attribute__((unused)) SD_HandleTypeDef *hsd,  __attribute__((unused)) void *Params) {
 	static DMA_HandleTypeDef dma_rx_handle;
 	static DMA_HandleTypeDef dma_tx_handle;
 

@@ -474,7 +474,7 @@ HAL_StatusTypeDef HAL_SAI_DeInit(SAI_HandleTypeDef *hsai) {
  *                the configuration information for SAI module.
  * @retval None
  */
-__weak void HAL_SAI_MspInit(SAI_HandleTypeDef *hsai) {
+__weak void HAL_SAI_MspInit( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SAI_MspInit could be implemented in the user file
 	 */
@@ -486,7 +486,7 @@ __weak void HAL_SAI_MspInit(SAI_HandleTypeDef *hsai) {
  *                the configuration information for SAI module.
  * @retval None
  */
-__weak void HAL_SAI_MspDeInit(SAI_HandleTypeDef *hsai) {
+__weak void HAL_SAI_MspDeInit( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SAI_MspDeInit could be implemented in the user file
 	 */
@@ -1197,7 +1197,7 @@ void HAL_SAI_IRQHandler(SAI_HandleTypeDef *hsai) {
  *                the configuration information for SAI module.
  * @retval None
  */
-__weak void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai) {
+__weak void HAL_SAI_TxCpltCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SAI_TxCpltCallback could be implemented in the user file
 	 */
@@ -1209,7 +1209,7 @@ __weak void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai) {
  *                the configuration information for SAI module.
  * @retval None
  */
-__weak void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
+__weak void HAL_SAI_TxHalfCpltCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SAI_TxHalfCpltCallback could be implemented in the user file
 	 */
@@ -1221,7 +1221,7 @@ __weak void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
  *                the configuration information for SAI module.
  * @retval None
  */
-__weak void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) {
+__weak void HAL_SAI_RxCpltCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SAI_RxCpltCallback could be implemented in the user file
 	 */
@@ -1233,7 +1233,7 @@ __weak void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) {
  *                the configuration information for SAI module.
  * @retval None
  */
-__weak void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
+__weak void HAL_SAI_RxHalfCpltCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SAI_RxCpltCallback could be implemented in the user file
 	 */
@@ -1245,7 +1245,7 @@ __weak void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
  *                the configuration information for SAI module.
  * @retval None
  */
-__weak void HAL_SAI_ErrorCallback(SAI_HandleTypeDef *hsai) {
+__weak void HAL_SAI_ErrorCallback( __attribute__((unused)) SAI_HandleTypeDef *hsai) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_SAI_ErrorCallback could be implemented in the user file
 	 */

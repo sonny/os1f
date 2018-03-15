@@ -286,7 +286,7 @@ HAL_StatusTypeDef HAL_DMA2D_DeInit(DMA2D_HandleTypeDef *hdma2d) {
  *                 the configuration information for the DMA2D.
  * @retval None
  */
-__weak void HAL_DMA2D_MspInit(DMA2D_HandleTypeDef* hdma2d) {
+__weak void HAL_DMA2D_MspInit( __attribute__((unused)) DMA2D_HandleTypeDef* hdma2d) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_DMA2D_MspInit could be implemented in the user file
 	 */
@@ -298,7 +298,7 @@ __weak void HAL_DMA2D_MspInit(DMA2D_HandleTypeDef* hdma2d) {
  *                 the configuration information for the DMA2D.
  * @retval None
  */
-__weak void HAL_DMA2D_MspDeInit(DMA2D_HandleTypeDef* hdma2d) {
+__weak void HAL_DMA2D_MspDeInit( __attribute__((unused)) DMA2D_HandleTypeDef* hdma2d) {
 	/* NOTE : This function Should not be modified, when the callback is needed,
 	 the HAL_DMA2D_MspDeInit could be implemented in the user file
 	 */
