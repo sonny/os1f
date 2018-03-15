@@ -36,7 +36,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim) {
 
 	/*##-2- Configure the NVIC for TIMx ########################################*/
 	/* Set the TIMx priority */
-	HAL_NVIC_SetPriority(TIM7_IRQn, 15, 0);
+	//HAL_NVIC_SetPriority(TIM7_IRQn, 15, 0);
 
 	/* Enable the TIMx global Interrupt */
 	HAL_NVIC_EnableIRQ(TIM7_IRQn);

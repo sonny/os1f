@@ -13,6 +13,8 @@ void os_start(void) {
 	display_init();
 	usec_timer_init();
 
+	HAL_NVIC_SetPriority(PendSV_IRQn, 15, 0);
+
 #ifdef ENABLE_FPU
 	kernel_FPU_enable();
 #endif /* ENABLE_FP */
@@ -21,6 +23,7 @@ void os_start(void) {
 	//NOTE: after here we are in user mode
 
 	__os_started = true;
+	//task_sleep(1000);
 }
 
 inline
@@ -29,4 +32,15 @@ bool os_started(void)
 	return __os_started;
 }
 
+void assert_os_started(void)
+{
+	assert(__os_started && "OS has not started quite yet.");
+}
 
+void _exit(int code)
+{
+#if defined(DEBUG)
+	__asm volatile ("bkpt 0");
+#endif
+	while(1) ;
+}

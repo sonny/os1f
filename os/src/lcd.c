@@ -47,20 +47,13 @@ int lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args) {
 
 int lcd_printf_at(int xpos, int ypos, const char *fmt, ...) {
 	va_list args;
-
-	char *p = (char*) fmt;
-	while (*p) {
-		if (*p == '\n' || *p == '\t')
-			*p = ' ';
-		//if (iscntrl(*p)) *p = ' ';
-		p++;
-	}
+	assert(ypos >= 0 && ypos <=16);
 
 	ypos = (ypos) * (BSP_LCD_GetFont()->Height + 4) + 5;
-
 	va_start(args, fmt);
-	lcd_vprintf_at(xpos, ypos, fmt, args);
+	int len = lcd_vprintf_at(xpos, ypos, fmt, args);
 	va_end(args);
+	return len;
 }
 
 #endif

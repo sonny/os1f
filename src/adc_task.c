@@ -19,6 +19,7 @@ void adc_task(void *p) {
 
 	adc_task_init();
 	//task_sleep(1000);
+	int tid = kernel_task_id_current();
 
 	while (1) {
 		//HAL_ADC_Start_IT(&AdcHandle);
@@ -37,7 +38,6 @@ void adc_task(void *p) {
 		//int v_mant   = V % 1000;
 		//double v = V/1000.0;
 
-		int tid = kernel_task_id_current();
 		if (T < 100.0 && V < 5.0)
 			lcd_printf_at(0, tid, "[%d] Temp: %.1f C, Vref: %.2f V %c", tid, T,
 					V, rot[rot_idx]);

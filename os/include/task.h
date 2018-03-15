@@ -61,7 +61,10 @@ struct task {
 #endif
 	event_t join;
 	uint32_t exc_return;
+	const uint32_t signature;
 }__attribute__((aligned(8)));
+
+
 
 static inline task_t * task_alloc(int stack_size) {
 	// ensure that eventual sp is 8 byte aligned
@@ -74,6 +77,7 @@ static inline task_t * task_alloc(int stack_size) {
 }
 
 static inline task_t * task_init(task_t *t, const char * name, int id) {
+	*(uint32_t*)&t->signature = 0xdeadbeef;
 	t->id = id;
 	t->name = name;
 	t->exc_return = 0xfffffffd;
@@ -96,17 +100,34 @@ void task_yield(void);
 __attribute__((always_inline)) static inline
 void task_free(task_t * t) {
 	assert(t->id > 0 && "Cannot free idle or main task.");
-	kernel_task_destroy_task(t);
+	service_call(kernel_task_destroy_task, t, true);
 	if (! (t->flags & TASK_FLAG_STATIC) )
 	  free_aligned(t);
 }
 
-__attribute__((always_inline))  static inline task_t * task_create_schedule(
-		void (*func)(void*), int stack_size, void *context, const char * name) {
-	task_t * t = task_create(stack_size, name);
-	task_frame_init(t, func, context);
-	task_schedule(t);
-	return t;
+typedef struct {
+	void (*func)(void*);
+	int stack_size;
+	void *context;
+	char * name;
+	task_t *task;
+} task_init_t;
+
+__attribute__((always_inline))  static inline
+void __task_create_schedule(void *ctx)
+{
+	task_init_t *ti = ctx;
+	ti->task = task_create(ti->stack_size, ti->name);
+	task_frame_init(ti->task, ti->func, ti->context);
+    kernel_task_start_task(ti->task);
+}
+
+__attribute__((always_inline))  static inline
+task_t * task_create_schedule(void (*func)(void*), int stack_size, void *context, const char * name)
+{
+	task_init_t ti = { .func = func, .stack_size = stack_size, .context = context, .name = name, .task = 0 };
+	service_call(__task_create_schedule, &ti, true);
+	return ti.task;
 }
 
 __attribute__((always_inline)) static inline
@@ -136,6 +157,7 @@ typedef struct {
 
 #define TASK_STATIC_INIT(_name, _name_str, _id) {            \
     { .node = LIST_STATIC_INIT(_name.task.node),             \
+		.signature = 0xdeadbeef, \
         .name = _name_str,                                   \
         .sp = &_name.stack[0] + sizeof(_name.stack),         \
         .stack_top = &_name.stack[0] + sizeof(_name.stack),  \
@@ -143,6 +165,8 @@ typedef struct {
         .state = TASK_ACTIVE,                                \
 	.flags = (TASK_FLAG_STATIC),                         \
 	.sleep_until = 0,                                    \
+	.lasttime = 0, \
+	.runtime = 0, \
         .join = EVENT_STATIC_INIT(_name.task.join),          \
         .exc_return = 0xfffffffd }, {0}                      \
   }
