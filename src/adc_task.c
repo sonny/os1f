@@ -4,9 +4,9 @@
 #include "display.h"
 #include "task.h"
 
-static event_t adc_event = EVENT_STATIC_INIT(adc_event);
-static ADC_HandleTypeDef AdcHandle;
-static uint32_t adc_values[2] = {0};
+static volatile event_t adc_event = EVENT_STATIC_INIT(adc_event);
+static volatile ADC_HandleTypeDef AdcHandle;
+static volatile uint32_t adc_values[2] = {0};
 static void adc_task_init(void);
 
 void adc_task( __attribute__((unused)) void *p) {
@@ -38,8 +38,8 @@ void adc_task( __attribute__((unused)) void *p) {
 		//int v_mant   = V % 1000;
 		//double v = V/1000.0;
 
-		if (T < 100.0 && V < 5.0)
-			lcd_printf_at(0, tid, "[%d] Temp: %.1f C, Vref: %.2f V %c", tid, T,
+		//if (T < 100.0 && V < 5.0)
+			lcd_printf_line(tid, "[%d] Temp: %.1f C, Vref: %.2f V %c", tid, T,
 					V, rot[rot_idx]);
 		rot_idx = (rot_idx + 1) % 4;
 		task_sleep(250);

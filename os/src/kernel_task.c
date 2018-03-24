@@ -16,10 +16,10 @@
 #define MAIN_STACK_SIZE 1024  // default size of main stack
 #define IDLE_TASK_ID    -1
 
-static task_t *task_list[MAX_TASK_COUNT] = {0};
+static volatile task_t *task_list[MAX_TASK_COUNT] = {0};
 
-static task_t * current_task = NULL;
-static list_t task_active = LIST_STATIC_INIT(task_active);
+static volatile task_t * current_task = NULL;
+static volatile list_t task_active = LIST_STATIC_INIT(task_active);
 //static list_t task_sleeping = LIST_STATIC_INIT(task_sleeping);
 
 static __attribute__((const))

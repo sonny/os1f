@@ -23,7 +23,7 @@ __attribute__ ((always_inline)) static inline
 void assert_protected(void)
 {
 	uint32_t primask;
-	asm volatile("mrs %0, PRIMASK\n" : "=r"(primask));
+	__asm volatile("mrs %0, PRIMASK\n" : "=r"(primask));
 	assert(primask & 1 && "Not in protected section.");
 }
 

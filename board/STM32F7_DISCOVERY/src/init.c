@@ -9,6 +9,8 @@ void HAL_MspInit(void)
 {
 	CPU_CACHE_Enable();
 	SystemClock_Config();
+	BSP_LED_Init(LED1);
+	BSP_LED_On(LED1);
 }
 
 /**

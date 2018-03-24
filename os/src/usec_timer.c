@@ -2,8 +2,8 @@
 
 #include "usec_timer.h"
 
-static uint64_t usec_timer = 0;
-static TIM_HandleTypeDef TimHandle;
+static volatile uint64_t usec_timer = 0;
+static volatile TIM_HandleTypeDef TimHandle;
 static const int period = 0xffff;
 
 void usec_timer_init(void) {

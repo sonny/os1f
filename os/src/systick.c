@@ -11,7 +11,7 @@
 
 #define SYSTICK_RESOLUTION 5 // in ms
 
-static uint32_t __systick;
+static volatile uint32_t __systick;
 
 /* override HAL_InitTick from stm32f7xx_hal.c */
 HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
@@ -42,20 +42,24 @@ void HAL_Delay(__IO uint32_t Delay)
 {
 	uint32_t tickstart = HAL_GetTick();
 
-	if (os_started())
+//	if (os_started())
+//	{
+//		task_sleep(Delay);
+//	}
+//	else
+//	{
+
+	while ((HAL_GetTick() - tickstart) < Delay)
 	{
-		task_sleep(Delay);
 	}
-	else
-	{
-		while ((HAL_GetTick() - tickstart) < Delay)
-		{
-		}
-	}
+//	}
 }
 
 void SysTick_Handler(void) {
 	HAL_IncTick();
+
+	if ((__systick % 1000) == 0)
+		BSP_LED_Toggle(LED1);
 
 	if (os_started())
 		protected_kernel_context_switch(NULL);

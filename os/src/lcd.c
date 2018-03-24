@@ -7,7 +7,7 @@
 #include "mutex.h"
 #include "os_printf.h"
 
-static mutex_t screen_lock = MUTEX_STATIC_INIT(screen_lock);
+static volatile mutex_t screen_lock = MUTEX_STATIC_INIT(screen_lock);
 
 void lcdInit(void) {
 	/* LCD Initialization */
@@ -33,9 +33,23 @@ void lcdInit(void) {
 	BSP_LCD_SetFont(&Font12);
 }
 
+int lcd_vprintf_line(int line, const char *fmt, va_list args)
+{
+	uint8_t * buffer = malloc(STDIO_BUFFER_SIZE);
+	int len = os_vsniprintf((char*)buffer, STDIO_BUFFER_SIZE, fmt, args);
+
+	mutex_lock(&screen_lock);
+	BSP_LCD_ClearStringLine(line);
+	BSP_LCD_DisplayStringAtLine(line, buffer);
+	mutex_unlock(&screen_lock);
+
+	free(buffer);
+	return len;
+}
+
 int lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args) {
-	char * buffer = malloc(STDIO_BUFFER_SIZE);
-	int len = os_vsniprintf(buffer, STDIO_BUFFER_SIZE, fmt, args);
+	uint8_t * buffer = malloc(STDIO_BUFFER_SIZE);
+	int len = os_vsniprintf((char*)buffer, STDIO_BUFFER_SIZE, fmt, args);
 
 	mutex_lock(&screen_lock);
 	BSP_LCD_DisplayStringAt(xpos, ypos, buffer, LEFT_MODE);
@@ -43,6 +57,17 @@ int lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args) {
 
 	free(buffer);
 	return len;
+}
+
+int lcd_printf_line(int line, const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	int len = lcd_vprintf_line(line, fmt, args);
+	va_end(args);
+	return len;
+
 }
 
 int lcd_printf_at(int xpos, int ypos, const char *fmt, ...) {

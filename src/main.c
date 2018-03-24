@@ -50,7 +50,7 @@ int main(void) {
 	uint32_t z = 0;
 	while (1) {
 		++z;
-		lcd_printf_at(0, tid, "[%d] Main Task counter : %d", tid, z);
+		lcd_printf_line(tid, "[%d] Main Task counter : %d", tid, z);
 
 		task_t * tonce = task_create_schedule(task_once, DEFAULT_STACK_SIZE,
 				NULL, "Once");
@@ -76,7 +76,7 @@ static void display_system_clock(void)
 		clk /= 1000;
 		clk_str = "KHz";
 	}
-	lcd_printf_at(0, 15, "System Clock : %d %s", clk, clk_str);
+	lcd_printf_line(15, "System Clock : %d %s", clk, clk_str);
 }
 
 
@@ -86,7 +86,7 @@ void task_func(void *context) {
 	struct func_data * fdata = context;
 	while (1) {
 		++k;
-		lcd_printf_at(0, tid, "[%d] Simple Task counter : %d", tid, k);
+		lcd_printf_line(tid, "[%d] Simple Task counter : %d", tid, k);
 		task_sleep(fdata->sleep);
 
 	};
@@ -97,7 +97,7 @@ void task_once(void *context) {
 	uint32_t tick = HAL_GetTick();
 	int tid = kernel_task_id_current();
 
-	lcd_printf_at(0, 9, "[%d] ONCE Task at %d ms", tid, tick);
+	lcd_printf_line(9, "[%d] ONCE Task at %d ms", tid, tick);
 }
 
 static void task_greedy(void *ctx) {
@@ -108,7 +108,7 @@ static void task_greedy(void *ctx) {
 	while (1) {
 		++k;
 		if ((k % 10000000) == 0) {
-			lcd_printf_at(0, tid, "[%d] Simple Greedy counter [%d]\n", tid, k);
+			lcd_printf_line(tid, "[%d] Simple Greedy counter [%d]\n", tid, k);
 		}
 	}
 }

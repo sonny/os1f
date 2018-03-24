@@ -6,7 +6,7 @@
 #include "task.h"
 #include "usec_timer.h"
 
-static bool __os_started = false;
+static volatile bool __os_started = false;
 
 void os_start(void) {
 	HAL_Init();
@@ -23,7 +23,6 @@ void os_start(void) {
 	//NOTE: after here we are in user mode
 
 	__os_started = true;
-	//task_sleep(1000);
 }
 
 inline
