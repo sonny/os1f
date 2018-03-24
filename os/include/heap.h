@@ -52,6 +52,7 @@ typedef struct {
 	void *(* const head)(const heap_t*);
 	bool (* const is_empty)(const heap_t*);
 	bool (* const is_full)(const heap_t*);
+	bool (* const is_member)(const void*, const heap_t*);
 } heap_class_t;
 
 extern heap_class_t Heap;

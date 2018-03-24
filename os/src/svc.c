@@ -44,6 +44,9 @@ void PendSV_Handler(void) {
 	kernel_task_schedule_current();
 	kernel_task_wakeup_all();
 	kernel_task_active_next_current();
+
+	assert_kernel_task_valid();
+
 	kernel_task_load_PSP_current();
 
 	kernel_task_update_lasttime_current();

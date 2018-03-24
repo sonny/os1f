@@ -163,6 +163,16 @@ static inline list_t *list_removeRear(list_t *head) {
   for (pos = (head)->next, tmp = pos->next; pos != (head);      \
        pos = tmp, tmp = pos->next)
 
+static inline
+bool list_element_of(list_t * node, list_t * list)
+{
+	list_t *pos, *tmp;
+	LIST_FOR_EACH_SAFE(pos, tmp, list) {
+		if (pos == node) return true;
+	}
+	return false;
+}
+
 /**
  * Conditionally call function on each element of list 
  *

@@ -90,7 +90,7 @@ static void adc_nvic_init( __attribute__((unused)) void *p) {
 	HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 }
 
-static DMA_HandleTypeDef hdma_adc;
+static volatile DMA_HandleTypeDef hdma_adc;
 void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc) {
 	/*## Enable peripherals and GPIO Clocks #################################*/
 	__HAL_RCC_ADC1_CLK_ENABLE();

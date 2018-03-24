@@ -168,6 +168,16 @@ bool heap_is_full(const heap_t *heap) {
 	return (heap->size == heap->max_size);
 }
 
+static inline
+bool heap_is_member(const void * data, const heap_t * heap)
+{
+	int i;
+	for (i = 0; i < heap->size; ++i) {
+		if (heap->data[i] == data) return true;
+	}
+	return false;
+}
+
 /**
  * Initialize heap structure
  * @param heap Heap opject
@@ -242,9 +252,14 @@ void *heap_remove_head(heap_t *heap) {
 /**
  * Heap class interface
  */
-heap_class_t Heap = { .init = heap_init, .insert = heap_insert, .remove_head =
-		heap_remove_head, .head = heap_head, .is_empty = heap_is_empty,
-		.is_full = heap_is_full };
+heap_class_t Heap = {
+		.init = heap_init,
+		.insert = heap_insert,
+		.remove_head = heap_remove_head,
+		.head = heap_head,
+		.is_empty = heap_is_empty,
+		.is_full = heap_is_full,
+		.is_member = heap_is_member };
 
 /************************************************************************/
 /*  Debug/Validation Code                                               */

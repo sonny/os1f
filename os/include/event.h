@@ -28,6 +28,7 @@ void event_notify(event_t *e) {
 
 static inline
 void event_wait(event_t *e) {
+	kernel_task_event_register(e);
 	service_call(protected_event_wait, e, false);
 }
 

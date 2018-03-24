@@ -72,7 +72,7 @@ typedef struct _tFont {
 
 } sFONT;
 
-extern sFONT Font24;
+//extern sFONT Font24;
 extern sFONT Font20;
 extern sFONT Font16;
 extern sFONT Font12;

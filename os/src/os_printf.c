@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <string.h>
-#include <math.h>
+//#include <math.h>
 #include "defs.h"
 #include "os_printf.h"
 #include "display.h"
@@ -89,9 +89,11 @@ int os_vsniprintf(char * buff, size_t size, const char *fmt, va_list va) {
 	return (bp - buff);
 }
 
+static const int POW10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
+
 int os_ftoa(float f, char *bf, int dec_precision) {
 	char * p = bf;
-	int mult = (int) pow(10, dec_precision);
+	int mult = POW10[dec_precision];
 
 	// put mantissa
 	int n = (int) f;

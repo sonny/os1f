@@ -12,11 +12,13 @@
 #include "assertions.h"
 
 #define MAX_TASK_COUNT  32
+#define MAX_EVENT_COUNT 64
 #define IDLE_STACK_SIZE 128
 #define MAIN_STACK_SIZE 1024  // default size of main stack
 #define IDLE_TASK_ID    -1
 
 static volatile task_t *task_list[MAX_TASK_COUNT] = {0};
+static volatile event_t *event_list[MAX_EVENT_COUNT] = {0};
 
 static volatile task_t * current_task = NULL;
 static volatile list_t task_active = LIST_STATIC_INIT(task_active);
@@ -31,6 +33,7 @@ static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID);
 static TASK_STATIC_CREATE(main_task, "Main", MAIN_STACK_SIZE, 0);
 
 static void kernel_task_main_hoist(void);
+
 static void kernel_task_idle_func(void *c)
 {
 	(void) c;
@@ -326,6 +329,99 @@ static inline __attribute__((const))
 	assert_protected();
 	const task_t * t = cxt;
 	return t->sleep_until;
+}
+
+static bool kernel_task_in_active(task_t * t)
+{
+	return list_element_of(task_to_list(t), &task_active);
+}
+
+static bool kernel_task_in_sleep(task_t * t)
+{
+	return Heap.is_member(t, &sleeping);
+}
+
+static int kernel_task_in_wait(task_t * t)
+{
+	int i;
+	int result = 0;
+	for (i = 0; i < MAX_EVENT_COUNT; ++i) {
+		event_t * e = event_list[i];
+		if (e == NULL) return result;
+		if (list_element_of(task_to_list(t), &e->waiting)) result++;
+	}
+	return result;
+}
+
+void kernel_task_event_register(event_t * new)
+{
+	int i, idx = 0;
+	for (i = 0; i < MAX_EVENT_COUNT; ++i) {
+		event_t * e = event_list[i];
+		if (e == NULL) break;
+		if (e == new) return; // nothing to do
+	}
+	// if we get here, i is the new index
+	assert(i < MAX_EVENT_COUNT && "Too many events.");
+	event_list[i] = new;
+}
+
+void assert_kernel_task_valid(void)
+{
+	bool in_active, in_sleep;
+	int in_wait;
+	int i;
+	for (i = 0; i < MAX_TASK_COUNT; ++i) {
+		task_t *t = task_list[i];
+		if (t == NULL) continue;
+
+		// task must have valid signature
+		assert(t->signature == TASK_SIGNATURE && "Invalid task signature.");
+
+		in_active = kernel_task_in_active(t);
+		in_sleep = kernel_task_in_sleep(t);
+		in_wait = kernel_task_in_wait(t);
+
+		// task id must be the same as its task_list entry
+		assert(t->id == i && "Invalid task ID.");
+		// task state must be one of Inactive, Active, Sleep, Wait, or end
+		switch(t->state) {
+		case TASK_ACTIVE:
+			// task must be current or in active queue
+			assert((t == current_task || in_active) && "Invalid TASK_ACTIVE");
+			// task must not be in sleep, or wait queue
+			assert(!(in_sleep || in_wait) && "Invalid TASK_ACTIVE");
+			break;
+		case TASK_SLEEP:
+			// task must not be current
+			assert((t != current_task) && "Invalid TASK_SLEEP");
+			// task must be in sleep queue
+			assert(in_sleep && "Invalid TASK_SLEEP");
+			// task must no be in active or wait queue
+			assert(!(in_active || in_wait) && "Invalid TASK_SLEEP");
+			break;
+		case TASK_WAIT:
+			// task must not be current
+			assert((t != current_task) && "Invalid TASK_WAIT");
+			// task must not be in active, or sleep queue
+			assert(!(in_active || in_sleep) && "Invalid TASK_WAIT");
+			// task must be in ONE wait queue
+			assert(in_wait == 1 && "Invalid TASK_WAIT");
+			break;
+		case TASK_INACTIVE:
+			// task must not be current
+			// task must not be in active, sleep, or wait queue
+		case TASK_END:
+			// task must not be current
+			assert((t != current_task) && "Invalid TASK_INACTIVE or TASK_END");
+			// task must not be in active, sleep, or wait queue
+			assert(!(in_active || in_sleep || in_wait) && "Invalid TASK_INACTIVE or TASK_END");
+			break;
+		default:
+			assert(0 && "Invalid task state.");
+			break;
+		}
+	}
 }
 
 void kernel_task_display_task_stats(void)

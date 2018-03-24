@@ -147,7 +147,7 @@ typedef enum {
 /** 
  * @brief LCD default font 
  */
-#define LCD_DEFAULT_FONT        Font24     
+#define LCD_DEFAULT_FONT        Font12
 
 /**
  * @brief LCD special pins
