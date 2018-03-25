@@ -5,9 +5,9 @@
 #include "mutex.h"
 #include <ctype.h>
 
-static volatile UART_HandleTypeDef VCPHandle;
-static volatile event_t VCP_TX_complete = EVENT_STATIC_INIT(VCP_TX_complete);
-static volatile event_t VCP_RX_complete = EVENT_STATIC_INIT(VCP_RX_complete);
+static UART_HandleTypeDef VCPHandle;
+static event_t VCP_TX_complete = EVENT_STATIC_INIT(VCP_TX_complete);
+static event_t VCP_RX_complete = EVENT_STATIC_INIT(VCP_RX_complete);
 
 void serialInit(void) {
 

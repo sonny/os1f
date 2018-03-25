@@ -48,4 +48,6 @@ void kernel_break(void) {
 	__asm volatile("BKPT #01");
 }
 
+void kernel_watchdog_refresh(void);
+
 #endif /* __KERNEL_H__ */

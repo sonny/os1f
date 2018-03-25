@@ -17,11 +17,11 @@
 #define MAIN_STACK_SIZE 1024  // default size of main stack
 #define IDLE_TASK_ID    -1
 
-static volatile task_t *task_list[MAX_TASK_COUNT] = {0};
-static volatile event_t *event_list[MAX_EVENT_COUNT] = {0};
+static task_t *task_list[MAX_TASK_COUNT] = {0};
+static event_t *event_list[MAX_EVENT_COUNT] = {0};
 
-static volatile task_t * current_task = NULL;
-static volatile list_t task_active = LIST_STATIC_INIT(task_active);
+static task_t * current_task = NULL;
+static list_t task_active = LIST_STATIC_INIT(task_active);
 //static list_t task_sleeping = LIST_STATIC_INIT(task_sleeping);
 
 static __attribute__((const))
@@ -39,6 +39,7 @@ static void kernel_task_idle_func(void *c)
 	(void) c;
 	while (1)
 	{
+		kernel_watchdog_refresh();
 		__WFI();
 	}
 }
@@ -338,7 +339,7 @@ static bool kernel_task_in_active(task_t * t)
 
 static bool kernel_task_in_sleep(task_t * t)
 {
-	return Heap.is_member(t, &sleeping);
+	return Heap.is_member(t, &sleeping.heap);
 }
 
 static int kernel_task_in_wait(task_t * t)
@@ -355,7 +356,7 @@ static int kernel_task_in_wait(task_t * t)
 
 void kernel_task_event_register(event_t * new)
 {
-	int i, idx = 0;
+	int i;
 	for (i = 0; i < MAX_EVENT_COUNT; ++i) {
 		event_t * e = event_list[i];
 		if (e == NULL) break;

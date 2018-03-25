@@ -4,9 +4,11 @@
 #include "display.h"
 #include "task.h"
 
-static volatile event_t adc_event = EVENT_STATIC_INIT(adc_event);
-static volatile ADC_HandleTypeDef AdcHandle;
+static event_t adc_event = EVENT_STATIC_INIT(adc_event);
+static ADC_HandleTypeDef AdcHandle;
+static DMA_HandleTypeDef hdma_adc;
 static volatile uint32_t adc_values[2] = {0};
+
 static void adc_task_init(void);
 
 void adc_task( __attribute__((unused)) void *p) {
@@ -90,7 +92,6 @@ static void adc_nvic_init( __attribute__((unused)) void *p) {
 	HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 }
 
-static volatile DMA_HandleTypeDef hdma_adc;
 void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc) {
 	/*## Enable peripherals and GPIO Clocks #################################*/
 	__HAL_RCC_ADC1_CLK_ENABLE();

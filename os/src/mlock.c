@@ -1,7 +1,7 @@
 #include <malloc.h>
 #include "mutex.h"
 
-static volatile mutex_t malloc_mutex = MUTEX_STATIC_INIT(malloc_mutex);
+static mutex_t malloc_mutex = MUTEX_STATIC_INIT(malloc_mutex);
 
 void __malloc_lock( __attribute__((unused)) struct _reent reent) {
 	mutex_lock(&malloc_mutex);

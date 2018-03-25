@@ -20,9 +20,9 @@ typedef struct {
 #define SHELL_IO_SIZE 2048
 #define MAX_ARGC 16
 
-static volatile char shell_buffer[SHELL_IO_SIZE];
-static volatile char *argv[MAX_ARGC];
-static volatile int argc = 0;
+static char shell_buffer[SHELL_IO_SIZE];
+static char *argv[MAX_ARGC];
+static int argc = 0;
 
 static void shell_task(void * ctx);
 static void shell_parse_cmd(int);

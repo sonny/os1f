@@ -7,7 +7,7 @@
 #include "mutex.h"
 #include "os_printf.h"
 
-static volatile mutex_t screen_lock = MUTEX_STATIC_INIT(screen_lock);
+static mutex_t screen_lock = MUTEX_STATIC_INIT(screen_lock);
 
 void lcdInit(void) {
 	/* LCD Initialization */
