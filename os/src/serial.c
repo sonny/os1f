@@ -96,6 +96,12 @@ int os_gets_vcp(char *buffer, int len) {
 		event_wait(&VCP_RX_complete);
 		mutex_unlock(&serial_rx_lock);
 
+		// echo received char
+		mutex_lock(&serial_tx_lock);
+		HAL_UART_Transmit_IT(&VCPHandle, p, 1);
+		//event_wait(&VCP_TX_complete);
+		mutex_unlock(&serial_tx_lock);
+
 		if (iscntrl(*p)) {
 			switch (*p) {
 			case 3:    // ETX - end of text (^C)
@@ -114,6 +120,7 @@ int os_gets_vcp(char *buffer, int len) {
 				/*   continue; */
 				/*   break; */
 			default:
+				// each character, echo nothing
 				return CONTROL_C;
 				break;
 			}
