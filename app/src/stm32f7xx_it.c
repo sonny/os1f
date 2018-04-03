@@ -31,9 +31,9 @@
  ******************************************************************************
  */
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f7xx_hal.h"
-#include "stm32f7xx.h"
-#include "stm32f7xx_it.h"
+//#include "stm32f7xx_hal.h"
+//#include "stm32f7xx.h"
+//#include "stm32f7xx_it.h"
 
 /* USER CODE BEGIN 0 */
 

@@ -9,12 +9,12 @@ gdb_server:
 
 
 experimental-debug: $(ELF) | gdb_server
-	$(GDB) -q -x gdb/dash-debug-hw.gdb $<
+	$(GDB) -q -x aux/gdb/dash-debug-hw.gdb $<
 	@killall -v openocd
 
 
 debug: $(ELF) | gdb_server
-	$(GDB) -q -x gdb/debug-hw.gdb $<
+	$(GDB) -q -x aux/gdb/debug-hw.gdb $<
 	@killall -v openocd
 
 xoocd:
@@ -24,9 +24,9 @@ xoocd:
 
 
 semi: $(ELF) | xoocd
-	$(GDB) -q -x gdb/debug-hw.gdb $<
+	$(GDB) -q -x aux/gdb/debug-hw.gdb $<
 	@($(KILL_OOCD)) || true
 
 load: $(ELF) | gdb_server
-	$(GDB) -q -x gdb/load-hw.gdb $<
+	$(GDB) -q -x aux/gdb/load-hw.gdb $<
 

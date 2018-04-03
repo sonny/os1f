@@ -2,15 +2,26 @@ BOARD := STM32746G-Discovery
 ######################################
 ## Application Paths
 ######################################
-INC_DIRS := include
-SRC_DIRS := src
+INC_DIRS := app/include
+SRC_DIRS := app/src
 
 ######################################
 ## OS Paths
 ######################################
-INC_DIRS += os/include
-SRC_DIRS += os/src
-SRC_DIRS += os/newlib
+INC_DIRS += \
+	os/core \
+	os/common \
+	os/device \
+	os/diag \
+	os/util
+
+SRC_DIRS += \
+	os/core \
+	os/common \
+	os/device \
+	os/diag \
+	os/util \
+	os/newlib
 
 INC_DIRS += config
 

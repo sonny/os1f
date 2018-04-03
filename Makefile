@@ -1,7 +1,7 @@
-BOARD := DISCOVERY
+#BOARD := DISCOVERY
 #BOARD := NUCLEO
 FPU := ENABLED
-PROJ := OS-CMSIS
+PROJ := OS1F
 
 ARM-PATH  := /opt/arm/toolchain
 #OOCD-PATH := /opt/openocd
@@ -20,7 +20,7 @@ SRCS :=
 OBJS :=
 DEPS := 
 
--include make/sources_auto.mk
+-include aux/make/sources_auto.mk
 
 FINAL  := $(OUT)/$(PROJ)
 ELF    := $(FINAL).elf
@@ -36,11 +36,11 @@ DEFINES += -DDEBUG -DTRACE
 DEFINES += -DOS_USE_VCP
 DEFINES += -DOS_USE_LCD
 
-ifeq ($(BOARD),DISCOVERY)
-DEFINES += -DBOARD_DISCOVERY
-else
-DEFINES += -DBOARD_NUCLEO
-endif
+#ifeq ($(BOARD),DISCOVERY)
+#DEFINES += -DBOARD_DISCOVERY
+#else
+#DEFINES += -DBOARD_NUCLEO
+#endif
 
 ARCH := -mcpu=cortex-m7 -mthumb
 ifeq ($(FPU),ENABLED)
@@ -73,9 +73,7 @@ PREPROC = $(DEFINES) -MMD -MP -MF$(@:%.o=%.d) -MT$(@)
 ##==================================================
 ## NOTE: use deferred assignment here
 LDFLAGS = $(ARCH) -Wl,-Map,$(OUT)/$*.map -Wl,--gc-sections,--print-memory-usage
-#-z defs 
-#LDFLAGS += -Lldscripts -T mem.ld -T sections.ld -T libs.ld -nostartfiles --specs=nano.specs -lc -lg -lm
-LDFLAGS += -TDebug_STM32F746NG_FLASH.ld -nostartfiles --specs=nano.specs -lc -lg -lm
+LDFLAGS += -Tconfig/STM32F746NG_FLASH.ld -nostartfiles --specs=nano.specs -lc -lg -lm
 ## for semihosting
 #LDFLAGS += --specs=rdimon.specs -lrdimon
 
@@ -124,7 +122,7 @@ clean:
 stuff:
 	@echo "$(OBJS)"
 
--include make/openocd.mk
+-include aux/make/openocd.mk
 -include $(DEPS)
 
 .SECONDARY:
