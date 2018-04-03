@@ -79,3 +79,70 @@ int lcd_printf_at(int xpos, int ypos, const char *fmt, ...) {
 	return len;
 }
 
+/* Overrides implementation in stm32746g_discovery_lcd.c */
+
+void BSP_LCD_ClockConfig(LTDC_HandleTypeDef *hltdc, void *Params)
+{
+  //static RCC_PeriphCLKInitTypeDef  periph_clk_init_struct;
+
+  /* RK043FN48H LCD clock configuration */
+  /* PLLSAI_VCO Input = HSE_VALUE/PLL_M = 1 Mhz */
+  /* PLLSAI_VCO Output = PLLSAI_VCO Input * PLLSAIN = 192 Mhz */
+  /* PLLLCDCLK = PLLSAI_VCO Output/PLLSAIR = 192/5 = 38.4 Mhz */
+  /* LTDC clock frequency = PLLLCDCLK / LTDC_PLLSAI_DIVR_4 = 38.4/4 = 9.6Mhz */
+//  periph_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
+//  periph_clk_init_struct.PLLSAI.PLLSAIN = 192;
+//  periph_clk_init_struct.PLLSAI.PLLSAIR = RK043FN48H_FREQUENCY_DIVIDER;
+//  periph_clk_init_struct.PLLSAIDivR = RCC_PLLSAIDIVR_4;
+//  HAL_RCCEx_PeriphCLKConfig(&periph_clk_init_struct);
+
+  /* copied from stm32f7xx_hal_rcc_ex.c lines 578 - 671 */
+
+  /*-------------------------------------- PLLSAI Configuration ---------------------------------*/
+  /* PLLSAI is configured when a peripheral will use it as source clock : SAI1, SAI2, LTDC or CK48 */
+  /* Disable PLLSAI Clock */
+  __HAL_RCC_PLLSAI_DISABLE();
+
+  /* Get Start Tick*/
+  uint32_t tickstart = HAL_GetTick();
+
+  /* Wait till PLLSAI is disabled */
+  while(__HAL_RCC_PLLSAI_GET_FLAG() != RESET)
+  {
+    if((HAL_GetTick() - tickstart) > PLLSAI_TIMEOUT_VALUE)
+    {
+      /* return in case of Timeout detected */
+      return;
+    }
+  }
+
+  /*---------------------------- LTDC configuration -------------------------------*/
+  /* Read PLLSAIP and PLLSAIQ value from PLLSAICFGR register (these value are not needed for LTDC configuration) */
+  uint32_t tmpreg0 = ((RCC->PLLSAICFGR & RCC_PLLSAICFGR_PLLSAIQ) >> RCC_PLLSAICFGR_PLLSAIQ_Pos);
+  uint32_t tmpreg1 = ((RCC->PLLSAICFGR & RCC_PLLSAICFGR_PLLSAIP) >> RCC_PLLSAICFGR_PLLSAIP_Pos);
+
+  /* PLLSAI_VCO Input  = PLL_SOURCE/PLLM */
+  /* PLLSAI_VCO Output = PLLSAI_VCO Input * PLLSAIN */
+  /* LTDC_CLK(first level) = PLLSAI_VCO Output/PLLSAIR */
+  __HAL_RCC_PLLSAI_CONFIG(192 , tmpreg1, tmpreg0, RK043FN48H_FREQUENCY_DIVIDER);
+
+  /* LTDC_CLK = LTDC_CLK(first level)/PLLSAIDIVR */
+  __HAL_RCC_PLLSAI_PLLSAICLKDIVR_CONFIG(RCC_PLLSAIDIVR_4);
+
+  /* Enable PLLSAI Clock */
+  __HAL_RCC_PLLSAI_ENABLE();
+
+  /* Get Start Tick*/
+  tickstart = HAL_GetTick();
+
+  /* Wait till PLLSAI is ready */
+  while(__HAL_RCC_PLLSAI_GET_FLAG() == RESET)
+  {
+      if((HAL_GetTick() - tickstart) > PLLSAI_TIMEOUT_VALUE)
+      {
+        /* return in case of Timeout detected */
+        return;
+      }
+  }
+}
+

@@ -22,9 +22,11 @@
 #define VCP_IRQn                     USART1_IRQn
 #define VCP_IRQHandler               USART1_IRQHandler
 
-#define VCPClockSelection            Usart1ClockSelection
-#define RCC_PERIPHCLK_VCP            RCC_PERIPHCLK_USART1
+#define HAL_RCC_VCP_CONFIG           __HAL_RCC_USART1_CONFIG
+//#define RCC_PERIPHCLK_VCP            RCC_PERIPHCLK_USART1
 #define RCC_VCPCLKSOURCE_SYSCLK      RCC_USART1CLKSOURCE_SYSCLK
+
+#define LCD_DEFAULT_FONT             Font12
 
 //#endif
 

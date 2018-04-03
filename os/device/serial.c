@@ -29,16 +29,14 @@ void serialInit(void) {
 void HAL_UART_MspInit( __attribute__((unused)) UART_HandleTypeDef *huart) {
 	GPIO_InitTypeDef GPIO_InitStruct;
 
-	RCC_PeriphCLKInitTypeDef RCC_PeriphClkInit;
-
 	/*##-1- Enable peripherals and GPIO Clocks #################################*/
 	/* Enable GPIO TX/RX clock */
 	VCP_TX_GPIO_CLK_ENABLE();
 	VCP_RX_GPIO_CLK_ENABLE();
 
-	RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_VCP;
-	RCC_PeriphClkInit.VCPClockSelection = RCC_VCPCLKSOURCE_SYSCLK;
-	HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphClkInit);
+	/* Configure the USART1 clock source */
+	HAL_RCC_VCP_CONFIG(RCC_VCPCLKSOURCE_SYSCLK);
+
 
 	/* Enable USARTx clock */
 	VCP_CLK_ENABLE();
