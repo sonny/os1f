@@ -7,6 +7,7 @@
 #include "task.h"
 #include "display.h"
 #include "shell.h"
+#include "watchdog.h"
 
 static void task_func(void *);
 static void task_once(void *);
@@ -42,9 +43,19 @@ int main(void) {
 	/* // memory_thread_test(); */
 	task_create_schedule(adc_task, 512, NULL, "ADC");
 
+	watchdog_init();
 	shell_init();
 
 	display_system_clock();
+	if (RCC->CSR & RCC_CSR_IWDGRSTF) {
+		// Watchdog reset occurred
+		lcd_printf_line(10, "Watchdog reset occurred.");
+		__HAL_RCC_CLEAR_RESET_FLAGS();
+	}
+	else {
+		// Watchdog reset did not occur
+		lcd_printf_line(10, "Watchdog reset DID NOT occur.");
+	}
 
 	int tid = kernel_task_id_current();
 	uint32_t z = 0;

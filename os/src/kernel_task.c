@@ -39,7 +39,6 @@ static void kernel_task_idle_func(void *c)
 	(void) c;
 	while (1)
 	{
-		kernel_watchdog_refresh();
 		__WFI();
 	}
 }
