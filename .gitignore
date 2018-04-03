@@ -3,3 +3,4 @@
 /f7disco.ioc
 /openocd.log
 probe_proxy*
+/Release/
