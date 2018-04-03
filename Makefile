@@ -29,7 +29,7 @@ ELF    := $(FINAL).elf
 ## DEFINES
 ##==================================================
 # TODO: implement non-printf trace functions
-DEFINES := -DSTM32F746xx 
+DEFINES := -DUSE_HAL_DRIVER -DSTM32F746xx 
 #DEFINEs += -DOS_USE_TRACE_ITM
 DEFINES += -DDEBUG -DTRACE 
 #DEFINES += -DOS_USE_SEMIHOSTING -DOS_USE_TRACE_SEMIHOSTING_DEBUG
@@ -53,7 +53,7 @@ endif
 ##==================================================
 ## CFLAGS
 ##==================================================
-CFLAGS := $(ARCH) -Og -g3 -std=c11
+CFLAGS := $(ARCH) -Og -g3 -gdwarf-2 -std=c11
 CFLAGS += -Wall -Wextra -Wfatal-errors -pedantic -Wno-unused-parameter
 CFLAGS += -fsigned-char -ffunction-sections -fdata-sections -ffreestanding 
 ##CFLAGS += -flto

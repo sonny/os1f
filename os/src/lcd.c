@@ -1,5 +1,3 @@
-#if defined(BOARD_DISCOVERY)
-
 #include <stdarg.h>
 #include <ctype.h>
 #include "stm32746g_discovery_lcd.h"
@@ -81,4 +79,3 @@ int lcd_printf_at(int xpos, int ypos, const char *fmt, ...) {
 	return len;
 }
 
-#endif

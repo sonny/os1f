@@ -1,43 +1,49 @@
-INC_DIRS := include 
-INC_DIRS += os/include
-INC_DIRS += board/STM32F7_$(BOARD)/config
-INC_DIRS += board/STM32F7_$(BOARD)/include/BSP
-
-INC_DIRS += system/include
-INC_DIRS += system/include/arm
-INC_DIRS += system/include/cortexm
-INC_DIRS += system/include/cmsis 
-INC_DIRS += system/include/stm32f7xx 
-
-INC_DIRS += system/include/Components
-INC_DIRS += system/include/Components/rk043fn48h
-INC_DIRS += Utilities/Fonts
-
+BOARD := STM32746G-Discovery
+######################################
+## Application Paths
+######################################
+INC_DIRS := include
 SRC_DIRS := src
-SRC_DIRS += os/src
-#SRC_DIRS += Utilities/CPU
-SRC_DIRS += Utilities/Fonts
-#SRC_DIRS += Utilities/Log
-#SRC_DIRS += system/include/Components/exc7200
-#SRC_DIRS += system/include/Components/ft5336
-#SRC_DIRS += system/include/Components/mfxstm32l152
-#SRC_DIRS += system/include/Components/ov9655
-#SRC_DIRS += system/include/Components/s5k5cag
-#SRC_DIRS += system/include/Components/stmpe811
-#SRC_DIRS += system/include/Components/ts3510
-#SRC_DIRS += system/include/Components/wm8994
-SRC_DIRS += board/STM32F7_$(BOARD)/src/BSP
-SRC_DIRS += board/STM32F7_$(BOARD)/src
 
-SRC_DIRS += system/src/cmsis
-SRC_DIRS += system/src/cortexm
-SRC_DIRS += system/src/diag
-SRC_DIRS += system/src/newlib
-SRC_DIRS += system/src/stm32f7xx
+######################################
+## OS Paths
+######################################
+INC_DIRS += os/include
+SRC_DIRS += os/src
+SRC_DIRS += os/newlib
+
+INC_DIRS += config
+
+######################################
+## STM32Cube Paths
+######################################
+CUBE := STM32CubeF7
+INC_DIRS += $(CUBE)/Drivers/CMSIS/Include
+INC_DIRS += $(CUBE)/Drivers/CMSIS/Device/ST/STM32F7xx/Include
+SRC_DIRS += $(CUBE)/Drivers/CMSIS/Device/ST/STM32F7xx/Source
+
+INC_DIRS += $(CUBE)/Drivers/STM32F7xx_HAL_Driver/Inc
+SRC_DIRS += $(CUBE)/Drivers/STM32F7xx_HAL_Driver/Src
+
+######################################
+## BSP Components
+######################################
+INC_DIRS += $(CUBE)/Drivers/BSP/$(BOARD)
+SRC_DIRS += $(CUBE)/Drivers/BSP/$(BOARD)
+
+######################################
+## Individual Files
+######################################
+STARTUP_ASM := config/startup_stm32f746xx.S
+SYSTEM_SRC := config/system_stm32f7xx.c
+INIT_SRC := config/init.c
 
 CSRCS := $(foreach DIR, $(SRC_DIRS), $(wildcard $(DIR)/*.c))
 ASRCS := $(foreach DIR, $(SRC_DIRS), $(wildcard $(DIR)/*.S))
 ASRCS += $(foreach DIR, $(SRC_DIRS), $(wildcard $(DIR)/*.s))
+
+CSRCS += $(SYSTEM_SRC) $(INIT_SRC)
+ASRCS += $(STARTUP_ASM)
 
 SRCS := $(ASRCS) $(CSRCS)
 

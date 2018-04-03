@@ -8,6 +8,7 @@
 #include "display.h"
 #include "shell.h"
 #include "watchdog.h"
+#include "lcd.h"
 
 static void task_func(void *);
 static void task_once(void *);
