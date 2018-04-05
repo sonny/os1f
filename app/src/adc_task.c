@@ -1,8 +1,4 @@
-#include "stm32f7xx_hal.h"
-#include "stm32f7xx_hal_adc.h"
-#include "event.h"
-#include "display.h"
-#include "task.h"
+#include "os.h"
 
 static event_t adc_event = EVENT_STATIC_INIT(adc_event);
 static ADC_HandleTypeDef AdcHandle;

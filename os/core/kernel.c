@@ -1,12 +1,9 @@
 #include <stdint.h>
-#include "defs.h"
-#include "kernel.h"
-#include "kernel_task.h"
-#include "display.h"
-#include "task.h"
-#include "usec_timer.h"
+#include "os.h"
 
 static volatile bool __os_started = false;
+
+static void os_services_start(void);
 
 void os_start(void) {
 	HAL_Init();
@@ -24,6 +21,8 @@ void os_start(void) {
 	//NOTE: after here we are in user mode
 
 	__os_started = true;
+
+	os_services_start();
 }
 
 inline
@@ -35,6 +34,19 @@ bool os_started(void)
 void assert_os_started(void)
 {
 	assert(__os_started && "OS has not started quite yet.");
+}
+
+static void os_services_start(void)
+{
+
+#ifdef WATCHDOG_ENABLE
+	watchdog_init();
+#endif /* WATCHDOG_ENABLE */
+
+#ifdef SHELL_ENABLE
+	shell_init();
+#endif /* SHELL_ENABLE */
+
 }
 
 void _exit( __attribute__((unused)) int code)

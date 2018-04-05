@@ -1,8 +1,6 @@
 #include <malloc.h>
 #include <stdio.h>
-#include "task.h"
-#include "stm32f7xx_hal.h"
-
+#include "os.h"
 /*
  This code is for testing malloc in the multitask
  environment.

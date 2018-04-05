@@ -1,14 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "kernel.h"
-#include "kernel_task.h"
-#include "defs.h"
-#include "task.h"
-#include "display.h"
-#include "shell.h"
-#include "watchdog.h"
-#include "lcd.h"
+#include "os.h"
 
 static void task_func(void *);
 static void task_once(void *);
@@ -43,9 +36,6 @@ int main(void) {
 	/* // Unocmment to test memory allocation syncronization */
 	/* // memory_thread_test(); */
 	task_create_schedule(adc_task, 512, NULL, "ADC");
-
-	watchdog_init();
-	shell_init();
 
 	display_system_clock();
 	if (RCC->CSR & RCC_CSR_IWDGRSTF) {

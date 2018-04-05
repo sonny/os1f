@@ -14,4 +14,8 @@
 //#define VCP_BAUD 1000000
 #define VCP_BAUD 38400
 
+/* enable/disable services */
+#define WATCHDOG_ENABLE
+#define SHELL_ENABLE
+
 #endif  /* __OS_CONFIG_H__ */
