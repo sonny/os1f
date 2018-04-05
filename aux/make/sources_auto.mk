@@ -2,7 +2,7 @@ BOARD := STM32746G-Discovery
 ######################################
 ## Application Paths
 ######################################
-INC_DIRS := app/include
+INC_DIRS := app/inc
 SRC_DIRS := app/src
 
 ######################################
@@ -10,16 +10,16 @@ SRC_DIRS := app/src
 ######################################
 INC_DIRS += \
 	os/core \
-	os/common \
 	os/device \
 	os/diag \
+	os/services \
 	os/util
 
 SRC_DIRS += \
 	os/core \
-	os/common \
 	os/device \
 	os/diag \
+	os/services \
 	os/util \
 	os/newlib
 
@@ -28,7 +28,7 @@ INC_DIRS += config
 ######################################
 ## STM32Cube Paths
 ######################################
-CUBE := STM32CubeF7
+CUBE := STM32Cube_external
 INC_DIRS += $(CUBE)/Drivers/CMSIS/Include
 INC_DIRS += $(CUBE)/Drivers/CMSIS/Device/ST/STM32F7xx/Include
 SRC_DIRS += $(CUBE)/Drivers/CMSIS/Device/ST/STM32F7xx/Source
