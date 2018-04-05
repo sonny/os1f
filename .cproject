@@ -29,6 +29,10 @@
 								<option id="com.atollic.truestudio.common_options.target.interwork.2112561550" name="Mix ARM/Thumb" superClass="com.atollic.truestudio.common_options.target.interwork" useByScannerDiscovery="false"/>
 								<option id="com.atollic.truestudio.as.general.incpath.711804585" name="Include path" superClass="com.atollic.truestudio.as.general.incpath" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/services}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/BSP/STM32746G-Discovery}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/STM32F7xx_HAL_Driver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Device/ST/STM32F7xx/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Include}&quot;"/>
 								</option>
 								<inputType id="com.atollic.truestudio.as.input.1610840203" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
@@ -53,11 +57,11 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/device}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/diag}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/util}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32CubeF7/Drivers/BSP/STM32746G-Discovery}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32CubeF7/Drivers/CMSIS/Include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32CubeF7/Drivers/CMSIS/Device/ST/STM32F7xx/Include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32CubeF7/Drivers/STM32F7xx_HAL_Driver/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/services}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/BSP/STM32746G-Discovery}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/STM32F7xx_HAL_Driver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Device/ST/STM32F7xx/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Include}&quot;"/>
 								</option>
 								<option id="com.atollic.truestudio.gcc.symbols.defined.480192182" name="Defined symbols" superClass="com.atollic.truestudio.gcc.symbols.defined" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="USE_HAL_DRIVER"/>
@@ -121,8 +125,41 @@
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.secoutput.2073406059" name="Other" superClass="com.atollic.truestudio.exe.debug.toolchain.secoutput"/>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="com.atollic.truestudio.exe.debug.264229784.859465392" name="/" resourcePath="STM32Cube_external">
+						<toolChain id="com.atollic.truestudio.exe.debug.toolchain.1405683298" name="Atollic ARM Tools" superClass="com.atollic.truestudio.exe.debug.toolchain" unusedChildren="">
+							<option id="com.atollic.truestudio.general.runtimelib.539596985.2144547342" name="Runtime Library" superClass="com.atollic.truestudio.general.runtimelib.539596985"/>
+							<option id="com.atollic.truestudio.toolchain_options.mcu.666560689.576843184" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu.666560689"/>
+							<option id="com.atollic.truestudio.toolchain_options.vendor.1917227683.803001459" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor.1917227683"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.atollic.truestudio.exe.debug.toolchain.platform" isAbstract="false" name="Debug platform" osList="all" superClass="com.atollic.truestudio.exe.debug.toolchain.platform"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.as.1987510084" name="Assembler" superClass="com.atollic.truestudio.exe.debug.toolchain.as.1400676300">
+								<inputType id="com.atollic.truestudio.as.input.223687125" name="Input" superClass="com.atollic.truestudio.as.input"/>
+							</tool>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.gcc.917428037" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc.50623301">
+								<option id="com.atollic.truestudio.gcc.directories.select.1163770694" name="Include path" superClass="com.atollic.truestudio.gcc.directories.select" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/app/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/common}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/device}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/diag}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/util}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/BSP/STM32746G-Discovery}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Device/ST/STM32F7xx/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/STM32F7xx_HAL_Driver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/services}&quot;"/>
+								</option>
+								<inputType id="com.atollic.truestudio.gcc.input.830785145" superClass="com.atollic.truestudio.gcc.input"/>
+							</tool>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.ld.1275065568" name="C Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ld.1685793371"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.gpp.2088347064" name="C++ Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gpp.2002802050"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.ldcc.1374528425" name="C++ Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ldcc.90295683"/>
+							<tool id="com.atollic.truestudio.ar.base.386493822" name="Archiver" superClass="com.atollic.truestudio.ar.base.2008725250"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.secoutput.183918134" name="Other" superClass="com.atollic.truestudio.exe.debug.toolchain.secoutput.2073406059"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="STM32CubeF7/Utilities|STM32CubeF7/Drivers/CMSIS/Lib|STM32CubeF7/Drivers/CMSIS/RTOS|STM32CubeF7/Drivers/BSP/Adafruit_Shield|STM32CubeF7/Drivers/BSP/STM32F7xx_Nucleo_144|STM32CubeF7/Drivers/CMSIS/DSP_Lib|STM32CubeF7/Drivers/BSP/STM32F723E-Discovery|STM32CubeF7/Drivers/BSP/STM32F769I_EVAL|STM32CubeF7/Drivers/BSP/STM32F769I-Discovery|STM32CubeF7/Drivers/BSP/STM32756G_EVAL|Utilities/Log/lcd_log.c|system/include/Components/ft5336/ft5336.c|system/include/Components/ts3510/ts3510.c|Utilities/Fonts/font24.c|Utilities/CPU/cpu_utils.c|os/src/vsnprintf.c|board/STM32F7_DISCOVERY/src/BSP/stm32746g_discovery_camera.c|board/STM32F7_NUCLEO/src/init.c|system/include/Components/exc7200/exc7200.c|system/include/Components/mfxstm32l152/mfxstm32l152.c|system/include/Components/ov9655/ov9655.c|board/STM32F7_DISCOVERY/src/BSP/stm32746g_discovery_ts.c|system/include/Components/s5k5cag/s5k5cag.c|system/include/Components/stmpe811/stmpe811.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="STM32Cube_external/Drivers/BSP/Adafruit_Shield|STM32Cube_external/Drivers/BSP/Components|STM32Cube_external/Utilities|STM32Cube_external/Drivers/CMSIS/Lib|STM32Cube_external/Drivers/CMSIS/RTOS|STM32Cube_external/Drivers/CMSIS/DSP_Lib|STM32Cube_external/Drivers/BSP/STM32F7xx_Nucleo_144|STM32Cube_external/Drivers/BSP/STM32F769I-Discovery|STM32Cube_external/Drivers/BSP/STM32F769I_EVAL|STM32Cube_external/Drivers/BSP/STM32F723E-Discovery|STM32Cube_external/Drivers/BSP/STM32756G_EVAL|STM32CubeF7/Utilities|STM32CubeF7/Drivers/CMSIS/Lib|STM32CubeF7/Drivers/CMSIS/RTOS|STM32CubeF7/Drivers/BSP/Adafruit_Shield|STM32CubeF7/Drivers/BSP/STM32F7xx_Nucleo_144|STM32CubeF7/Drivers/CMSIS/DSP_Lib|STM32CubeF7/Drivers/BSP/STM32F723E-Discovery|STM32CubeF7/Drivers/BSP/STM32F769I_EVAL|STM32CubeF7/Drivers/BSP/STM32F769I-Discovery|STM32CubeF7/Drivers/BSP/STM32756G_EVAL|Utilities/Log/lcd_log.c|system/include/Components/ft5336/ft5336.c|system/include/Components/ts3510/ts3510.c|Utilities/Fonts/font24.c|Utilities/CPU/cpu_utils.c|os/src/vsnprintf.c|board/STM32F7_DISCOVERY/src/BSP/stm32746g_discovery_camera.c|board/STM32F7_NUCLEO/src/init.c|system/include/Components/exc7200/exc7200.c|system/include/Components/mfxstm32l152/mfxstm32l152.c|system/include/Components/ov9655/ov9655.c|board/STM32F7_DISCOVERY/src/BSP/stm32746g_discovery_ts.c|system/include/Components/s5k5cag/s5k5cag.c|system/include/Components/stmpe811/stmpe811.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -170,6 +207,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/system/include/arm}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/system/include/Components}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/services}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/BSP/STM32746G-Discovery}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/STM32F7xx_HAL_Driver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Device/ST/STM32F7xx/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Include}&quot;"/>
 								</option>
 								<inputType id="com.atollic.truestudio.as.input.1446394888" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
@@ -196,6 +237,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/system/include/arm}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/system/include/Components}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/os/services}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/BSP/STM32746G-Discovery}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/STM32F7xx_HAL_Driver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Device/ST/STM32F7xx/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/STM32Cube_external/Drivers/CMSIS/Include}&quot;"/>
 								</option>
 								<inputType id="com.atollic.truestudio.gcc.input.446618354" superClass="com.atollic.truestudio.gcc.input"/>
 							</tool>
@@ -232,7 +277,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="STM32CubeF7/Utilities|STM32CubeF7/Drivers/CMSIS/Lib|STM32CubeF7/Drivers/CMSIS/RTOS|STM32CubeF7/Drivers/BSP/Adafruit_Shield|STM32CubeF7/Drivers/BSP/STM32F7xx_Nucleo_144|STM32CubeF7/Drivers/CMSIS/DSP_Lib|STM32CubeF7/Drivers/BSP/STM32F723E-Discovery|STM32CubeF7/Drivers/BSP/STM32F769I_EVAL|STM32CubeF7/Drivers/BSP/STM32F769I-Discovery|STM32CubeF7/Drivers/BSP/STM32756G_EVAL|Utilities/Fonts/font24.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="STM32Cube_external/Drivers/BSP/Adafruit_Shield|STM32Cube_external/Drivers/BSP/Components|STM32Cube_external/Utilities|STM32Cube_external/Drivers/CMSIS/Lib|STM32Cube_external/Drivers/CMSIS/RTOS|STM32Cube_external/Drivers/CMSIS/DSP_Lib|STM32Cube_external/Drivers/BSP/STM32F7xx_Nucleo_144|STM32Cube_external/Drivers/BSP/STM32F769I-Discovery|STM32Cube_external/Drivers/BSP/STM32F769I_EVAL|STM32Cube_external/Drivers/BSP/STM32F723E-Discovery|STM32Cube_external/Drivers/BSP/STM32756G_EVAL|STM32CubeF7/Utilities|STM32CubeF7/Drivers/CMSIS/Lib|STM32CubeF7/Drivers/CMSIS/RTOS|STM32CubeF7/Drivers/BSP/Adafruit_Shield|STM32CubeF7/Drivers/BSP/STM32F7xx_Nucleo_144|STM32CubeF7/Drivers/CMSIS/DSP_Lib|STM32CubeF7/Drivers/BSP/STM32F723E-Discovery|STM32CubeF7/Drivers/BSP/STM32F769I_EVAL|STM32CubeF7/Drivers/BSP/STM32F769I-Discovery|STM32CubeF7/Drivers/BSP/STM32756G_EVAL|Utilities/Fonts/font24.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
