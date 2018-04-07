@@ -13,9 +13,11 @@ struct func_data {
 	uint32_t sleep;
 };
 
-static struct func_data fdata[4] = { { .name = "Task1", .sleep = 4000 }, {
-		.name = "Task2", .sleep = 2000 }, { .name = "Task3", .sleep = 1000 }, {
-		.name = "Task4", .sleep = 500 }, };
+static struct func_data fdata[4] = {
+		{ .name = "Simple 1", .sleep = 4000 },
+		{ .name = "Simple 2", .sleep = 2000 },
+		{ .name = "Simple 3", .sleep = 1000 },
+		{ .name = "Simple 4", .sleep = 500 }, };
 
 extern void adc_task(void*);
 //extern void memory_thread_test(void);
@@ -26,10 +28,8 @@ int main(void) {
 	// switch modes and make main a normal user task
 	os_start();
 
-	task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*) &fdata[0],
-			"Simple 0");
-	task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*) &fdata[1],
-			"Simple 1");
+	task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*) &fdata[2], fdata[2].name);
+	task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*) &fdata[3], fdata[3].name);
 	//  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 0");
 	//  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 1");
 
@@ -48,11 +48,19 @@ int main(void) {
 		lcd_printf_line(10, "Watchdog reset DID NOT occur.");
 	}
 
+
 	int tid = kernel_task_id_current();
 	uint32_t z = 0;
 	while (1) {
-		++z;
-		lcd_printf_line(tid, "[%d] Main Task counter : %d", tid, z);
+		uint32_t tick = HAL_GetTick();
+		uint32_t rt_hours = tick / 3600000;
+		uint32_t rt_hours_rem  = tick % 3600000;
+		uint32_t rt_mins = rt_hours_rem / 60000;
+		uint32_t rt_mins_rem = rt_hours_rem % 60000;
+		uint32_t rt_secs = rt_mins_rem / 1000;
+		uint32_t rt_msecs = rt_mins_rem % 1000;
+
+		lcd_printf_line(tid, "[%d] Main Task Runtime - %d:%d:%d:%d", tid, rt_hours, rt_mins, rt_secs, rt_msecs);
 
 		task_t * tonce = task_create_schedule(task_once, DEFAULT_STACK_SIZE,
 				NULL, "Once");
