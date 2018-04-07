@@ -3,11 +3,14 @@
 #include "serial.h"
 #include "event.h"
 #include "mutex.h"
+#include "os_printf.h"
 #include <ctype.h>
 
 static UART_HandleTypeDef VCPHandle;
 static event_t VCP_TX_complete = EVENT_STATIC_INIT(VCP_TX_complete);
 static event_t VCP_RX_complete = EVENT_STATIC_INIT(VCP_RX_complete);
+static mutex_t serial_tx_lock = MUTEX_STATIC_INIT(serial_tx_lock);
+static mutex_t serial_rx_lock = MUTEX_STATIC_INIT(serial_rx_lock);
 
 void serialInit(void) {
 
@@ -74,8 +77,6 @@ void VCP_IRQHandler(void) {
 /*   return len; */
 /* } */
 
-static mutex_t serial_tx_lock = MUTEX_STATIC_INIT(serial_tx_lock);
-static mutex_t serial_rx_lock = MUTEX_STATIC_INIT(serial_rx_lock);
 
 int os_puts_vcp(char *buffer, int len) {
 	mutex_lock(&serial_tx_lock);
@@ -85,56 +86,86 @@ int os_puts_vcp(char *buffer, int len) {
 	return len;
 }
 
+static inline
+char rx_byte(void)
+{
+	char byte;
+	mutex_lock(&serial_rx_lock);
+	HAL_UART_Receive_IT(&VCPHandle, &byte, 1);
+	event_wait(&VCP_RX_complete);
+	mutex_unlock(&serial_rx_lock);
+	return byte;
+}
+
+static inline
+void tx_byte(char byte)
+{
+	char tx = byte;
+	mutex_lock(&serial_tx_lock);
+	HAL_UART_Transmit_IT(&VCPHandle, &tx, 1);
+	event_wait(&VCP_TX_complete);
+	mutex_unlock(&serial_tx_lock);
+}
+
 int os_gets_vcp(char *buffer, int len) {
+	bool done = false;
 	char *p = buffer;
-	while (p - buffer < len) {
-		mutex_lock(&serial_rx_lock);
-		// eat input one char at a time
-		HAL_UART_Receive_IT(&VCPHandle, (unsigned char*) p, 1);
-		event_wait(&VCP_RX_complete);
-		mutex_unlock(&serial_rx_lock);
+	while (!done && (p - buffer < len)) {
+		*p = rx_byte();
+
+		char echo_char = *p;
+		switch (*p) {
+		case ASCII_ETX: // CTRL-C
+			return CONTROL_C;
+			break;
+		case ASCII_EOT: // CTRL-D
+			return CONTROL_C;
+			break;
+		case ASCII_BS:  // CTRL-H
+			if (p > buffer) p -= 1;
+			else echo_char = 0;
+			break;
+		case ASCII_LF:
+			break;
+		case ASCII_CR:
+			tx_byte(ASCII_LF);
+			done = true;
+			break;
+		case ASCII_ESC:
+			echo_char = '.';
+			done = true;
+			break;
+		default:
+			p++;
+			break;
+		}
 
 		// echo received char
-		mutex_lock(&serial_tx_lock);
-		HAL_UART_Transmit_IT(&VCPHandle, p, 1);
-		//event_wait(&VCP_TX_complete);
-		mutex_unlock(&serial_tx_lock);
+		if (echo_char) tx_byte(echo_char);
 
-		if (iscntrl(*p)) {
-			switch (*p) {
-			case 3:    // ETX - end of text (^C)
-				return CONTROL_C;
-				break;
-			case '\b': // backspace
-				// eat both \b and prev char
-				if (p > buffer + 1)
-					p -= 2;
-				break;
-			case '\r':
-				goto DONE;
-				break;
-				/* case 0x1B: // ESC */
-				/*   p -= 1; */
-				/*   continue; */
-				/*   break; */
-			default:
-				// each character, echo nothing
-				return CONTROL_C;
-				break;
-			}
-		} else
-			p++;
 	}
 
-	DONE: *p++ = '\0'; // null terminate result
+	*p++ = '\0'; // null terminate result
+	os_iprintf("BUFFER: [%s]\r\n", buffer);
 	return (p - buffer);
 }
 
+int ansii_esc(char *b, int len, bool echo)
+{
+	bool done = false;
+	char * p = b;
+//	while (!done && (p-b > len))
+//	{
+//		char byte;
+//	}
+	return 0;
+}
+
 void HAL_UART_TxCpltCallback( __attribute__((unused)) UART_HandleTypeDef *huart) {
-	protected_event_notify(&VCP_TX_complete);
+	event_notify_irq(&VCP_TX_complete);
 }
 
 void HAL_UART_RxCpltCallback( __attribute__((unused)) UART_HandleTypeDef *huart) {
-	protected_event_notify(&VCP_RX_complete);
+	event_notify_irq(&VCP_RX_complete);
 }
 

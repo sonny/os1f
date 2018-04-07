@@ -48,9 +48,15 @@ int list_size(const list_t *head) {
  * @return true if list is empty
  */
 static inline
-bool list_empty(const list_t *head) {
+bool list_empty(const list_t const * head) {
 	assert(head && "List Head is a Null Pointer");
 	return (head->next == head);
+}
+
+static inline
+bool list_element(const list_t  const * node)
+{
+	return !list_empty(node);
 }
 
 /**

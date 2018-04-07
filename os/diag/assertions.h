@@ -9,6 +9,9 @@
 #define OS_INCLUDE_ASSERTIONS_H_
 
 #include <assert.h>
+#include "task.h"
+#include "event.h"
+#include "mutex.h"
 
 void assert_os_started(void); // implemented in kernel.c
 
@@ -16,8 +19,21 @@ void assert_os_started(void); // implemented in kernel.c
 static inline
 void assert_task_sig(task_t *t)
 {
-	assert(t->signature == 0xdeadbeef && "Invalid task signature.");
+	assert(t->signature == TASK_SIGNATURE && "Invalid task signature.");
 }
+
+static inline
+void assert_event_sig(event_t *e)
+{
+	assert(e->signature == EVENT_SIGNATURE && "Invalid signature.");
+}
+
+static inline
+void assert_mutex_sig(mutex_t *m)
+{
+	assert(m->signature == TASK_SIGNATURE && "Invalid signature.");
+}
+
 
 __attribute__ ((always_inline)) static inline
 void assert_protected(void)

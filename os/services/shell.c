@@ -52,9 +52,9 @@ void shell_init(void) {
 
 static void shell_task(void * cxt) {
 	(void) cxt;
-	os_iprintf("\n\nSimple SHELL v1.0\n");
+	os_iprintf("\r\n\nSimple SHELL v1.0\r\n");
 	while (1) {
-		os_iprintf("\nshell> ");
+		os_iprintf("\r\nshell> ");
 		int len = os_gets(shell_buffer, SHELL_IO_SIZE);
 		if (len < 0) {
 			if (len == CONTROL_C)
@@ -78,7 +78,7 @@ static void shell_process_cmd(void) {
 	}
 
 	if (cmd == NULL) {
-		os_iprintf("CMD: %s is invalid.\n", argv[0]);
+		os_iprintf("CMD: %s is invalid.\r\n", argv[0]);
 		shell_cmd_help();
 	} else {
 		cmd->call();
@@ -112,12 +112,12 @@ static void shell_parse_cmd(int size) {
 static void shell_cmd_help(void) {
 	int i;
 	for (i = 0; i < command_count; ++i) {
-		os_iprintf("%s\t%s\n", commands[i].name, commands[i].usage);
+		os_iprintf("%s\t%s\r\n", commands[i].name, commands[i].usage);
 	}
 }
 
 static void shell_cmd_echo(void) {
-	os_iprintf("%s\n", argv[1]);
+	os_iprintf("%s\r\n", argv[1]);
 }
 
 static void shell_cmd_ps(void) {
@@ -147,29 +147,29 @@ static void shell_cmd_mem(void) {
 	int static_used = &_Heap_Begin - &_end;
 	int heap_used = heap_size_get();
 
-	os_iprintf("Total Ram                              %d\n", total_ram);
-	os_iprintf("Static allocation                      %d\n", static_used);
-	os_iprintf("Heap allocation                        %d\n", heap_used);
+	os_iprintf("Total Ram                              %d\r\n", total_ram);
+	os_iprintf("Static allocation                      %d\r\n", static_used);
+	os_iprintf("Heap allocation                        %d\r\n", heap_used);
 
 	mi = mallinfo();
 
-	os_iprintf("Total non-mmapped bytes (arena):       %d\n", mi.arena);
-	os_iprintf("# of free chunks (ordblks):            %d\n", mi.ordblks);
-	os_iprintf("# of free fastbin blocks (smblks):     %d\n", mi.smblks);
-	os_iprintf("# of mapped regions (hblks):           %d\n", mi.hblks);
-	os_iprintf("Bytes in mapped regions (hblkhd):      %d\n", mi.hblkhd);
-	os_iprintf("Max. total allocated space (usmblks):  %d\n", mi.usmblks);
-	os_iprintf("Free bytes held in fastbins (fsmblks): %d\n", mi.fsmblks);
-	os_iprintf("Total allocated space (uordblks):      %d\n", mi.uordblks);
-	os_iprintf("Total free space (fordblks):           %d\n", mi.fordblks);
-	os_iprintf("Topmost releasable block (keepcost):   %d\n", mi.keepcost);
+	os_iprintf("Total non-mmapped bytes (arena):       %d\r\n", mi.arena);
+	os_iprintf("# of free chunks (ordblks):            %d\r\n", mi.ordblks);
+	os_iprintf("# of free fastbin blocks (smblks):     %d\r\n", mi.smblks);
+	os_iprintf("# of mapped regions (hblks):           %d\r\n", mi.hblks);
+	os_iprintf("Bytes in mapped regions (hblkhd):      %d\r\n", mi.hblkhd);
+	os_iprintf("Max. total allocated space (usmblks):  %d\r\n", mi.usmblks);
+	os_iprintf("Free bytes held in fastbins (fsmblks): %d\r\n", mi.fsmblks);
+	os_iprintf("Total allocated space (uordblks):      %d\r\n", mi.uordblks);
+	os_iprintf("Total free space (fordblks):           %d\r\n", mi.fordblks);
+	os_iprintf("Topmost releasable block (keepcost):   %d\r\n", mi.keepcost);
 }
 
 static void shell_cmd_time(void) {
 	uint32_t mstime = HAL_GetTick();
 	uint32_t ustime = usec_time();
 
-	os_iprintf("SysTick      time %d ms\n", mstime);
-	os_iprintf("uSec counter time %d us\n", ustime);
+	os_iprintf("SysTick      time %d ms\r\n", mstime);
+	os_iprintf("uSec counter time %d us\r\n", ustime);
 }
 

@@ -8,28 +8,32 @@
 #include "kernel_task.h"
 
 struct event {
+	const char const * name;
 	list_t waiting;
+	uint32_t signature;
 };
 
-#define EVENT_STATIC_INIT(name) { LIST_STATIC_INIT( (name).waiting ) }
+#define EVENT_STATIC_INIT(NAME) { #NAME, LIST_STATIC_INIT( (NAME).waiting ), EVENT_SIGNATURE }
 
-static void protected_event_wait(void * cxt);
-static void protected_event_notify(void *cxt);
+static void event_wait_irq(void * cxt);
+static void event_notify_irq(void *cxt);
 
 static inline
-void event_init(event_t *e) {
+void event_init(const char * name, event_t *e) {
+	e->name = name;
 	list_init(&e->waiting);
+	e->signature = EVENT_SIGNATURE;
 }
 
 static inline
 void event_notify(event_t *e) {
-	service_call(protected_event_notify, e, false);
+	service_call(event_notify_irq, e, false);
 }
 
 static inline
 void event_wait(event_t *e) {
-	kernel_task_event_register(e);
-	service_call(protected_event_wait, e, false);
+	service_call(kernel_task_event_register, e, true);
+	service_call(event_wait_irq, e, false);
 }
 
 static inline
@@ -38,7 +42,7 @@ bool event_task_waiting(event_t *e) {
 }
 
 static inline
-void protected_event_wait(void * cxt) {
+void event_wait_irq(void * cxt) {
 	event_t *e = cxt;
 	__disable_irq();
 	kernel_task_event_wait_current(e);
@@ -47,7 +51,7 @@ void protected_event_wait(void * cxt) {
 }
 
 static inline
-void protected_event_notify(void *cxt) {
+void event_notify_irq(void * cxt) {
 	event_t *e = cxt;
 	__disable_irq();
 	kernel_task_event_notify_all(e);

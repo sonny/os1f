@@ -11,7 +11,14 @@
 #include "list.h"
 #include "usec_timer.h"
 
-#define TASK_SIGNATURE 0xdeadbeef
+typedef enum {
+	TASK_INACTIVE,
+	TASK_ACTIVE,
+	TASK_SLEEP,
+	TASK_WAIT,
+	TASK_END
+} task_state_e;
+
 
 typedef struct
 {
@@ -56,7 +63,8 @@ struct task
 	uint8_t * stack_top;
 	uint8_t * sp;
 	int32_t id;
-	uint32_t state;
+	//uint32_t state;
+	task_state_e state;
 	uint32_t flags;
 	uint32_t sleep_until;
 	uint64_t runtime;
@@ -90,7 +98,7 @@ task_t * task_init(task_t *t, const char * name, int id)
 	t->name = name;
 	t->exc_return = 0xfffffffd;
 	list_init(&t->node);
-	event_init(&t->join);
+	event_init("Join", &t->join);
 	return t;
 }
 
@@ -111,8 +119,6 @@ void task_free(task_t * t)
 {
 	assert(t->id > 0 && "Cannot free idle or main task.");
 	service_call((svcall_t) kernel_task_destroy_task, t, true);
-	if (!(t->flags & TASK_FLAG_STATIC))
-		free_aligned(t);
 }
 
 typedef struct

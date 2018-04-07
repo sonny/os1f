@@ -3,11 +3,11 @@
 
 #define TIME_SLICE 5 // in milliseconds
 
-#define TASK_INACTIVE (0)
-#define TASK_ACTIVE   (1)
-#define TASK_SLEEP    (2)
-#define TASK_WAIT     (3)
-#define TASK_END      (4)
+//#define TASK_INACTIVE (0)
+//#define TASK_ACTIVE   (1)
+//#define TASK_SLEEP    (2)
+//#define TASK_WAIT     (3)
+//#define TASK_END      (4)
 
 #define TASK_FLAG_FPU    (1<<31)
 #define TASK_FLAG_STATIC (1<<30)
@@ -26,5 +26,9 @@ typedef struct task task_t;
 typedef struct event event_t;
 typedef struct list list_t;
 typedef struct mutex mutex_t;
+
+#define TASK_SIGNATURE  0xdeadbeef
+#define MUTEX_SIGNATURE 0xbeaddaeb
+#define EVENT_SIGNATURE 0xfeebfaab
 
 #endif  /*__DEFS_H__ */

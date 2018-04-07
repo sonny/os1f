@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdatomic.h>
+#include "defs.h"
 #include "stm32f7xx.h"
 #include "kernel_task.h"
 #include "task.h"
@@ -13,15 +14,16 @@
 struct mutex {
 	volatile uint32_t lock;
 	uint32_t depth;
-	event_t waiting;
+	event_t tasks;
+	uint32_t signature;
 };
 
-#define MUTEX_STATIC_INIT(name) { 0, 0, EVENT_STATIC_INIT( (name).waiting ) }
+#define MUTEX_STATIC_INIT(name) { 0, 0, EVENT_STATIC_INIT( (name).tasks ), MUTEX_SIGNATURE }
 
 static inline
 void mutex_init(mutex_t* m) {
 	m->depth = 0;
-	event_init(&m->waiting);
+	event_init("Mutex", &m->tasks);
 }
 
 static inline
@@ -32,7 +34,7 @@ void mutex_lock(mutex_t *m) {
 		m->depth++;
 	} else {
 		while (!spinlock_try_lock_value(&m->lock, tid)) {
-			event_wait(&m->waiting);
+			event_wait(&m->tasks);
 		}
 	}
 
@@ -55,8 +57,8 @@ static inline
 void mutex_unlock(mutex_t *m) {
 	if (m->depth == 0) {
 		spinlock_unlock(&m->lock);
-		if (event_task_waiting(&m->waiting))
-			event_notify(&m->waiting);
+		if (event_task_waiting(&m->tasks))
+			event_notify(&m->tasks);
 	} else {
 		m->depth--;
 	}
