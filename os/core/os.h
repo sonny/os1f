@@ -8,6 +8,7 @@
 #ifndef OS_CORE_OS_H_
 #define OS_CORE_OS_H_
 
+
 #include "os_config.h"
 #include "defs.h"
 
@@ -22,9 +23,9 @@
 #include "task.h"
 
 /* device header files */
-#include "serial.h"
 #include "lcd.h"
 #include "usec_timer.h"
+#include "vcp.h"
 
 /* diag header files */
 #include "assertions.h"
@@ -35,6 +36,7 @@
 #include "display.h"
 #include "heap.h"
 #include "list.h"
+#include "ring_buffer.h"
 
 /* services header files */
 #ifdef SHELL_ENABLE

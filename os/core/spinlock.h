@@ -9,6 +9,8 @@
 #define SPINLOCK_UNLOCKED 0
 #define SPINLOCK_LOCKED   1
 
+typedef uint32_t spinlock_t;
+
 // see mutex implementation
 // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dht0008a/ch01s03s03.html
 /*
@@ -20,29 +22,34 @@
  */
 
 __attribute__ ((always_inline)) static inline
-bool spinlock_locked_as(volatile uint32_t *l, uint32_t lock_value) {
+bool spinlock_locked_as(const volatile spinlock_t const *l, spinlock_t lock_value)
+{
 	return *l == lock_value;
 }
 
 __attribute__ ((always_inline)) static inline
-bool spinlock_try_lock_value(volatile uint32_t *l, uint32_t lock_value) {
-	const uint32_t unlocked = SPINLOCK_UNLOCKED;
+bool spinlock_try_lock_value(volatile spinlock_t *l, spinlock_t lock_value)
+{
+	const spinlock_t unlocked = SPINLOCK_UNLOCKED;
 	return atomic_compare_exchange_strong(l, &unlocked, lock_value);
 }
 
 __attribute__ ((always_inline)) static inline
-bool spinlock_try_lock(volatile uint32_t *l) {
+bool spinlock_try_lock(volatile spinlock_t *l)
+{
 	return spinlock_try_lock_value(l, SPINLOCK_LOCKED);
 }
 
 __attribute__ ((always_inline)) static inline
-void spinlock_lock(volatile uint32_t *l) {
+void spinlock_lock(volatile spinlock_t *l)
+{
 	while (!spinlock_try_lock(l))
 		;
 }
 
 __attribute__ ((always_inline)) static inline
-void spinlock_unlock(volatile uint32_t *l) {
+void spinlock_unlock(volatile spinlock_t *l)
+{
 	__DMB();
 	*l = SPINLOCK_UNLOCKED;
 }

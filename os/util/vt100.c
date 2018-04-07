@@ -11,11 +11,11 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
+#include <vcp.h>
 #include "vt100.h"
 #include "display.h"
 #include "mutex.h"
 #include "event.h"
-#include "serial.h"
 #include "os_printf.h"
 
 // Save Cursor	<ESC>[s

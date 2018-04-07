@@ -16,7 +16,7 @@ void display_line_at(int line, const char* fmt, ...);
 
 #elif defined(OS_USE_VCP)
 
-#include "serial.h"
+#include "vcp.h"
 #include "vt100.h"
 
 #define printf_at term_printf_at
