@@ -12,6 +12,11 @@
 #include "os_config.h"
 #include "defs.h"
 
+/* core type header files */
+#include "event_type.h"
+#include "task_type.h"
+#include "mutex_type.h"
+
 /* core header files */
 #include "event.h"
 #include "kernel_task.h"

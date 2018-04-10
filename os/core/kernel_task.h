@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include "defs.h"
+#include "event_type.h"
+#include "task_type.h"
 
 void kernel_task_init(void);
 int32_t kernel_task_next_id(void);

@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
+typedef struct list list_t;
+
 struct list {
 	list_t *prev;
 	list_t *next;

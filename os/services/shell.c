@@ -7,6 +7,7 @@
 #include "usec_timer.h"
 #include <ctype.h>
 #include <string.h>
+#include <malloc.h>
 
 typedef void (*cmd_t)(void);
 

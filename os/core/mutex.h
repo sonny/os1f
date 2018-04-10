@@ -10,15 +10,8 @@
 #include "task.h"
 #include "event.h"
 #include "spinlock.h"
+#include "mutex_type.h"
 
-struct mutex {
-	volatile uint32_t lock;
-	uint32_t depth;
-	event_t tasks;
-	uint32_t signature;
-};
-
-#define MUTEX_STATIC_INIT(name) { 0, 0, EVENT_STATIC_INIT( (name).tasks ), MUTEX_SIGNATURE }
 
 static inline
 void mutex_init(mutex_t* m) {

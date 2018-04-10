@@ -10,6 +10,7 @@ SRC_DIRS := app/src
 ######################################
 INC_DIRS += \
 	os/core \
+	os/core/types \
 	os/device \
 	os/diag \
 	os/services \

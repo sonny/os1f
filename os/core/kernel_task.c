@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include "kernel.h"
 #include "task.h"
-#include "event.h"
 #include "defs.h"
 #include "list.h"
 #include "svc.h"
@@ -10,11 +9,8 @@
 #include "os_printf.h"
 #include "heap.h"
 #include "assertions.h"
+#include "memory.h"
 
-#define MAX_TASK_COUNT  32
-#define MAX_EVENT_COUNT 64
-#define IDLE_STACK_SIZE 128
-#define MAIN_STACK_SIZE 1024  // default size of main stack
 #define IDLE_TASK_ID    -1
 
 static task_t *task_list[MAX_TASK_COUNT] = {0};
@@ -316,7 +312,6 @@ void kernel_task_destroy_task(task_t *t)
 {
 	assert_protected();
 	assert(task_list[t->id] == t && "Invalid Task Entry");
-	//list_remove(task_to_list(t));
 	assert(!list_element(task_to_list(t)) && "Node still in some list.");
 	// remove from task list
 	task_list[t->id] = NULL;

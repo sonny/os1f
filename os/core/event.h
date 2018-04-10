@@ -6,14 +6,7 @@
 #include "list.h"
 #include "kernel.h"
 #include "kernel_task.h"
-
-struct event {
-	const char const * name;
-	list_t waiting;
-	uint32_t signature;
-};
-
-#define EVENT_STATIC_INIT(NAME) { #NAME, LIST_STATIC_INIT( (NAME).waiting ), EVENT_SIGNATURE }
+#include "event_type.h"
 
 static void event_wait_irq(void * cxt);
 static void event_notify_irq(void *cxt);
