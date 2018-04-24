@@ -13,6 +13,8 @@
 #define VCP_BAUD 115200
 #endif
 
+#define LCD_TEXT_COLOR LCD_COLOR_WHITE
+
 #define CONTROL_C -1
 
 #define TASK_SIGNATURE  0xdeadbeef
@@ -34,5 +36,32 @@
 #ifndef MAIN_STACK_SIZE
 #define MAIN_STACK_SIZE 1024  // default size of main stack
 #endif
+
+#define USEC_TIMER            TIM7
+
+#define SYS_TIMER             TIM5
+#define SYS_TIMER_CLK_ENABLE  __HAL_RCC_TIM5_CLK_ENABLE()
+#define SYS_TIMER_IRQ         TIM5_IRQn
+#define SYS_TIMER_IRQHandler  TIM5_IRQHandler
+
+enum {
+	VLED0 = 0,
+	VLED1,
+	VLED2,
+	VLED3,
+	VLED4,
+	VLED5,
+	VLED6,
+	VLED7,
+	VLED8,
+	VLED9,
+	VLED10,
+	VLED11,
+	VLED12,
+	VLED13,
+	VLED14,
+	VLED15
+};
+
 
 #endif  /*__DEFS_H__ */

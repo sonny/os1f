@@ -32,6 +32,10 @@
 #include "usec_timer.h"
 #include "vcp.h"
 
+#ifdef VIRTLED_ENABLE
+#include "virtled.h"
+#endif
+
 /* diag header files */
 #include "assertions.h"
 #include "Trace.h"

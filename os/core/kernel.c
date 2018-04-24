@@ -47,6 +47,10 @@ static void os_services_start(void)
 	shell_init();
 #endif /* SHELL_ENABLE */
 
+#ifdef VIRTLED_ENABLE
+	virtled_init();
+#endif
+
 }
 
 void _exit( __attribute__((unused)) int code)

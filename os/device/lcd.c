@@ -5,7 +5,9 @@
 #include "mutex.h"
 #include "os_printf.h"
 
-static mutex_t screen_lock = MUTEX_STATIC_INIT(screen_lock);
+//mutex_t screen_lock = MUTEX_STATIC_INIT(screen_lock);
+static spinlock_t __lcd_lock = SPINLOCK_UNLOCKED;
+spinlock_t * const lcd_lock = &__lcd_lock;
 
 void lcdInit(void) {
 	/* LCD Initialization */
@@ -36,10 +38,13 @@ int lcd_vprintf_line(int line, const char *fmt, va_list args)
 	uint8_t * buffer = malloc(STDIO_BUFFER_SIZE);
 	int len = os_vsniprintf((char*)buffer, STDIO_BUFFER_SIZE, fmt, args);
 
-	mutex_lock(&screen_lock);
+	//mutex_lock(&screen_lock);
+	spinlock_lock(lcd_lock);
+	BSP_LCD_SetTextColor(LCD_TEXT_COLOR);
 	BSP_LCD_ClearStringLine(line);
 	BSP_LCD_DisplayStringAtLine(line, buffer);
-	mutex_unlock(&screen_lock);
+	//mutex_unlock(&screen_lock);
+	spinlock_unlock(lcd_lock);
 
 	free(buffer);
 	return len;
@@ -49,9 +54,11 @@ int lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args) {
 	uint8_t * buffer = malloc(STDIO_BUFFER_SIZE);
 	int len = os_vsniprintf((char*)buffer, STDIO_BUFFER_SIZE, fmt, args);
 
-	mutex_lock(&screen_lock);
+	//mutex_lock(&screen_lock);
+	spinlock_lock(lcd_lock);
 	BSP_LCD_DisplayStringAt(xpos, ypos, buffer, LEFT_MODE);
-	mutex_unlock(&screen_lock);
+	//mutex_unlock(&screen_lock);
+	spinlock_unlock(lcd_lock);
 
 	free(buffer);
 	return len;
@@ -83,19 +90,6 @@ int lcd_printf_at(int xpos, int ypos, const char *fmt, ...) {
 
 void BSP_LCD_ClockConfig(LTDC_HandleTypeDef *hltdc, void *Params)
 {
-  //static RCC_PeriphCLKInitTypeDef  periph_clk_init_struct;
-
-  /* RK043FN48H LCD clock configuration */
-  /* PLLSAI_VCO Input = HSE_VALUE/PLL_M = 1 Mhz */
-  /* PLLSAI_VCO Output = PLLSAI_VCO Input * PLLSAIN = 192 Mhz */
-  /* PLLLCDCLK = PLLSAI_VCO Output/PLLSAIR = 192/5 = 38.4 Mhz */
-  /* LTDC clock frequency = PLLLCDCLK / LTDC_PLLSAI_DIVR_4 = 38.4/4 = 9.6Mhz */
-//  periph_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
-//  periph_clk_init_struct.PLLSAI.PLLSAIN = 192;
-//  periph_clk_init_struct.PLLSAI.PLLSAIR = RK043FN48H_FREQUENCY_DIVIDER;
-//  periph_clk_init_struct.PLLSAIDivR = RCC_PLLSAIDIVR_4;
-//  HAL_RCCEx_PeriphCLKConfig(&periph_clk_init_struct);
-
   /* copied from stm32f7xx_hal_rcc_ex.c lines 578 - 671 */
 
   /*-------------------------------------- PLLSAI Configuration ---------------------------------*/
@@ -121,9 +115,6 @@ void BSP_LCD_ClockConfig(LTDC_HandleTypeDef *hltdc, void *Params)
   uint32_t tmpreg0 = ((RCC->PLLSAICFGR & RCC_PLLSAICFGR_PLLSAIQ) >> RCC_PLLSAICFGR_PLLSAIQ_Pos);
   uint32_t tmpreg1 = ((RCC->PLLSAICFGR & RCC_PLLSAICFGR_PLLSAIP) >> RCC_PLLSAICFGR_PLLSAIP_Pos);
 
-  /* PLLSAI_VCO Input  = PLL_SOURCE/PLLM */
-  /* PLLSAI_VCO Output = PLLSAI_VCO Input * PLLSAIN */
-  /* LTDC_CLK(first level) = PLLSAI_VCO Output/PLLSAIR */
   __HAL_RCC_PLLSAI_CONFIG(192 , tmpreg1, tmpreg0, RK043FN48H_FREQUENCY_DIVIDER);
 
   /* LTDC_CLK = LTDC_CLK(first level)/PLLSAIDIVR */

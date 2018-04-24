@@ -6,6 +6,7 @@
 static void task_func(void *);
 static void task_once(void *);
 static void task_greedy(void *);
+static void task_lcd_led(void *);
 static void display_system_clock(void);
 
 struct func_data {
@@ -33,6 +34,9 @@ int main(void) {
 	//  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 0");
 	//  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 1");
 
+	task_create_schedule(task_lcd_led, DEFAULT_STACK_SIZE, (void*) NULL, "LED LCD");
+
+
 	/* // Unocmment to test memory allocation syncronization */
 	/* // memory_thread_test(); */
 	task_create_schedule(adc_task, 512, NULL, "ADC");
@@ -50,7 +54,7 @@ int main(void) {
 
 
 	int tid = kernel_task_id_current();
-	uint32_t z = 0;
+
 	while (1) {
 		uint32_t tick = HAL_GetTick();
 		uint32_t rt_hours = tick / 3600000;
@@ -120,5 +124,13 @@ static void task_greedy(void *ctx) {
 		if ((k % 10000000) == 0) {
 			lcd_printf_line(tid, "[%d] Simple Greedy counter [%d]\n", tid, k);
 		}
+	}
+}
+
+static void task_lcd_led(void *context)
+{
+	while(1) {
+		virtled_toggle(VLED11);
+		task_sleep(1000);
 	}
 }

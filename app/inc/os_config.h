@@ -18,4 +18,7 @@
 #define WATCHDOG_ENABLE
 #define SHELL_ENABLE
 
+/* enable devices */
+#define VIRTLED_ENABLE
+
 #endif  /* __OS_CONFIG_H__ */
