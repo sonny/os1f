@@ -3,10 +3,17 @@
 
 static volatile bool __os_started = false;
 
-static void os_services_start(void);
+static void os_services_start();
 
 void os_start(void)
 {
+#ifdef DEBUG
+	HAL_DBGMCU_EnableDBGStandbyMode();
+	__HAL_DBGMCU_FREEZE_IWDG();
+	__HAL_DBGMCU_FREEZE_TIM9();
+	__HAL_DBGMCU_FREEZE_TIM10();
+#endif
+
 	HAL_Init();
 	display_init();
 	usec_timer_init();
