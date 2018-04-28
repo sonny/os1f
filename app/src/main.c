@@ -23,6 +23,9 @@ static struct func_data fdata[4] = {
 
 static volatile uint32_t counters[] = {0, 0, 0, 0};
 
+static volatile uint64_t USECtime = 0;
+static volatile uint32_t MSECtime = 0;
+
 extern void adc_task(void*);
 //extern void memory_thread_test(void);
 //extern uint32_t heap_size_get(void);
@@ -63,6 +66,11 @@ int main(void) {
 	int tid = kernel_task_id_current();
 
 	while (1) {
+		MSECtime = msec_time();
+		USECtime = usec_time();
+
+
+
 		uint32_t tick = HAL_GetTick();
 		uint32_t rt_hours = tick / 3600000;
 		uint32_t rt_hours_rem  = tick % 3600000;

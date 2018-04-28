@@ -10,6 +10,7 @@ void os_start(void)
 #ifdef DEBUG
 	HAL_DBGMCU_EnableDBGStandbyMode();
 	__HAL_DBGMCU_FREEZE_IWDG();
+	__HAL_DBGMCU_FREEZE_TIM4();
 	__HAL_DBGMCU_FREEZE_TIM9();
 	__HAL_DBGMCU_FREEZE_TIM10();
 #endif

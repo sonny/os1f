@@ -35,6 +35,7 @@ struct systimer_s {
 
 void systimer_init(void);
 systimer_t * systimer_create_exec(size_t, timer_callback, void*);
-
+uint32_t msec_time(void);
+uint64_t usec_time(void);
 
 #endif /* OS_CORE_SYSTIMER_H_ */

@@ -38,39 +38,49 @@ static uint16_t systimer_current(void);
 static void systimers_start(void);
 static void systimers_stop(void);
 
-/*
- * SysTimer will consist of two HW timers in master-slave mode.
- * SysTimer0 (TIM10) by default will have a 1mHz freq and be
- * used for the usec-timer. The Autoreload will be configured for
- * a 1ms period (set to 1000 us). The UpdateEvent will be set as
- * TRGO and used for the input to clock TIM9. TIM9 capture/compare
- * will be used for the systimer interrupt handler.
- *
- */
-
-#define SYSTIMERM_PERIOD 500
+#define SYSTIMERM_PERIOD 1000
 #define SYSTIMERS_PERIOD 0x10000
+
+
+uint32_t msec_time(void)
+{
+	return msec_counter + SYSTIMERS->CNT;
+}
+
+uint64_t usec_time(void)
+{
+	return usec_counter + (SYSTIMERS->CNT * 1000) + SYSTIMERM->CNT;
+}
 
 void systimer_init(void)
 {
 	TimHandle[0].Instance = SYSTIMERM;
 	TimHandle[1].Instance = SYSTIMERS;
 
+	/* Enable RCC and IRQs */
+	SYSTIMERM_CLK_ENABLE();
+	SYSTIMERS_CLK_ENABLE();
+	HAL_NVIC_EnableIRQ(SYSTIMERS_IRQn);
+
 	/* setup master */
+	SYSTIMERM->CR1 |= (1<<2);
 	TimHandle[0].Init.Period = SYSTIMERM_PERIOD - 1; // 1ms
-	TimHandle[0].Init.Prescaler = (SYSTIMERM_CLK / 1000000) * 2 - 1; // 1 us period
+	TimHandle[0].Init.Prescaler = (SYSTIMERM_CLK / 1000000) - 1; // 1 us period
 	TimHandle[0].Init.CounterMode = TIM_COUNTERMODE_UP;
 	HAL_TIM_OC_Init(&TimHandle[0]);
 
 	sConfig[0].OCMode = TIM_OCMODE_PWM1;
+    sConfig[0].OCPolarity   = TIM_OCPOLARITY_HIGH;
+	sConfig[0].OCFastMode   = TIM_OCFAST_DISABLE;
+	sConfig[0].OCNPolarity  = TIM_OCNPOLARITY_HIGH;
+	sConfig[0].OCNIdleState = TIM_OCNIDLESTATE_RESET;
+	sConfig[0].OCIdleState  = TIM_OCIDLESTATE_RESET;
+
 	sConfig[0].Pulse = SYSTIMERM_PERIOD / 2 - 1;
 	HAL_TIM_OC_ConfigChannel(&TimHandle[0], &sConfig[0], TIM_CHANNEL_1);
 
-	sMasterConfig.MasterOutputTrigger = TIM_TRGO_OC1REF;
-	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
-	// HAL_TIMEx_MasterConfigSynchronization(&TimHandle[0], &sMasterConfig); NOTE: does not work for TIM10
-
 	/* setup slave */
+	SYSTIMERS->CR1 |= (1<<2);
 	TimHandle[1].Init.Period = SYSTIMERS_PERIOD - 1;
 	TimHandle[1].Init.Prescaler = 0;
 	TimHandle[1].Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -84,10 +94,8 @@ void systimer_init(void)
 	HAL_TIM_SlaveConfigSynchronization(&TimHandle[1], &sSlaveConfig);
 
 	sConfig[1].OCMode = TIM_OCMODE_TIMING;
-//	sConfig[1].Pulse      = 4;
 	HAL_TIM_OC_ConfigChannel(&TimHandle[1], &sConfig[1], TIM_CHANNEL_1);
 
-	SYSTIMERM->DIER |= 1; // enable update event interrupts
 	SYSTIMERS->DIER |= 1; // enable update event interrupts
 	HAL_TIM_OC_Start(&TimHandle[1], TIM_CHANNEL_1);
 	HAL_TIM_OC_Start(&TimHandle[0], TIM_CHANNEL_1);
@@ -173,21 +181,18 @@ static void systimers_start(void)
 	if (systimers)
 	{
 		SYSTIMERS->CCR1 = systimers->exec_at;
-		//HAL_TIM_OC_Start_IT(&TimHandle[1], TIM_CHANNEL_1);
 		__HAL_TIM_ENABLE_IT(&TimHandle[1], TIM_IT_CC1);
 	}
 }
 
 static void systimers_stop(void)
 {
-	//HAL_TIM_OC_Stop_IT(&TimHandle[1], TIM_CHANNEL_1);
 	__HAL_TIM_DISABLE_IT(&TimHandle[1], TIM_IT_CC1);
 }
 
 void systimers_slave_CC1_callback(void)
 {
 	assert(systimers && "Something bad happened to timer queue");
-	//assert(timers->exec_at == systimer_current() && "Invalid timer");
 	systimers_stop();
 
 	size_t systime = systimer_current();
@@ -228,20 +233,13 @@ void systimers_slave_CC1_callback(void)
 
 void systimers_slave_UE_callback(void)
 {
+	msec_counter += SYSTIMERS_PERIOD;
+	usec_counter += SYSTIMERS_PERIOD * SYSTIMERM_PERIOD;
+
 	assert(systimers == NULL && "Bad logic");
 	systimers = rollovers;
 	rollovers = NULL;
 	systimers_start();
-}
-
-void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim)
-{
-	SYSTIMERM_CLK_ENABLE()
-	;
-	SYSTIMERS_CLK_ENABLE()
-	;
-	HAL_NVIC_EnableIRQ(SYSTIMERM_IRQn);
-	HAL_NVIC_EnableIRQ(SYSTIMERS_IRQn);
 }
 
 void SYSTIMERS_IRQHandler(void)
@@ -268,10 +266,4 @@ void SYSTIMERS_IRQHandler(void)
 		}
 	}
 
-}
-
-void SYSTIMERM_IRQHandler(void)
-{
-	usec_counter += SYSTIMERM_PERIOD;
-	__HAL_TIM_CLEAR_IT(&TimHandle[0], TIM_IT_UPDATE);
 }
