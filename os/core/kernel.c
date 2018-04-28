@@ -5,17 +5,21 @@ static volatile bool __os_started = false;
 
 static void os_services_start(void);
 
-void os_start(void) {
+void os_start(void)
+{
 	HAL_Init();
 	display_init();
 	usec_timer_init();
+
+#ifdef SYSTIMER_ENABLE
+	systimer_init();
+#endif
 
 	HAL_NVIC_SetPriority(PendSV_IRQn, 15, 0);
 
 #ifdef ENABLE_FPU
 	kernel_FPU_enable();
 #endif /* ENABLE_FP */
-
 
 	kernel_task_init();
 	//NOTE: after here we are in user mode
@@ -53,10 +57,11 @@ static void os_services_start(void)
 
 }
 
-void _exit( __attribute__((unused)) int code)
+void _exit(__attribute__((unused)) int code)
 {
 #if defined(DEBUG)
 	__asm volatile ("bkpt 0");
 #endif
-	while(1) ;
+	while (1)
+		;
 }

@@ -36,6 +36,10 @@
 #include "virtled.h"
 #endif
 
+#ifdef SYSTIMER_ENABLE
+#include "systimer.h"
+#endif
+
 /* diag header files */
 #include "assertions.h"
 #include "Trace.h"

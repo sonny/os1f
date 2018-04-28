@@ -8,8 +8,7 @@
 #include "stm32f7xx_hal.h"
 #include "kernel.h"
 #include "task.h"
-
-#define SYSTICK_RESOLUTION 5 // in ms
+#include "defs.h"
 
 static volatile uint32_t __systick;
 

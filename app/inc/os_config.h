@@ -20,5 +20,6 @@
 
 /* enable devices */
 #define VIRTLED_ENABLE
+#define SYSTIMER_ENABLE
 
 #endif  /* __OS_CONFIG_H__ */

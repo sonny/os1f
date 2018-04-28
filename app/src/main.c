@@ -7,6 +7,7 @@ static void task_func(void *);
 static void task_once(void *);
 static void task_greedy(void *);
 static void task_lcd_led(void *);
+static void timer_counter(void *);
 static void display_system_clock(void);
 
 struct func_data {
@@ -19,6 +20,8 @@ static struct func_data fdata[4] = {
 		{ .name = "Simple 2", .sleep = 2000 },
 		{ .name = "Simple 3", .sleep = 1000 },
 		{ .name = "Simple 4", .sleep = 500 }, };
+
+static volatile uint32_t counters[] = {0, 0, 0, 0};
 
 extern void adc_task(void*);
 //extern void memory_thread_test(void);
@@ -34,7 +37,11 @@ int main(void) {
 	//  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 0");
 	//  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 1");
 
-	task_create_schedule(task_lcd_led, DEFAULT_STACK_SIZE, (void*) NULL, "LED LCD");
+	//task_create_schedule(task_lcd_led, DEFAULT_STACK_SIZE, (void*) NULL, "LED LCD");
+	systimer_create_exec(1000, timer_counter, &counters[0]);
+	systimer_create_exec(100, timer_counter, &counters[1]);
+	systimer_create_exec(10, timer_counter, &counters[2]);
+	systimer_create_exec(1, timer_counter, &counters[3]);
 
 
 	/* // Unocmment to test memory allocation syncronization */
@@ -65,7 +72,7 @@ int main(void) {
 		uint32_t rt_msecs = rt_mins_rem % 1000;
 
 		lcd_printf_line(tid, "[%d] Main Task Runtime - %d:%d:%d:%d", tid, rt_hours, rt_mins, rt_secs, rt_msecs);
-
+		lcd_printf_line(1, "Counters [%d] [%d] [%d] [%d]", counters[0], counters[1], counters[2], counters[3]);
 		task_t * tonce = task_create_schedule(task_once, DEFAULT_STACK_SIZE,
 				NULL, "Once");
 
@@ -133,4 +140,10 @@ static void task_lcd_led(void *context)
 		virtled_toggle(VLED11);
 		task_sleep(1000);
 	}
+}
+
+static void timer_counter(void *ctx)
+{
+	uint32_t * i = ctx;
+	(*i)++;
 }

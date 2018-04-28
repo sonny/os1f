@@ -1,7 +1,7 @@
 #ifndef __DEFS_H__
 #define __DEFS_H__
 
-#define TIME_SLICE 5 // in milliseconds
+#define SYSTICK_RESOLUTION 1 // in milliseconds
 
 #define TASK_FLAG_FPU    (1<<31)
 #define TASK_FLAG_STATIC (1<<30)
@@ -39,10 +39,17 @@
 
 #define USEC_TIMER            TIM7
 
-#define SYS_TIMER             TIM5
-#define SYS_TIMER_CLK_ENABLE  __HAL_RCC_TIM5_CLK_ENABLE()
-#define SYS_TIMER_IRQ         TIM5_IRQn
-#define SYS_TIMER_IRQHandler  TIM5_IRQHandler
+#define SYSTIMERM_CLK         (SystemCoreClock)
+#define SYSTIMERM             TIM10
+#define SYSTIMERM_CLK_ENABLE  __HAL_RCC_TIM10_CLK_ENABLE
+#define SYSTIMERM_IRQn        TIM1_UP_TIM10_IRQn
+#define SYSTIMERM_IRQHandler  TIM1_UP_TIM10_IRQHandler
+
+#define SYSTIMERS             TIM9
+#define SYSTIMERS_CLK_ENABLE  __HAL_RCC_TIM9_CLK_ENABLE
+#define SYSTIMERS_IRQn        TIM1_BRK_TIM9_IRQn
+#define SYSTIMERS_IRQHandler  TIM1_BRK_TIM9_IRQHandler
+
 
 enum {
 	VLED0 = 0,
