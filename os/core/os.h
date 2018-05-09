@@ -29,7 +29,6 @@
 
 /* device header files */
 #include "lcd.h"
-#include "usec_timer.h"
 #include "vcp.h"
 
 #ifdef VIRTLED_ENABLE
@@ -61,6 +60,10 @@
 #endif /* WATCHDOG_ENABLE */
 
 /* HAL header files */
+#ifdef __GNUC__
+// Avoid tons of warnings with root code
+#pragma GCC system_header
+#endif
 #include "stm32f7xx_hal.h"
 
 #endif /* OS_CORE_OS_H_ */

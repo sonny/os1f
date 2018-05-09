@@ -24,7 +24,7 @@ typedef void (*timer_callback)(void*);
 typedef struct systimer_s systimer_t;
 
 struct systimer_s {
-	systimer_t * next;
+	list_t node;
 	uint16_t exec_at;
 	uint16_t period; // set to 0 to make timer happen once
 	timer_callback callback;

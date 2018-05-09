@@ -5,7 +5,6 @@
 #include <stdbool.h>
 #include <stdatomic.h>
 #include "defs.h"
-#include "stm32f7xx.h"
 #include "kernel_task.h"
 #include "task.h"
 #include "event.h"

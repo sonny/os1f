@@ -5,7 +5,7 @@
  *      Author: sonny
  */
 #include <stdint.h>
-#include "stm32746g_discovery_lcd.h"
+#include "board.h"
 #include "virtled.h"
 #include "lcd.h"
 

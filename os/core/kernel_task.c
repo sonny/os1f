@@ -10,6 +10,7 @@
 #include "heap.h"
 #include "assertions.h"
 #include "memory.h"
+#include "systimer.h"
 
 #define IDLE_TASK_ID    -1
 
@@ -364,8 +365,10 @@ static int kernel_task_in_wait(task_t * t)
 	return result;
 }
 
-void kernel_task_event_register(event_t * new)
+void kernel_task_event_register(void * ctx)
 {
+	event_t * new = ctx;
+
 	assert_protected();
 	assert_event_sig(new);
 	int i;

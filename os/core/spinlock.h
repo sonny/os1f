@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdatomic.h>
-#include "stm32f7xx.h"
+#include "board.h"
 
 #define SPINLOCK_UNLOCKED 0
 #define SPINLOCK_LOCKED   1

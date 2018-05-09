@@ -5,7 +5,6 @@
  *      Author: sonny
  */
 
-#include "stm32746g_discovery.h"
 #include "task.h"
 #include "display.h"
 

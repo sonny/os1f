@@ -5,42 +5,45 @@
  *      Author: sonny
  */
 
-#include "stm32f7xx.h"
 #include "defs.h"
 #include "systimer.h"
 #include "event.h"
+#include "assertions.h"
 
 static volatile uint64_t usec_counter = 0;
 static volatile uint32_t msec_counter = 0;
 
-static TIM_OC_InitTypeDef sConfig[2] =
-{
-{ 0 },
-{ 0 } };
-static TIM_HandleTypeDef TimHandle[2] =
-{
-{ 0 },
-{ 0 } };
-static TIM_MasterConfigTypeDef sMasterConfig =
-{ 0 };
-static TIM_SlaveConfigTypeDef sSlaveConfig =
-{ 0 };
 /*
  * Timers is sorted so that the next timer to
  * fire is at the head.
  */
-static systimer_t * systimers = NULL;
-static systimer_t * rollovers = NULL;
 
+static list_t timers[2] = {
+		LIST_STATIC_INIT(timers[0]),
+		LIST_STATIC_INIT(timers[1]),
+};
+
+static list_t * systimers = &timers[0];
+static list_t * rollovers = &timers[1];
+
+static void systimer_config_timers(void);
 static void systimer_insert(systimer_t *);
+static void systimer_remove(systimer_t * t);
+
 static void systimer_schedule(systimer_t *);
 static uint16_t systimer_current(void);
-static void systimers_start(void);
-static void systimers_stop(void);
+static void systimer_schedule_next(void);
+static void systimer_disable_all(void);
+static void systimer_start_protected(void*);
+static void systimer_stop_protected(void*);
+static systimer_t * list_to_timer(list_t *);
+static list_t * timer_to_list(systimer_t *);
 
 #define SYSTIMERM_PERIOD 1000
 #define SYSTIMERS_PERIOD 0x10000
 
+#define list_to_timer(list) ((systimer_t*)(list))
+#define timer_to_list(timer) (&(timer)->node)
 
 uint32_t msec_time(void)
 {
@@ -52,53 +55,40 @@ uint64_t usec_time(void)
 	return usec_counter + (SYSTIMERS->CNT * 1000) + SYSTIMERM->CNT;
 }
 
+
 void systimer_init(void)
 {
-	TimHandle[0].Instance = SYSTIMERM;
-	TimHandle[1].Instance = SYSTIMERS;
+	systimer_config_timers();
+}
 
-	/* Enable RCC and IRQs */
-	SYSTIMERM_CLK_ENABLE();
-	SYSTIMERS_CLK_ENABLE();
-	HAL_NVIC_EnableIRQ(SYSTIMERS_IRQn);
+void systimer_start(systimer_t * t)
+{
+	service_call(systimer_start_protected, t, false);
+}
 
-	/* setup master */
-	SYSTIMERM->CR1 |= (1<<2);
-	TimHandle[0].Init.Period = SYSTIMERM_PERIOD - 1; // 1ms
-	TimHandle[0].Init.Prescaler = (SYSTIMERM_CLK / 1000000) - 1; // 1 us period
-	TimHandle[0].Init.CounterMode = TIM_COUNTERMODE_UP;
-	HAL_TIM_OC_Init(&TimHandle[0]);
+static
+void systimer_start_protected(void * ctx)
+{
+	systimer_t * t = ctx;
+	__disable_irq();
+	systimer_schedule(t);
+	systimer_schedule_next();
+	__enable_irq();
+}
 
-	sConfig[0].OCMode = TIM_OCMODE_PWM1;
-    sConfig[0].OCPolarity   = TIM_OCPOLARITY_HIGH;
-	sConfig[0].OCFastMode   = TIM_OCFAST_DISABLE;
-	sConfig[0].OCNPolarity  = TIM_OCNPOLARITY_HIGH;
-	sConfig[0].OCNIdleState = TIM_OCNIDLESTATE_RESET;
-	sConfig[0].OCIdleState  = TIM_OCIDLESTATE_RESET;
+void systimer_stop(systimer_t * t)
+{
+	service_call(systimer_stop_protected, t, false);
+}
 
-	sConfig[0].Pulse = SYSTIMERM_PERIOD / 2 - 1;
-	HAL_TIM_OC_ConfigChannel(&TimHandle[0], &sConfig[0], TIM_CHANNEL_1);
-
-	/* setup slave */
-	SYSTIMERS->CR1 |= (1<<2);
-	TimHandle[1].Init.Period = SYSTIMERS_PERIOD - 1;
-	TimHandle[1].Init.Prescaler = 0;
-	TimHandle[1].Init.CounterMode = TIM_COUNTERMODE_UP;
-	HAL_TIM_OC_Init(&TimHandle[1]);
-
-	sSlaveConfig.SlaveMode = TIM_SLAVEMODE_EXTERNAL1;
-	sSlaveConfig.InputTrigger = TIM_TS_ITR2;
-	sSlaveConfig.TriggerPolarity = TIM_TRIGGERPOLARITY_NONINVERTED;
-	sSlaveConfig.TriggerPrescaler = TIM_TRIGGERPRESCALER_DIV1;
-	sSlaveConfig.TriggerFilter = 0;
-	HAL_TIM_SlaveConfigSynchronization(&TimHandle[1], &sSlaveConfig);
-
-	sConfig[1].OCMode = TIM_OCMODE_TIMING;
-	HAL_TIM_OC_ConfigChannel(&TimHandle[1], &sConfig[1], TIM_CHANNEL_1);
-
-	SYSTIMERS->DIER |= 1; // enable update event interrupts
-	HAL_TIM_OC_Start(&TimHandle[1], TIM_CHANNEL_1);
-	HAL_TIM_OC_Start(&TimHandle[0], TIM_CHANNEL_1);
+static
+void systimer_stop_protected(void * ctx)
+{
+	systimer_t * t = ctx;
+	__disable_irq();
+	systimer_remove(t);
+	systimer_schedule_next();
+	__enable_irq();
 }
 
 systimer_t * systimer_create_exec(size_t period, timer_callback callback,
@@ -109,99 +99,87 @@ systimer_t * systimer_create_exec(size_t period, timer_callback callback,
 					&& "Periods greater than timer period not supported.");
 
 	systimer_t *timer = malloc(sizeof(systimer_t));
-	timer->next = NULL;
+	list_init(&timer->node);
 	timer->period = period;
 	timer->type = TIMER_EXEC_IRQ;
 	timer->callback = callback;
 	timer->cb_ctx = ctx;
 	timer->event = NULL;
-	systimer_schedule(timer);
-	systimers_start();
+	systimer_start(timer);
 	return timer;
 }
 
-static inline uint16_t systimer_current(void)
+static inline
+uint16_t systimer_current(void)
 {
 	return SYSTIMERS->CNT;
 }
 
 static void systimer_schedule(systimer_t *t)
 {
+	assert_protected();
 	t->exec_at = (systimer_current() + t->period) % SYSTIMERS_PERIOD;
 	systimer_insert(t);
 }
 
+static bool systimer_insert_condition(list_t * node, list_t * new)
+{
+	// true if current node is executed later than new node
+	return (list_to_timer(node)->exec_at > list_to_timer(new)->exec_at);
+}
+
 static void systimer_insert(systimer_t * t)
 {
+	assert_protected();
 	size_t systime = systimer_current();
-	t->next = NULL;
-
-	systimer_t * current, * prev;
-	systimer_t **head;
-
-	if (t->exec_at < systime) {
-		current = prev = rollovers;
-		head = &rollovers;
-	}
-	else {
-		current = prev = systimers;
-		head = &systimers;
-	}
-
-	if (*head == NULL) {
-		*head = t; // assign rollovers or systimers
-		return;
-	}
-
-	// Insertion sort from here
-	// Advance to the insertion point
-	while (current && current->exec_at <= t->exec_at)
-	{
-		prev = current;
-		current = current->next;
-	}
-
-	// case : insert at head
-	if (current == *head)
-	{
-		t->next = current;
-		*head = t;
-	}
-
-	// case : insert after head
+	list_t * head;
+	if (t->exec_at < systime)
+		head = rollovers;
 	else
+		head = systimers;
+
+	list_insert_condition(head, timer_to_list(t), systimer_insert_condition);
+}
+
+static
+void systimer_remove(systimer_t * t)
+{
+	assert_protected();
+	list_remove(timer_to_list(t));
+}
+
+static inline
+void systimer_schedule_next(void)
+{
+	assert_protected();
+	if (!list_empty(systimers))
 	{
-		t->next = prev->next;
-		prev->next = t;
+		SYSTIMERS->CCR1 = list_to_timer(list_head(systimers))->exec_at;
+		SYSTIMERS->DIER |= TIM_IT_CC1;
 	}
 }
 
-static void systimers_start(void)
+static inline
+void systimer_disable_all(void)
 {
-	if (systimers)
-	{
-		SYSTIMERS->CCR1 = systimers->exec_at;
-		__HAL_TIM_ENABLE_IT(&TimHandle[1], TIM_IT_CC1);
-	}
-}
-
-static void systimers_stop(void)
-{
-	__HAL_TIM_DISABLE_IT(&TimHandle[1], TIM_IT_CC1);
+	assert_protected();
+	SYSTIMERS->DIER &= ~TIM_IT_CC1;
 }
 
 void systimers_slave_CC1_callback(void)
 {
 	assert(systimers && "Something bad happened to timer queue");
-	systimers_stop();
+	__disable_irq();
+	systimer_disable_all();
 
 	size_t systime = systimer_current();
 
-	while (systimers && systimers->exec_at == systime)
+	while (!list_empty(systimers) &&
+			list_to_timer(list_head(systimers))->exec_at == systime)
 	{
-		systimer_t * t = systimers;
-		systimers = systimers->next;
-		t->next = NULL;
+		systimer_t * t = list_to_timer(list_removeFront(systimers));
+
+		__enable_irq(); // not protected
 
 		switch (t->type)
 		{
@@ -222,13 +200,16 @@ void systimers_slave_CC1_callback(void)
 			assert(0 && "Invalid timer type");
 		}
 
+		__disable_irq();
+
 		if (t->period != 0)
 		{
 			systimer_schedule(t);
 		}
 	}
 
-	systimers_start();
+	systimer_schedule_next();
+	__enable_irq();
 }
 
 void systimers_slave_UE_callback(void)
@@ -236,34 +217,66 @@ void systimers_slave_UE_callback(void)
 	msec_counter += SYSTIMERS_PERIOD;
 	usec_counter += SYSTIMERS_PERIOD * SYSTIMERM_PERIOD;
 
-	assert(systimers == NULL && "Bad logic");
-	systimers = rollovers;
-	rollovers = NULL;
-	systimers_start();
+	assert(list_empty(systimers) && "Bad Logic");
+	__disable_irq();
+	list_t * temp = rollovers;
+	rollovers = systimers;
+	systimers = temp;
+	systimer_schedule_next();
+	__enable_irq();
 }
 
 void SYSTIMERS_IRQHandler(void)
 {
 	// Check compare/capture 1 event
-	if (__HAL_TIM_GET_FLAG(&TimHandle[1], TIM_FLAG_CC1))
+	if (SYSTIMERS->SR & TIM_FLAG_CC1)
 	{
-		if (__HAL_TIM_GET_IT_SOURCE(&TimHandle[1], TIM_IT_CC1))
-		{
-			__HAL_TIM_CLEAR_IT(&TimHandle[1], TIM_IT_CC1);
-
-			/* Output capture event */
-			if ((SYSTIMERS->CCMR1 & TIM_CCMR1_CC1S) == 0x00)
-				systimers_slave_CC1_callback();
-		}
+		SYSTIMERS->SR &= ~TIM_IT_CC1;
+		systimers_slave_CC1_callback();
 	}
 	/* TIM Update event */
-	if (__HAL_TIM_GET_FLAG(&TimHandle[1], TIM_FLAG_UPDATE))
+	if (SYSTIMERS->SR & TIM_FLAG_UPDATE)
 	{
-		if (__HAL_TIM_GET_IT_SOURCE(&TimHandle[1], TIM_IT_UPDATE))
-		{
-			__HAL_TIM_CLEAR_IT(&TimHandle[1], TIM_IT_UPDATE);
-			systimers_slave_UE_callback();
-		}
+		SYSTIMERS->SR &= ~TIM_IT_UPDATE;
+		systimers_slave_UE_callback();
 	}
 
+}
+
+static void systimer_config_timers(void)
+{
+	/* Enable RCC and IRQs */
+	SYSTIMERM_CLK_ENABLE();
+	SYSTIMERS_CLK_ENABLE();
+	HAL_NVIC_EnableIRQ(SYSTIMERS_IRQn);
+
+	/* setup master */
+	SYSTIMERM->CR1 = TIM_CR1_URS | TIM_COUNTERMODE_UP;
+	SYSTIMERM->ARR = SYSTIMERM_PERIOD - 1;          // 1ms
+	SYSTIMERM->PSC = (SYSTIMERM_CLK / 1000000) - 1; // 1 us period
+	SYSTIMERM->DIER = 0;
+	SYSTIMERM->EGR = TIM_EGR_UG;
+
+	// Configure Master Capture/Compare
+	SYSTIMERM->CCMR1 |= TIM_OCMODE_PWM1;
+	SYSTIMERM->CCR1 = SYSTIMERM_PERIOD / 2 - 1;
+	SYSTIMERM->CCER |= (uint32_t)(TIM_CCx_ENABLE << TIM_CHANNEL_1);
+
+	/* setup slave */
+	SYSTIMERS->CR1 = TIM_CR1_URS | TIM_COUNTERMODE_UP;
+	SYSTIMERS->ARR = SYSTIMERS_PERIOD - 1;
+	SYSTIMERS->PSC = 0;
+	SYSTIMERS->DIER = TIM_DIER_UIE | TIM_IT_CC1;
+	SYSTIMERS->EGR = TIM_EGR_UG;
+
+	// Configure Slave Capture/Compare
+	SYSTIMERS->CCMR1 |= TIM_OCMODE_TIMING;
+	SYSTIMERS->CCER |= (uint32_t)(TIM_CCx_ENABLE << TIM_CHANNEL_1);
+
+	// Configure Slave Mode
+	SYSTIMERS->SMCR = TIM_TS_ITR2 | TIM_SLAVEMODE_EXTERNAL1;
+
+	// Enable both timers
+	SYSTIMERS->CR1 |= TIM_CR1_CEN;
+	SYSTIMERM->CR1 |= TIM_CR1_CEN;
 }

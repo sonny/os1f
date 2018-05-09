@@ -30,7 +30,6 @@ void display_line_at(int line, const char* fmt, ...);
 #if defined(OS_USE_LCD)
 
 #include "lcd.h"
-#include "stm32746g_discovery_lcd.h"
 
 /* #define printf_at lcd_printf_at */
 /* #define vprintf_at lcd_vprintf_at */

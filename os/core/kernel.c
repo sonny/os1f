@@ -17,7 +17,6 @@ void os_start(void)
 
 	HAL_Init();
 	display_init();
-	usec_timer_init();
 
 #ifdef SYSTIMER_ENABLE
 	systimer_init();

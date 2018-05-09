@@ -21,7 +21,7 @@ static struct func_data fdata[4] = {
 		{ .name = "Simple 3", .sleep = 1000 },
 		{ .name = "Simple 4", .sleep = 500 }, };
 
-static volatile uint32_t counters[] = {0, 0, 0, 0};
+static uint32_t counters[] = {0, 0, 0, 0};
 
 static volatile uint64_t USECtime = 0;
 static volatile uint32_t MSECtime = 0;
@@ -142,8 +142,9 @@ static void task_greedy(void *ctx) {
 	}
 }
 
-static void task_lcd_led(void *context)
+static void task_lcd_led(void *ctx)
 {
+	(void)ctx;
 	while(1) {
 		virtled_toggle(VLED11);
 		task_sleep(1000);

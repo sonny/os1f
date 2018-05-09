@@ -1,7 +1,7 @@
 #ifndef __KERNEL_H__
 #define __KERNEL_H__
-#include "stm32746g_discovery.h"
 
+#include "board.h"
 #include "defs.h"
 #include "svc.h"
 

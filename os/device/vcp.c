@@ -1,4 +1,3 @@
-#include "stm32f7xx_hal.h"
 #include "board.h"
 #include "event.h"
 #include "mutex.h"
@@ -88,7 +87,7 @@ void VCP_IRQHandler(void)
 	// RX mode
 	if (isrflags & USART_ISR_RXNE)
 	{
-		Ringbuffer.insert(&serial_rx_buffer, VCP->RDR);
+		Ringbuffer.insert(&serial_rx_buffer.rb, VCP->RDR);
 		event_notify_irq(&vcp_rx_complete);
 	}
 	// TX complete
@@ -96,8 +95,8 @@ void VCP_IRQHandler(void)
 	{
 		// clear TC
 		VCP->ICR |= USART_ICR_TCCF;
-		if (!Ringbuffer.empty(&serial_tx_buffer))
-			VCP->TDR = Ringbuffer.remove(&serial_tx_buffer);
+		if (!Ringbuffer.empty(&serial_tx_buffer.rb))
+			VCP->TDR = Ringbuffer.remove(&serial_tx_buffer.rb);
 		else
 			event_notify_irq(&vcp_tx_complete);
 	}
@@ -113,10 +112,10 @@ void VCP_IRQHandler(void)
 static inline
 uint8_t vcp_rx_byte(void)
 {
-	if (Ringbuffer.empty(&serial_rx_buffer))
+	if (Ringbuffer.empty(&serial_rx_buffer.rb))
 		event_wait(&vcp_rx_complete);
 
-	return Ringbuffer.remove(&serial_rx_buffer);
+	return Ringbuffer.remove(&serial_rx_buffer.rb);
 }
 
 static inline
@@ -135,7 +134,7 @@ static inline
 void vcp_tx_string(const char * buffer, int len)
 {
 	// put all but the first byte into the ringbuffer
-	Ringbuffer.insert_string(&serial_tx_buffer, buffer + 1, len -1);
+	Ringbuffer.insert_string(&serial_tx_buffer.rb, buffer + 1, len -1);
 
 	mutex_lock(&serial_tx_lock);
 	// send the first byte

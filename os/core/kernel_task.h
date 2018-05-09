@@ -32,7 +32,7 @@ void kernel_task_destroy_task(task_t *t);
 
 void kernel_task_load_PSP_current(void);
 void kernel_task_save_PSP_current(void);
-void kernel_task_event_register(event_t *);
+void kernel_task_event_register(void *);
 void assert_kernel_task_valid(void);
 
 #endif  /* __KERNEL_TASK_H__ */

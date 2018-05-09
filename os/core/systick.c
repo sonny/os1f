@@ -5,7 +5,7 @@
  *      Author: sonny
  */
 
-#include "stm32f7xx_hal.h"
+#include "board.h"
 #include "kernel.h"
 #include "task.h"
 #include "defs.h"

@@ -1,4 +1,4 @@
-#include "stm32746g_discovery.h"
+#include "board.h"
 
 static void
 CPU_CACHE_Enable(void);

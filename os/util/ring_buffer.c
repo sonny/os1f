@@ -29,7 +29,7 @@ void ringbuffer_init(ring_buffer_t *rb, uint8_t * buffer, size_t size)
  * @return true if rb is full
  */
 static inline
-bool ringbuffer_isFull(const ring_buffer_t * rb)
+bool ringbuffer_isFull(ring_buffer_t * const rb)
 {
 	spinlock_lock(&rb->lock);
 	bool result = (((rb->end + 1) % rb->size) == rb->start);
@@ -43,7 +43,7 @@ bool ringbuffer_isFull(const ring_buffer_t * rb)
  * @return true if rb is empty
  */
 static inline
-bool ringbuffer_isEmpty(const ring_buffer_t * rb)
+bool ringbuffer_isEmpty(ring_buffer_t * const rb)
 {
 	spinlock_lock(&rb->lock);
 	bool result = (rb->start == rb->end);
@@ -57,7 +57,7 @@ bool ringbuffer_isEmpty(const ring_buffer_t * rb)
  * @return count of elements remaining in rb
  */
 static inline
-uint8_t ringbuffer_remainder(const ring_buffer_t *rb)
+uint8_t ringbuffer_remainder(ring_buffer_t * const rb)
 {
 	spinlock_lock(&rb->lock);
 	uint8_t result = (rb->start + rb->size - rb->end) % rb->size;
@@ -75,7 +75,7 @@ uint8_t ringbuffer_remainder(const ring_buffer_t *rb)
  * @return true if rb remainder is too close
  */
 static inline
-bool ringbuffer_almost_full(const ring_buffer_t * rb)
+bool ringbuffer_almost_full(ring_buffer_t * const rb)
 {
 	spinlock_lock(&rb->lock);
 	bool result = (ringbuffer_remainder(rb) >= RING_BUFFER_TOO_CLOSE);
@@ -109,7 +109,7 @@ void ringbuffer_insert_element(ring_buffer_t * const rb, char c)
  * @return void
  */
 static void
-ringbuffer_insert_string(const ring_buffer_t * restrict rb, const char * restrict s, int len)
+ringbuffer_insert_string(ring_buffer_t * const restrict rb, const char * restrict s, int len)
 {
 	int i;
 	for (i = 0; i < len; ++i)
@@ -143,7 +143,7 @@ ringbuffer_extract_element(ring_buffer_t * const rb)
  * @return number of elements occupied in rb
  */
 static
-size_t ringbuffer_used(const ring_buffer_t *rb)
+size_t ringbuffer_used(ring_buffer_t * const rb)
 {
 	spinlock_lock(&rb->lock);
 	size_t result = (rb->size + rb->end - rb->start) % rb->size;

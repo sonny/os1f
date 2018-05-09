@@ -1,6 +1,6 @@
 #include <stdarg.h>
 #include <ctype.h>
-#include "stm32746g_discovery_lcd.h"
+#include "board.h"
 #include "defs.h"
 #include "mutex.h"
 #include "os_printf.h"
@@ -90,6 +90,8 @@ int lcd_printf_at(int xpos, int ypos, const char *fmt, ...) {
 
 void BSP_LCD_ClockConfig(LTDC_HandleTypeDef *hltdc, void *Params)
 {
+	(void)hltdc;
+	(void)Params;
   /* copied from stm32f7xx_hal_rcc_ex.c lines 578 - 671 */
 
   /*-------------------------------------- PLLSAI Configuration ---------------------------------*/

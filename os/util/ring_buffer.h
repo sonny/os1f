@@ -48,14 +48,14 @@ typedef struct {
 		RB_STATIC_ALLOCATE(NAME, SIZE) = RB_STATIC_INIT(NAME, SIZE)
 
 typedef struct {
-  void (* const init)(ring_buffer_t*, size_t);
-  bool (* const full)(const ring_buffer_t*);
-  bool (* const empty)(const ring_buffer_t*);
-  bool (* const almost_full)(const ring_buffer_t*);
-  void (* const insert)(const ring_buffer_t*, char);
-  void (* const insert_string)(const ring_buffer_t*, const char*, int);
-  char (* const remove)(const ring_buffer_t*);
-  uint8_t (* const used)(const ring_buffer_t *);
+  void (* const init)(ring_buffer_t*, uint8_t*, size_t);
+  bool (* const full)(ring_buffer_t*const);
+  bool (* const empty)(ring_buffer_t*const);
+  bool (* const almost_full)(ring_buffer_t*const);
+  void (* const insert)(ring_buffer_t*const, char);
+  void (* const insert_string)(ring_buffer_t*const, const char*, int);
+  char (* const remove)(ring_buffer_t*const);
+  size_t (* const used)(ring_buffer_t *const);
 } ringbuffer_class_t;
 
 extern const ringbuffer_class_t const Ringbuffer;

@@ -30,4 +30,11 @@
 
 //#endif
 
+#ifdef __GNUC__
+// Avoid tons of warnings with root code
+#pragma GCC system_header
+#endif
+#include "stm32746g_discovery.h"
+#include "stm32746g_discovery_lcd.h"
+
 #endif /*  __BOARD_DISCOVERY_H__ */
