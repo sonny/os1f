@@ -31,12 +31,22 @@ typedef struct
 static virtled_t virtleds[MAX_VIRTLED_COUNT];
 static uint32_t virtled_colors[] =
 {
-LCD_COLOR_BLUE,
-LCD_COLOR_GREEN,
-LCD_COLOR_RED,
-LCD_COLOR_CYAN,
-LCD_COLOR_MAGENTA,
-LCD_COLOR_YELLOW, };
+		/*
+		Color Palette from:
+		http://colorpalettes.net/color-palette-3694/
+		*/
+0xff5fa55a,
+0xff01b4bc,
+0xfff6d51f,
+0xfffa8925,
+0xfffa5457,
+//LCD_COLOR_BLUE,
+//LCD_COLOR_GREEN,
+//LCD_COLOR_RED,
+//LCD_COLOR_CYAN,
+//LCD_COLOR_MAGENTA,
+//LCD_COLOR_YELLOW,
+};
 
 static const int virtled_color_count = sizeof(virtled_colors)
 		/ sizeof(virtled_colors[0]);
