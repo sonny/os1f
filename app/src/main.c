@@ -79,9 +79,9 @@ int main(void) {
 
 		lcd_printf_line(tid, "[%d] Main Task Runtime - %d:%d:%d:%d", tid, rt_hours, rt_mins, rt_secs, rt_msecs);
 		lcd_printf_line(1, "Counters [%d] [%d] [%d] [%d]", counters[0], counters[1], counters[2], counters[3]);
-		task_t * tonce = task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL, "Once");
 
-		task_join(tonce);
+		//task_t * tonce = task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL, "Once");
+		//task_join(tonce);
 
 		task_delay(500);
 	}

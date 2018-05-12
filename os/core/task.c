@@ -7,6 +7,7 @@
 #include "svc.h"
 #include "event.h"
 #include "systimer.h"
+#include "task_control.h"
 
 // implemented in kernel_task
 extern void kernel_task_end(void);
@@ -25,7 +26,7 @@ task_t * task_alloc(int stack_size)
 task_t * task_init(task_t *t, const char * name, int id)
 {
 	*(uint32_t*) &t->signature = TASK_SIGNATURE;
-	t->id = id;
+	//t->id = id;
 	t->name = name;
 	t->exc_return = 0xfffffffd;
 	list_init(&t->node);
@@ -36,7 +37,8 @@ task_t * task_init(task_t *t, const char * name, int id)
 task_t * task_create(int stack_size, const char * name)
 {
 	task_t * t = task_alloc(stack_size);
-	task_init(t, name, kernel_task_next_id());
+	task_init(t, name, -32);
+	task_control_add(t);
 	return t;
 }
 
