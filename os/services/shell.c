@@ -1,5 +1,5 @@
 #include "defs.h"
-#include "task_type.h"
+#include "task.h"
 #include "os_printf.h"
 #include "display.h"
 #include "kernel_task.h"
@@ -19,7 +19,7 @@ typedef struct {
 	cmd_t call;
 } shell_cmd_t;
 
-#define SHELL_STACK_SIZE 2048
+#define SHELL_STACK_SIZE 1024
 #define SHELL_IO_SIZE 2048
 #define MAX_ARGC 16
 
@@ -145,6 +145,8 @@ static void shell_cmd_stop(void) {
 }
 
 extern char _end; // Bottom of RAM ???
+extern char _sdata, _edata; // start and end of data
+extern char _sbss, _ebss; // start and end of bss
 extern char _Heap_Begin;
 extern char _estack; // top of RAM
 extern uint32_t heap_size_get(void);
@@ -152,11 +154,14 @@ extern uint32_t heap_size_get(void);
 static void shell_cmd_mem(void) {
 	struct mallinfo mi;
 	int total_ram = &_estack - &_end;
-	int static_used = &_Heap_Begin - &_end;
+	int bss = &_ebss - &_sbss;
+	int data = &_edata - &_sdata;
 	int heap_used = heap_size_get();
 
 	os_iprintf("Total Ram                              %d\r\n", total_ram);
-	os_iprintf("Static allocation                      %d\r\n", static_used);
+	os_iprintf("Static allocation                      %d\r\n", bss + data);
+	os_iprintf("    Initialized   (.data)              %d\r\n", data);
+	os_iprintf("    Uninitialized (.bss)               %d\r\n", bss);
 	os_iprintf("Heap allocation                        %d\r\n", heap_used);
 
 	mi = mallinfo();
