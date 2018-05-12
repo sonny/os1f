@@ -35,4 +35,9 @@ void kernel_task_save_PSP_current(void);
 void kernel_task_event_register(void *);
 void assert_kernel_task_valid(void);
 
+uintptr_t kernel_task_get_pc(int id);
+uintptr_t kernel_task_get_sp(int id);
+hw_stack_frame_t kernel_task_get_task_saved_hw_frame(int id);
+sw_stack_frame_t kernel_task_get_task_saved_sw_frame(int id);
+
 #endif  /* __KERNEL_TASK_H__ */

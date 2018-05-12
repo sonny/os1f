@@ -6,7 +6,7 @@
 #define TASK_FLAG_FPU    (1<<31)
 #define TASK_FLAG_STATIC (1<<30)
 
-#define DEFAULT_STACK_SIZE 256
+#define DEFAULT_STACK_SIZE 512
 #define STDIO_BUFFER_SIZE 256
 
 #ifndef VCP_BAUD

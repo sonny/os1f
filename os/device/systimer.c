@@ -231,14 +231,14 @@ void SYSTIMERS_IRQHandler(void)
 	// Check compare/capture 1 event
 	if (SYSTIMERS->SR & TIM_FLAG_CC1)
 	{
-		SYSTIMERS->SR &= ~TIM_IT_CC1;
 		systimers_slave_CC1_callback();
+		SYSTIMERS->SR &= ~TIM_IT_CC1;
 	}
 	/* TIM Update event */
 	if (SYSTIMERS->SR & TIM_FLAG_UPDATE)
 	{
-		SYSTIMERS->SR &= ~TIM_IT_UPDATE;
 		systimers_slave_UE_callback();
+		SYSTIMERS->SR &= ~TIM_IT_UPDATE;
 	}
 
 }

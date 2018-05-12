@@ -387,6 +387,44 @@ void kernel_task_event_register(void * ctx)
 	event_list[i] = new;
 }
 
+inline uintptr_t kernel_task_get_sp(int id)
+{
+  task_t * t = task_list[id];
+  if (t) {
+    return t->sp;
+  }
+  return 0;
+}
+
+uintptr_t kernel_task_get_pc(int id)
+{
+  uintptr_t sp = kernel_task_get_sp(id);
+  if (sp) {
+    hw_stack_frame_t * frame = (hw_stack_frame_t*)sp;
+    return frame->pc; 
+  }
+  return 0;
+}
+
+hw_stack_frame_t kernel_task_get_task_saved_hw_frame(int id)
+{
+  uintptr_t sp = kernel_task_get_sp(id);
+  if (sp) {
+    hw_stack_frame_t * frame = (hw_stack_frame_t*)sp;
+    return *frame; 
+  }
+  return (hw_stack_frame_t){0,0,0,0,0,0,0,0};
+}
+
+sw_stack_frame_t kernel_task_get_task_saved_sw_frame(int id)
+{
+  task_t * t = task_list[id];
+  if (t)
+    return t->sw_context;
+  else
+    return (sw_stack_frame_t){0,0,0,0,0,0,0,0};
+}
+
 void assert_kernel_task_valid(void)
 {
 	bool in_active, in_sleep;

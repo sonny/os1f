@@ -1,5 +1,5 @@
 #include "defs.h"
-#include "task.h"
+#include "task_type.h"
 #include "os_printf.h"
 #include "display.h"
 #include "kernel_task.h"
@@ -8,6 +8,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <malloc.h>
+#include <errno.h>
+#include "backtrace.h"
 
 typedef void (*cmd_t)(void);
 
@@ -17,7 +19,7 @@ typedef struct {
 	cmd_t call;
 } shell_cmd_t;
 
-#define SHELL_STACK_SIZE 512
+#define SHELL_STACK_SIZE 2048
 #define SHELL_IO_SIZE 2048
 #define MAX_ARGC 16
 
@@ -36,14 +38,19 @@ static void shell_cmd_start(void);
 static void shell_cmd_stop(void);
 static void shell_cmd_mem(void);
 static void shell_cmd_time(void);
+static void shell_cmd_backtrace(void);
 
-static shell_cmd_t commands[] = { { "help", "\t-- print this help",
-		shell_cmd_help }, { "echo", "string\t-- echo string to terminal",
-		shell_cmd_echo }, { "ps", "\t-- list tasks", shell_cmd_ps }, { "start",
-		"task_id\t-- start task", shell_cmd_start }, { "stop",
-		"task_id\t-- stop task", shell_cmd_stop }, { "mem",
-		"\t-- display memory usage", shell_cmd_mem }, { "time",
-		"\t-- display system timer values", shell_cmd_time }, };
+
+static shell_cmd_t commands[] = {
+  { "help", "\t-- print this help", shell_cmd_help },
+  { "echo", "string\t-- echo string to terminal", shell_cmd_echo },
+  { "ps", "\t-- list tasks", shell_cmd_ps },
+  { "start", "task_id\t-- start task", shell_cmd_start },
+  { "stop", "task_id\t-- stop task", shell_cmd_stop },
+  { "mem", "\t-- display memory usage", shell_cmd_mem },
+  { "time", "\t-- display system timer values", shell_cmd_time },
+  { "bt", "task_id\t-- display backtrace", shell_cmd_backtrace },
+};
 
 static int command_count = sizeof(commands) / sizeof(shell_cmd_t);
 
@@ -174,3 +181,29 @@ static void shell_cmd_time(void) {
 	os_iprintf("uSec counter time %d us\r\n", ustime);
 }
 
+
+#define BACKTRACE_SIZE 25
+
+static void shell_cmd_backtrace(void)
+{
+  backtrace_t backtrace[BACKTRACE_SIZE];
+  backtrace_frame_t bt_frame;
+
+  errno = 0;
+  char *end;
+  int id = strtol(argv[1], &end, 10);
+  if (errno) id = 0;
+
+  hw_stack_frame_t hw_frame = kernel_task_get_task_saved_hw_frame(id);
+  sw_stack_frame_t sw_frame = kernel_task_get_task_saved_sw_frame(id);
+
+  bt_frame.sp = kernel_task_get_sp(id);
+  bt_frame.fp = sw_frame.r7;
+  bt_frame.lr = hw_frame.lr;
+  bt_frame.pc = hw_frame.pc;
+
+  int count = _backtrace_unwind(backtrace, BACKTRACE_SIZE, &bt_frame);
+  int i;
+  for (i = 0; i < count; ++i)
+    os_iprintf("%d: 0x%x - %s@0x%x\r\n", i, backtrace[i].function, backtrace[i].name, backtrace[i].address);
+}

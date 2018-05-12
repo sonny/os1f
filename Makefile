@@ -57,6 +57,7 @@ CFLAGS := $(ARCH) -Og -g3 -gdwarf-2 -std=c11
 CFLAGS += -Wall -Wextra -Wfatal-errors -pedantic -Wno-unused-parameter
 CFLAGS += -fsigned-char -ffunction-sections -fdata-sections -ffreestanding 
 ##CFLAGS += -flto
+CFLAGS += -fno-inline -fno-omit-frame-pointer -funwind-tables -mpoke-function-name 
 
 ##==================================================
 ## INCLUDES
