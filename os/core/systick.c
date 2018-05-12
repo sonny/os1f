@@ -41,17 +41,9 @@ void HAL_Delay(__IO uint32_t Delay)
 {
 	uint32_t tickstart = HAL_GetTick();
 
-//	if (os_started())
-//	{
-//		task_sleep(Delay);
-//	}
-//	else
-//	{
-
 	while ((HAL_GetTick() - tickstart) < Delay)
 	{
 	}
-//	}
 }
 
 void SysTick_Handler(void) {

@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "svc.h"
 #include "event.h"
+#include "systimer.h"
 
 // implemented in kernel_task
 extern void kernel_task_end(void);
@@ -28,7 +29,7 @@ task_t * task_init(task_t *t, const char * name, int id)
 	t->name = name;
 	t->exc_return = 0xfffffffd;
 	list_init(&t->node);
-	event_init("Join", &t->join);
+	event_init(&t->join, "Join");
 	return t;
 }
 
@@ -76,25 +77,20 @@ static void protected_task_start(void * cxt)
   __enable_irq();
 }
 
-static void protected_task_sleep(void *cxt)
-{
-  uint32_t ms = (uint32_t)cxt;
-  __disable_irq();
-  kernel_task_sleep_current(ms);
-  __enable_irq();
-  protected_kernel_context_switch(NULL);
-}
-
 //inline
 void task_schedule(task_t *task)
 {
   service_call(protected_task_start, task, false);
 }
 
-//inline
-void task_sleep(uint32_t ms) 
+void task_delay(uint32_t ms)
 {
-  service_call(protected_task_sleep, (void*)ms, false);
+	event_t event = {0};
+	event_init(&event, "Delay Event");
+	systimer_t * timer = systimer_create_event_onetime(ms, &event);
+	event_wait(&event);
+	systimer_destroy(timer);
+	service_call(kernel_task_event_unregister, &event, true);
 }
 
 //inline

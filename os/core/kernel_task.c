@@ -19,12 +19,6 @@ static event_t *event_list[MAX_EVENT_COUNT] = {0};
 
 static task_t * current_task = NULL;
 static list_t task_active = LIST_STATIC_INIT(task_active);
-//static list_t task_sleeping = LIST_STATIC_INIT(task_sleeping);
-
-static __attribute__((const))
-heap_key_t sleeping_heap_key(const void * cxt);
-
-static HEAP_MIN_STATIC_CREATE(sleeping, MAX_TASK_COUNT, sleeping_heap_key);
 
 static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID);
 static TASK_STATIC_CREATE(main_task, "Main", MAIN_STACK_SIZE, 0);
@@ -160,6 +154,7 @@ void kernel_task_schedule_current(void)
 		break;
 	case TASK_SLEEP:
 		// Task is scheduled by task_sleep
+		assert(0 && "Sleep is now an invalid mode.");
 		break;
 	case TASK_WAIT:
 		// Task is scheduled by task_event_wait
@@ -216,39 +211,12 @@ void kernel_task_stop_task(task_t * t)
 	t->state = TASK_INACTIVE;
 }
 
-void kernel_task_sleep_current(uint32_t ms)
-{
-	assert(current_task && "Current Task is NULL");
-	assert_protected();
-	current_task->state = TASK_SLEEP;
-	current_task->sleep_until = HAL_GetTick() + ms;
-	Heap.insert(&sleeping.heap, current_task);
-}
-
 void kernel_task_event_wait_current(event_t * e)
 {
 	assert(current_task && "Current Task is NULL");
 	assert_protected();
 	current_task->state = TASK_WAIT;
 	list_addAtRear(&e->waiting, task_to_list(current_task));
-}
-
-void kernel_task_wakeup_all(void)
-{
-	assert_protected();
-	uint32_t tick = HAL_GetTick();
-
-	task_t * t = Heap.head(&sleeping.heap);
-	while (t && t->sleep_until <= tick)
-	{
-		t = Heap.remove_head(&sleeping.heap);
-		assert_task_sig(t);
-		t->sleep_until = 0;
-		t->state = TASK_ACTIVE;
-		list_addAtRear(&task_active, task_to_list(t));
-
-		t = Heap.head(&sleeping.heap);
-	}
 }
 
 void kernel_task_event_notify_all(event_t * e)
@@ -346,11 +314,6 @@ static bool kernel_task_in_active(task_t * t)
 	return list_element_of(task_to_list(t), &task_active);
 }
 
-static bool kernel_task_in_sleep(task_t * t)
-{
-	return Heap.is_member(t, &sleeping.heap);
-}
-
 static int kernel_task_in_wait(task_t * t)
 {
 	int i;
@@ -386,11 +349,27 @@ void kernel_task_event_register(void * ctx)
 	event_list[i] = new;
 }
 
+void kernel_task_event_unregister(void * ctx)
+{
+	event_t * event = ctx;
+	assert_protected();
+	assert_event_sig(event);
+	// find registration spot
+	int i;
+	for (i = 0; i < MAX_EVENT_COUNT; ++i) {
+		if (event_list[i] == event) {
+			event_list[i] = NULL;
+			return;
+		}
+	}
+}
+
+
 inline uintptr_t kernel_task_get_sp(int id)
 {
   task_t * t = task_list[id];
   if (t) {
-    return t->sp;
+    return (uintptr_t)t->sp;
   }
   return 0;
 }
@@ -437,7 +416,7 @@ void assert_kernel_task_valid(void)
 		assert(t->signature == TASK_SIGNATURE && "Invalid task signature.");
 
 		in_active = kernel_task_in_active(t);
-		in_sleep = kernel_task_in_sleep(t);
+		in_sleep = false; //kernel_task_in_sleep(t);
 		in_wait = kernel_task_in_wait(t);
 
 		// task id must be the same as its task_list entry
@@ -451,6 +430,7 @@ void assert_kernel_task_valid(void)
 			assert(!(in_sleep || in_wait) && "Invalid TASK_ACTIVE");
 			break;
 		case TASK_SLEEP:
+			assert(0 && "Task Sleep is an invalid mode.");
 			// task must not be current
 			assert((t != current_task) && "Invalid TASK_SLEEP");
 			// task must be in sleep queue

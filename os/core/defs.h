@@ -26,7 +26,7 @@
 #endif
 
 #ifndef MAX_EVENT_COUNT
-#define MAX_EVENT_COUNT 16
+#define MAX_EVENT_COUNT 32
 #endif
 
 #ifndef IDLE_STACK_SIZE
@@ -36,8 +36,6 @@
 #ifndef MAIN_STACK_SIZE
 #define MAIN_STACK_SIZE 1024  // default size of main stack
 #endif
-
-#define USEC_TIMER            TIM7
 
 #define SYSTIMERM_CLK         (SystemCoreClock)
 #define SYSTIMERM             TIM10
@@ -49,26 +47,5 @@
 #define SYSTIMERS_CLK_ENABLE  __HAL_RCC_TIM9_CLK_ENABLE
 #define SYSTIMERS_IRQn        TIM1_BRK_TIM9_IRQn
 #define SYSTIMERS_IRQHandler  TIM1_BRK_TIM9_IRQHandler
-
-
-enum {
-	VLED0 = 0,
-	VLED1,
-	VLED2,
-	VLED3,
-	VLED4,
-	VLED5,
-	VLED6,
-	VLED7,
-	VLED8,
-	VLED9,
-	VLED10,
-	VLED11,
-	VLED12,
-	VLED13,
-	VLED14,
-	VLED15
-};
-
 
 #endif  /*__DEFS_H__ */

@@ -9,6 +9,7 @@
 #include "systimer.h"
 #include "event.h"
 #include "assertions.h"
+#include <malloc.h>
 
 static volatile uint64_t usec_counter = 0;
 static volatile uint32_t msec_counter = 0;
@@ -91,22 +92,43 @@ void systimer_stop_protected(void * ctx)
 	__enable_irq();
 }
 
+static inline
+systimer_t * systimer_allocate(void)
+{
+	systimer_t *timer = malloc(sizeof(systimer_t));
+	memset(timer, 0, sizeof(systimer_t));
+	list_init(&timer->node);
+	return timer;
+}
+
+void systimer_destroy(systimer_t * timer)
+{
+	systimer_stop(timer);
+	free(timer);
+}
+
+systimer_t * systimer_create_event_onetime(size_t period, event_t * event)
+{
+	systimer_t * t = systimer_allocate();
+	t->period = period;
+	t->type = TIMER_EVENT_ONCE;
+	t->event = event;
+	systimer_start(t);
+	return t;
+}
+
 systimer_t * systimer_create_exec(size_t period, timer_callback callback,
 		void * ctx)
 {
-	assert(
-			period <= 0xffff
-					&& "Periods greater than timer period not supported.");
+	assert(period <= 0xffff	&& "Periods greater than timer period not supported.");
 
-	systimer_t *timer = malloc(sizeof(systimer_t));
-	list_init(&timer->node);
-	timer->period = period;
-	timer->type = TIMER_EXEC_IRQ;
-	timer->callback = callback;
-	timer->cb_ctx = ctx;
-	timer->event = NULL;
-	systimer_start(timer);
-	return timer;
+	systimer_t * t = systimer_allocate();
+	t->period = period;
+	t->type = TIMER_EXEC_IRQ;
+	t->callback = callback;
+	t->cb_ctx = ctx;
+	systimer_start(t);
+	return t;
 }
 
 static inline
@@ -187,12 +209,15 @@ void systimers_slave_CC1_callback(void)
 			assert(0 && "Not implemented yet");
 			break;
 		case TIMER_EVENT:
+		case TIMER_EVENT_ONCE:
 			event_notify_irq(t->event);
 			break;
 		case TIMER_EXEC_IRQ:
+		case TIMER_EXEC_IRQ_ONCE:
 			t->callback(t->cb_ctx);
 			break;
 		case TIMER_EXEC_DEF:
+		case TIMER_EXEC_DEF_ONCE:
 			assert(0 && "Not implemented yet");
 			break;
 		case TIMER_NONE:
@@ -202,7 +227,9 @@ void systimers_slave_CC1_callback(void)
 
 		__disable_irq();
 
-		if (t->period != 0)
+		if (t->type == TIMER_EVENT    ||
+			t->type == TIMER_EXEC_IRQ ||
+			t->type == TIMER_EXEC_DEF )
 		{
 			systimer_schedule(t);
 		}

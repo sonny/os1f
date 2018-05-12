@@ -15,7 +15,7 @@
 static inline
 void mutex_init(mutex_t* m) {
 	m->depth = 0;
-	event_init("Mutex", &m->tasks);
+	event_init(&m->tasks, "Mutex");
 }
 
 static inline

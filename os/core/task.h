@@ -17,7 +17,7 @@ task_t * task_create_schedule(void (*)(void*), int, void*, const char*);
 void task_free(task_t * t);
 void task_join(task_t * t);
 void task_schedule(task_t *task);
-void task_sleep(uint32_t ms);
+void task_delay(uint32_t ms);
 void task_yield(void);
 
 static inline

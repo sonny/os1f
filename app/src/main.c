@@ -40,11 +40,14 @@ int main(void) {
 	//  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 0");
 	//  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 1");
 
-	//task_create_schedule(task_lcd_led, DEFAULT_STACK_SIZE, (void*) NULL, "LED LCD");
-	systimer_create_exec(1000, timer_counter, &counters[0]);
-	systimer_create_exec(100, timer_counter, &counters[1]);
-	systimer_create_exec(10, timer_counter, &counters[2]);
-	systimer_create_exec(1, timer_counter, &counters[3]);
+	task_create_schedule(task_lcd_led, DEFAULT_STACK_SIZE, (void*) NULL, "LED LCD");
+
+	systimer_create_exec(1000, (timer_callback)virtled_toggle, (void*)VLED0);
+	systimer_create_exec(500, (timer_callback)virtled_toggle, (void*)VLED1);
+	systimer_create_exec(250, (timer_callback)virtled_toggle, (void*)VLED2);
+	systimer_create_exec(125, (timer_callback)virtled_toggle, (void*)VLED3);
+	systimer_create_exec(65, (timer_callback)virtled_toggle, (void*)VLED4);
+	systimer_create_exec(32, (timer_callback)virtled_toggle, (void*)VLED5);
 
 
 	/* // Unocmment to test memory allocation syncronization */
@@ -80,7 +83,7 @@ int main(void) {
 
 		task_join(tonce);
 
-		task_sleep(500);
+		task_delay(500);
 	}
 
 	return 0;
@@ -109,8 +112,8 @@ void task_func(void *context) {
 	struct func_data * fdata = context;
 	while (1) {
 		++k;
-		lcd_printf_line(tid, "[%d] Simple Task counter : %d", tid, k);
-		task_sleep(fdata->sleep);
+		lcd_printf_line(tid, "[%d] Simple Task counter (%d delay) : %d", tid, fdata->sleep, k);
+		task_delay(fdata->sleep);
 
 	};
 }
@@ -131,7 +134,7 @@ static void task_greedy(void *ctx) {
 	while (1) {
 		++k;
 		if ((k % 10000000) == 0) {
-			lcd_printf_line(tid, "[%d] Simple Greedy counter [%d]\n", tid, k);
+			lcd_printf_line(tid, "[%d] Simple Greedy counter [%d]", tid, k);
 		}
 	}
 }
@@ -139,9 +142,17 @@ static void task_greedy(void *ctx) {
 static void task_lcd_led(void *ctx)
 {
 	(void)ctx;
+	int tid = kernel_task_id_current();
+
 	while(1) {
+		uint64_t tstart = usec_time();
 		virtled_toggle(VLED11);
-		task_sleep(1000);
+		uint64_t tend = usec_time();
+		uint32_t tdiff = tend - tstart;
+
+		lcd_printf_line(tid, "[%d] VLED toggle time: %dus", tid, tdiff);
+
+		task_delay(1000);
 	}
 }
 

@@ -10,11 +10,9 @@ void kernel_task_init(void);
 int32_t kernel_task_next_id(void);
 void kernel_task_display_task_stats(void);
 void kernel_task_event_notify_all(event_t *);
-void kernel_task_wakeup_all(void);
 
 void kernel_task_active_next_current(void);
 void kernel_task_schedule_current(void);
-void kernel_task_sleep_current(uint32_t);
 void kernel_task_wait_current(uint32_t);
 void kernel_task_event_wait_current(event_t *);
 void kernel_task_save_context_current(int);
@@ -33,6 +31,7 @@ void kernel_task_destroy_task(task_t *t);
 void kernel_task_load_PSP_current(void);
 void kernel_task_save_PSP_current(void);
 void kernel_task_event_register(void *);
+void kernel_task_event_unregister(void *);
 void assert_kernel_task_valid(void);
 
 uintptr_t kernel_task_get_pc(int id);

@@ -12,7 +12,8 @@ static void event_wait_irq(void * cxt);
 static void event_notify_irq(void *cxt);
 
 static inline
-void event_init(const char * name, event_t *e) {
+void event_init(event_t * e, const char * name)
+{
 	e->name = name;
 	list_init(&e->waiting);
 	e->signature = EVENT_SIGNATURE;

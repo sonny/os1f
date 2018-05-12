@@ -8,7 +8,7 @@
 #include "task.h"
 #include "display.h"
 
-#define WATCHDOG_STACK_SIZE 128
+#define WATCHDOG_STACK_SIZE 256
 static void watchdog_task(void *ctx);
 static void watchdog_enable(void);
 static void watchdog_refresh(void);
@@ -30,7 +30,7 @@ static void watchdog_task(void *ctx)
 	while (1)
 	{
 		watchdog_refresh();
-		task_sleep(100);
+		task_delay(100);
 	}
 }
 

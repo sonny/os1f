@@ -45,7 +45,7 @@ void adc_task(__attribute__((unused)) void *p)
 		lcd_printf_line(tid, "[%d] Temp: %.1f C, Vref: %.2f V %c", tid, T, V,
 				rot[rot_idx]);
 		rot_idx = (rot_idx + 1) % 4;
-		task_sleep(250);
+		task_delay(250);
 	}
 
 }
