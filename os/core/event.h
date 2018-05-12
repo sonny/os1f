@@ -27,6 +27,7 @@ static inline
 void event_wait(event_t *e) {
 	service_call(kernel_task_event_register, e, true);
 	service_call(event_wait_irq, e, false);
+	e->signal = 0;
 }
 
 static inline
@@ -38,15 +39,18 @@ static inline
 void event_wait_irq(void * cxt) {
 	event_t *e = cxt;
 	__disable_irq();
-	kernel_task_event_wait_current(e);
+	if (e->signal == 0) {
+		kernel_task_event_wait_current(e);
+		protected_kernel_context_switch(NULL);
+	}
 	__enable_irq();
-	protected_kernel_context_switch(NULL);
 }
 
 static inline
 void event_notify_irq(void * cxt) {
 	event_t *e = cxt;
 	__disable_irq();
+	e->signal = 1;
 	kernel_task_event_notify_all(e);
 	__enable_irq();
 }

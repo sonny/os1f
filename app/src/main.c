@@ -66,11 +66,6 @@ int main(void) {
 	int tid = kernel_task_id_current();
 
 	while (1) {
-		MSECtime = msec_time();
-		USECtime = usec_time();
-
-
-
 		uint32_t tick = HAL_GetTick();
 		uint32_t rt_hours = tick / 3600000;
 		uint32_t rt_hours_rem  = tick % 3600000;
@@ -81,8 +76,7 @@ int main(void) {
 
 		lcd_printf_line(tid, "[%d] Main Task Runtime - %d:%d:%d:%d", tid, rt_hours, rt_mins, rt_secs, rt_msecs);
 		lcd_printf_line(1, "Counters [%d] [%d] [%d] [%d]", counters[0], counters[1], counters[2], counters[3]);
-		task_t * tonce = task_create_schedule(task_once, DEFAULT_STACK_SIZE,
-				NULL, "Once");
+		task_t * tonce = task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL, "Once");
 
 		task_join(tonce);
 

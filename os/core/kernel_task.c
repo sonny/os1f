@@ -100,7 +100,7 @@ void kernel_task_init(void)
 // NOTE: Do Not Call from inside an IRQ
 // This function switches modes from privileged to user
 // Handle with care
-// NOTE: NO MALLOC (or any other syscall) until after syscall_start
+// NOTE: NO MALLOC (or any other syscall) until after context_switch
 extern uint32_t main_return_point;
 static void kernel_task_main_hoist(void)
 {
@@ -108,7 +108,6 @@ static void kernel_task_main_hoist(void)
 	uint32_t stack_base = *((uint32_t*) SCB->VTOR);
 	uint32_t stack_ptr = kernel_SP_get();
 	uint32_t stack_size = stack_base - stack_ptr;
-	//  void *main_task_sp = &main_task_stack[0] + MAIN_STACK_SIZE - stack_size;
 	uint8_t *main_task_sp = &main_task.stack[0] + sizeof(main_task.stack)
 			- stack_size;
 	memcpy(main_task_sp, (void*) stack_ptr, stack_size);

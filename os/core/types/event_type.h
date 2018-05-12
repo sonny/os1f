@@ -13,10 +13,11 @@
 
 typedef struct {
 	const char const * name;
+	uint32_t signal;
 	list_t waiting;
 	uint32_t signature;
 } event_t;
 
-#define EVENT_STATIC_INIT(NAME) { #NAME, LIST_STATIC_INIT( (NAME).waiting ), EVENT_SIGNATURE }
+#define EVENT_STATIC_INIT(NAME) { #NAME, 0, LIST_STATIC_INIT( (NAME).waiting ), EVENT_SIGNATURE }
 
 #endif /* OS_CORE_TYPES_EVENT_TYPE_H_ */
