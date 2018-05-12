@@ -19,7 +19,6 @@ void ringbuffer_init(ring_buffer_t *rb, uint8_t * buffer, size_t size)
 	rb->size = size;
 	rb->start = 0;
 	rb->end = 0;
-	rb->lock = SPINLOCK_UNLOCKED;
 	rb->buffer = buffer;
 }
 
@@ -31,9 +30,7 @@ void ringbuffer_init(ring_buffer_t *rb, uint8_t * buffer, size_t size)
 static inline
 bool ringbuffer_isFull(ring_buffer_t * const rb)
 {
-	spinlock_lock(&rb->lock);
 	bool result = (((rb->end + 1) % rb->size) == rb->start);
-	spinlock_unlock(&rb->lock);
 	return result;
 }
 
@@ -45,9 +42,7 @@ bool ringbuffer_isFull(ring_buffer_t * const rb)
 static inline
 bool ringbuffer_isEmpty(ring_buffer_t * const rb)
 {
-	spinlock_lock(&rb->lock);
 	bool result = (rb->start == rb->end);
-	spinlock_unlock(&rb->lock);
 	return result;
 }
 
@@ -59,9 +54,7 @@ bool ringbuffer_isEmpty(ring_buffer_t * const rb)
 static inline
 uint8_t ringbuffer_remainder(ring_buffer_t * const rb)
 {
-	spinlock_lock(&rb->lock);
 	uint8_t result = (rb->start + rb->size - rb->end) % rb->size;
-	spinlock_unlock(&rb->lock);
 	return result;
 }
 
@@ -77,9 +70,7 @@ uint8_t ringbuffer_remainder(ring_buffer_t * const rb)
 static inline
 bool ringbuffer_almost_full(ring_buffer_t * const rb)
 {
-	spinlock_lock(&rb->lock);
 	bool result = (ringbuffer_remainder(rb) >= RING_BUFFER_TOO_CLOSE);
-	spinlock_unlock(&rb->lock);
 	return result;
 }
 
@@ -94,11 +85,8 @@ static inline
 void ringbuffer_insert_element(ring_buffer_t * const rb, char c)
 {
   assert(!Ringbuffer.full(rb) && "Ring Buffer is Full.");
-  spinlock_lock(&rb->lock);
   rb->buffer[rb->end] = c;
-
   rb->end = (rb->end + 1 ) % rb->size;
-  spinlock_unlock(&rb->lock);
 }
 
 /**
@@ -126,10 +114,8 @@ ringbuffer_insert_string(ring_buffer_t * const restrict rb, const char * restric
 static char
 ringbuffer_extract_element(ring_buffer_t * const rb)
 {
-	spinlock_lock(&rb->lock);
 	char c = rb->buffer[rb->start];
 	rb->start = (rb->start + 1 ) % rb->size;
-	spinlock_unlock(&rb->lock);
 	return c;
 }
 
@@ -145,9 +131,7 @@ ringbuffer_extract_element(ring_buffer_t * const rb)
 static
 size_t ringbuffer_used(ring_buffer_t * const rb)
 {
-	spinlock_lock(&rb->lock);
 	size_t result = (rb->size + rb->end - rb->start) % rb->size;
-	spinlock_unlock(&rb->lock);
 	return result;
 }
 

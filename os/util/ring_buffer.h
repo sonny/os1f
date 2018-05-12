@@ -26,7 +26,6 @@ typedef struct {
 	size_t size;
 	size_t start;
 	size_t end;
-	spinlock_t lock;
 	uint8_t * buffer;
 } ring_buffer_t;
 
@@ -40,7 +39,6 @@ typedef struct {
 	{ .size = SIZE,					\
 	  .start = 0,					\
 	  .end = 0,						\
-	  .lock = SPINLOCK_UNLOCKED,    \
 	  .buffer = NAME.buffer }, {0}  \
 	}
 
