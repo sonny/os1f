@@ -5,8 +5,7 @@
 #include <stdbool.h>
 #include <stdatomic.h>
 #include "defs.h"
-#include "kernel_task.h"
-#include "task.h"
+#include "task_type.h"
 #include "event.h"
 #include "spinlock.h"
 #include "mutex_type.h"

@@ -9,9 +9,9 @@
 #define OS_INCLUDE_ASSERTIONS_H_
 
 #include <assert.h>
-#include "task.h"
-#include "event.h"
-#include "mutex.h"
+#include "task_type.h"
+#include "event_type.h"
+#include "mutex_type.h"
 
 void assert_os_started(void); // implemented in kernel.c
 

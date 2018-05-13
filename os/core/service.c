@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include "service.h"
 #include "kernel.h"
-#include "kernel_task.h"
 #include "defs.h"
 
 // do not give compiler oportunity to optimize out

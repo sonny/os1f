@@ -1,7 +1,6 @@
 #include <stdarg.h>
 #include "os_printf.h"
 #include "display.h"
-#include "kernel_task.h"
 #include "task.h"
 
 static void __display_line_at(int line, const char* fmt, va_list args) {

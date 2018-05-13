@@ -11,6 +11,7 @@
 #include "error.h"
 #include "task_control.h"
 #include "scheduler.h"
+#include "task.h"
 
 static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID);
 

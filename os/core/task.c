@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include "task_type.h"
 #include "defs.h"
-#include "kernel_task.h"
 #include "memory.h"
 #include "service.h"
 #include "event.h"
@@ -101,7 +100,7 @@ void task_delay(uint32_t ms)
 	systimer_t * timer = systimer_create_event_onetime(ms, &event);
 	event_wait(&event);
 	systimer_destroy(timer);
-	service_call(kernel_task_event_unregister, &event, true);
+	service_call((svcall_t)event_control_remove, &event, true);
 }
 
 void task_yield(void) 
@@ -130,7 +129,8 @@ static void task_destroy(task_t *t)
 	assert_protected();
 	assert(!list_element(task_to_list(t)) && "Node still in some list.");
 	task_control_remove(t);
-	kernel_task_remove_join_event(t);
+	//kernel_task_remove_join_event(t);
+	event_control_remove(&t->join);
 
 	if (!(t->flags & TASK_FLAG_STATIC))
 		free_aligned(t);
@@ -234,10 +234,8 @@ void assert_task_valid(task_t *t)
 
 	bool in_active = scheduler_task_ready(t);
 	bool in_sleep = false;
-	bool in_wait = kernel_task_in_wait(t);
+	bool in_wait = event_control_task_waiting(t);
 
-	// task id must be the same as its task_list entry
-	//assert(t->id == i && "Invalid task ID.");
 	// task state must be one of Inactive, Active, Sleep, Wait, or end
 	switch(t->state) {
 	case TASK_ACTIVE:

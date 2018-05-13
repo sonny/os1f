@@ -19,7 +19,6 @@
 
 /* core header files */
 #include "event.h"
-#include "kernel_task.h"
 #include "kernel.h"
 #include "memory.h"
 #include "mutex.h"

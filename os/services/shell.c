@@ -2,7 +2,6 @@
 #include "task.h"
 #include "os_printf.h"
 #include "display.h"
-#include "kernel_task.h"
 #include "service.h"
 #include "systimer.h"
 #include <ctype.h>
