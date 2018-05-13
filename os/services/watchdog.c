@@ -5,33 +5,18 @@
  *      Author: sonny
  */
 
-#include "task.h"
 #include "display.h"
+#include "systimer.h"
 
-#define WATCHDOG_STACK_SIZE 256
-static void watchdog_task(void *ctx);
 static void watchdog_enable(void);
-static void watchdog_refresh(void);
-static uint32_t GetLSIFrequency(void);
+static void watchdog_refresh(void*);
 
 static IWDG_HandleTypeDef IwdgHandle;
 
 void watchdog_init(void)
 {
-	//uint32_t lsifreq = GetLSIFrequency();
-	//lcd_printf_line(10, "LSI Freq %d", lsifreq);
 	watchdog_enable();
-	task_create_schedule(watchdog_task, WATCHDOG_STACK_SIZE, NULL, "Watchdog");
-}
-
-static void watchdog_task(void *ctx)
-{
-	(void)ctx;
-	while (1)
-	{
-		watchdog_refresh();
-		task_delay(100);
-	}
+	systimer_create_exec(200, (timer_callback)watchdog_refresh, NULL);
 }
 
 static void watchdog_enable(void)
@@ -43,8 +28,9 @@ static void watchdog_enable(void)
 	IWDG->KR = IWDG_KEY_RELOAD; // reload counter with reload value (WO)
 }
 
-static void watchdog_refresh(void)
+static void watchdog_refresh(void * ctx)
 {
+	(void)ctx;
 	IWDG->KR = IWDG_KEY_RELOAD;
 }
 

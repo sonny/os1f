@@ -28,7 +28,17 @@
 
 #define LCD_DEFAULT_FONT             Font12
 
-//#endif
+
+#define SYSTIMERM_CLK         (SystemCoreClock)
+#define SYSTIMERM             TIM10
+#define SYSTIMERM_CLK_ENABLE  __HAL_RCC_TIM10_CLK_ENABLE
+#define SYSTIMERM_IRQn        TIM1_UP_TIM10_IRQn
+#define SYSTIMERM_IRQHandler  TIM1_UP_TIM10_IRQHandler
+
+#define SYSTIMERS             TIM9
+#define SYSTIMERS_CLK_ENABLE  __HAL_RCC_TIM9_CLK_ENABLE
+#define SYSTIMERS_IRQn        TIM1_BRK_TIM9_IRQn
+#define SYSTIMERS_IRQHandler  TIM1_BRK_TIM9_IRQHandler
 
 #ifdef __GNUC__
 // Avoid tons of warnings with root code
@@ -36,5 +46,7 @@
 #endif
 #include "stm32746g_discovery.h"
 #include "stm32746g_discovery_lcd.h"
+
+//#endif
 
 #endif /*  __BOARD_DISCOVERY_H__ */

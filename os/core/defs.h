@@ -37,15 +37,4 @@
 #define MAIN_STACK_SIZE 1024  // default size of main stack
 #endif
 
-#define SYSTIMERM_CLK         (SystemCoreClock)
-#define SYSTIMERM             TIM10
-#define SYSTIMERM_CLK_ENABLE  __HAL_RCC_TIM10_CLK_ENABLE
-#define SYSTIMERM_IRQn        TIM1_UP_TIM10_IRQn
-#define SYSTIMERM_IRQHandler  TIM1_UP_TIM10_IRQHandler
-
-#define SYSTIMERS             TIM9
-#define SYSTIMERS_CLK_ENABLE  __HAL_RCC_TIM9_CLK_ENABLE
-#define SYSTIMERS_IRQn        TIM1_BRK_TIM9_IRQn
-#define SYSTIMERS_IRQHandler  TIM1_BRK_TIM9_IRQHandler
-
 #endif  /*__DEFS_H__ */

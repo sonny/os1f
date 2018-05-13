@@ -117,22 +117,21 @@ static void task_end(void)
 	task_yield();
 }
 
-static void task_destroy(task_t *t)
+static void task_remove(task_t *t)
 {
 	assert_protected();
 	assert(!list_element(task_to_list(t)) && "Node still in some list.");
 	task_control_remove(t);
-	//kernel_task_remove_join_event(t);
 	event_control_remove(&t->join);
-
-	if (!(t->flags & TASK_FLAG_STATIC))
-		free_aligned(t);
 }
 
 void task_free(task_t * t)
 {
 	assert(t->id > 0 && "Cannot free idle or main task.");
-	service_call((svcall_t) task_destroy, (void*)t, true);
+	service_call((svcall_t) task_remove, (void*)t, true);
+
+	if (!(t->flags & TASK_FLAG_STATIC))
+		free_aligned(t);
 }
 
 void task_join(task_t * t)
