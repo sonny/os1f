@@ -9,8 +9,18 @@
 #include "task_type.h"
 #include "assertions.h"
 #include "error.h"
+#include "task_control.h"
+#include "scheduler.h"
+
+static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID);
 
 static task_t *TCB[MAX_TASK_COUNT] = {0};
+
+void task_control_init(void)
+{
+	extern void scheduler_idle(void * ctx);
+	task_frame_init(&idle_task.task, scheduler_idle, NULL);
+}
 
 int task_control_add(task_t * task)
 {
@@ -32,13 +42,14 @@ int task_control_remove(task_t * task)
 {
 	assert_protected();
 	TCB[task->id] = NULL;
-	list_remove(task_to_list(task));
+	scheduler_unschedule_task(task);
 	return OS_OK;
 }
 
 task_t * task_control_get(int id)
 {
-	if (id >= MAX_TASK_COUNT || id < 0) return NULL;
+	if (id >= MAX_TASK_COUNT || id < IDLE_TASK_ID) return NULL;
+	if (id == IDLE_TASK_ID) return &idle_task.task;
 	return TCB[id];
 }
 

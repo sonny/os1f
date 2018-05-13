@@ -3,13 +3,14 @@
 #include "os_printf.h"
 #include "display.h"
 #include "kernel_task.h"
-#include "svc.h"
+#include "service.h"
 #include "systimer.h"
 #include <ctype.h>
 #include <string.h>
 #include <malloc.h>
 #include <errno.h>
 #include "backtrace.h"
+#include "task_control.h"
 
 typedef void (*cmd_t)(void);
 
@@ -129,19 +130,21 @@ static void shell_cmd_echo(void) {
 }
 
 static void shell_cmd_ps(void) {
-	kernel_task_display_task_stats();
+	os_iprintf("ID\tState\tStack\tTime\tName\r\n");
+	task_display(task_control_get(IDLE_TASK_ID));
+	task_control_each(task_display);
 }
 
 static void shell_cmd_start(void) {
 	char *end;
 	int id = strtol(argv[1], &end, 10);
-	service_call((svcall_t) kernel_task_start_id, (void*) id, true);
+	service_call((svcall_t) task_start, (void*) id, true);
 }
 
 static void shell_cmd_stop(void) {
 	char *end;
 	int id = strtol(argv[1], &end, 10);
-	service_call((svcall_t) kernel_task_stop_id, (void*) id, true);
+	service_call((svcall_t) task_stop, (void*) id, true);
 }
 
 extern char _end; // Bottom of RAM ???
@@ -199,10 +202,10 @@ static void shell_cmd_backtrace(void)
   int id = strtol(argv[1], &end, 10);
   if (errno) id = 0;
 
-  hw_stack_frame_t hw_frame = kernel_task_get_task_saved_hw_frame(id);
-  sw_stack_frame_t sw_frame = kernel_task_get_task_saved_sw_frame(id);
+  hw_stack_frame_t hw_frame = task_get_saved_hw_frame(id);
+  sw_stack_frame_t sw_frame = task_get_saved_sw_frame(id);
 
-  bt_frame.sp = kernel_task_get_sp(id);
+  bt_frame.sp = task_get_sp(id);
   bt_frame.fp = sw_frame.r7;
   bt_frame.lr = hw_frame.lr;
   bt_frame.pc = hw_frame.pc;

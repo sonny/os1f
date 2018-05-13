@@ -7,36 +7,37 @@
 #include "task_type.h"
 
 void kernel_task_init(void);
-int32_t kernel_task_next_id(void);
-void kernel_task_display_task_stats(void);
+//int32_t kernel_task_next_id(void);
+//void kernel_task_display_task_stats(void);
 void kernel_task_event_notify_all(event_t *);
 
-void kernel_task_active_next_current(void);
-void kernel_task_schedule_current(void);
+//void kernel_task_active_next_current(void);
+//void kernel_task_schedule_current(void);
 void kernel_task_wait_current(uint32_t);
 void kernel_task_event_wait_current(event_t *);
-void kernel_task_save_context_current(int);
-uint32_t kernel_task_load_context_current(void);
-uint32_t kernel_task_id_current(void);
-void kernel_task_update_lasttime_current(void);
-void kernel_task_update_runtime_current(void);
+//void kernel_task_save_context_current(int);
+//uint32_t kernel_task_load_context_current(void);
+//uint32_t kernel_task_id_current(void);
+//void kernel_task_update_lasttime_current(void);
+//void kernel_task_update_runtime_current(void);
 
-void kernel_task_start_id(int);
-void kernel_task_stop_id(int);
+//void kernel_task_start_id(int);
+//void kernel_task_stop_id(int);
 
-void kernel_task_start_task(task_t *);
-void kernel_task_stop_task(task_t *);
-void kernel_task_destroy_task(task_t *t);
+//void kernel_task_start_task(task_t *);
+//void kernel_task_stop_task(task_t *);
+//void kernel_task_destroy_task(task_t *t);
 
-void kernel_task_load_PSP_current(void);
-void kernel_task_save_PSP_current(void);
+//void kernel_task_load_PSP_current(void);
+//void kernel_task_save_PSP_current(void);
 void kernel_task_event_register(void *);
 void kernel_task_event_unregister(void *);
-void assert_kernel_task_valid(void);
+//void assert_kernel_task_valid(void);
 
-uintptr_t kernel_task_get_pc(int id);
-uintptr_t kernel_task_get_sp(int id);
-hw_stack_frame_t kernel_task_get_task_saved_hw_frame(int id);
-sw_stack_frame_t kernel_task_get_task_saved_sw_frame(int id);
-
+//uintptr_t kernel_task_get_pc(int id);
+//uintptr_t kernel_task_get_sp(int id);
+//hw_stack_frame_t kernel_task_get_task_saved_hw_frame(int id);
+//sw_stack_frame_t kernel_task_get_task_saved_sw_frame(int id);
+int kernel_task_in_wait(task_t * t);
+//void kernel_task_main_hoist(void);
 #endif  /* __KERNEL_TASK_H__ */

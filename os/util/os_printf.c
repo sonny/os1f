@@ -18,6 +18,7 @@ int os_iprintf(const char *fmt, ...) {
 
 int os_viprintf(const char *fmt, va_list va) {
 	char *buffer = malloc(STDIO_BUFFER_SIZE);
+	memset(buffer, 0, STDIO_BUFFER_SIZE);
 	int len = os_vsniprintf(buffer, STDIO_BUFFER_SIZE, fmt, va);
 	os_puts(buffer, len);
 	free(buffer);

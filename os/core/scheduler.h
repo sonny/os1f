@@ -12,7 +12,9 @@
 
 int scheduler_init(void);
 int scheduler_reschedule_task(task_t * task);
+int scheduler_unschedule_task(task_t * task);
 task_t * scheduler_get_next_ready(void);
+task_t * scheduler_get_current_task(void);
 bool scheduler_task_ready(task_t * t);
 
 

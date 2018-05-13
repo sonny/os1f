@@ -6,6 +6,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. 
  */
 
+// -funwind-tables -mpoke-function-name  -fno-inline -fno-omit-frame-pointer
+
 #include <backtrace.h>
 #include <stdlib.h>
 #include <string.h>

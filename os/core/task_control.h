@@ -8,6 +8,9 @@
 #ifndef OS_TASK_CONTROL_H_
 #define OS_TASK_CONTROL_H_
 
+#define IDLE_TASK_ID    -1
+
+void task_control_init(void);
 int task_control_add(task_t * task);
 int task_control_remove(task_t * task);
 task_t * task_control_get(int id);

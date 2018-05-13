@@ -3,7 +3,7 @@
 
 #include "board.h"
 #include "defs.h"
-#include "svc.h"
+#include "service.h"
 
 void os_start(void);
 bool os_started(void);

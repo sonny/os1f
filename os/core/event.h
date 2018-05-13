@@ -2,7 +2,7 @@
 #define __EVENT_H__
 
 #include "defs.h"
-#include "svc.h"
+#include "service.h"
 #include "list.h"
 #include "kernel.h"
 #include "kernel_task.h"

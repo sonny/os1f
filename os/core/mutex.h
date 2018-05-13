@@ -20,7 +20,7 @@ void mutex_init(mutex_t* m) {
 
 static inline
 void mutex_lock(mutex_t *m) {
-	int tid = kernel_task_id_current();
+	int tid = get_task_id();
 
 	if (spinlock_locked_as(&m->lock, tid)) {
 		m->depth++;
@@ -35,7 +35,7 @@ void mutex_lock(mutex_t *m) {
 
 static inline
 int mutex_lock_try(mutex_t *m) {
-	int tid = kernel_task_id_current();
+	int tid = get_task_id();
 
 	if (spinlock_locked_as(&m->lock, tid)) {
 		m->depth++;

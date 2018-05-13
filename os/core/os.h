@@ -24,8 +24,10 @@
 #include "memory.h"
 #include "mutex.h"
 #include "spinlock.h"
-#include "svc.h"
+#include "service.h"
 #include "task.h"
+#include "scheduler.h"
+#include "task_control.h"
 
 /* device header files */
 #include "lcd.h"
