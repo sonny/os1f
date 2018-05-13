@@ -11,7 +11,7 @@
 #include "board.h"
 #include "assertions.h"
 #include "task_control.h"
-#include "task.h"
+#include "task_type.h"
 
 #if OS_SCHEDULER == SCHEDULER_ROUND_ROBIN
 

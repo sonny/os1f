@@ -7,7 +7,6 @@
 
 #include "board.h"
 #include "kernel.h"
-#include "task.h"
 #include "defs.h"
 
 static volatile uint32_t __systick;

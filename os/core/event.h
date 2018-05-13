@@ -8,7 +8,7 @@
 #include "event_type.h"
 #include "event_control.h"
 #include "task_control.h"
-#include "task.h"
+#include "task_type.h"
 #include "assertions.h"
 #include "scheduler.h"
 

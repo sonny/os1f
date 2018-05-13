@@ -13,7 +13,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "spinlock.h"
+#include <stddef.h>
 
 //#define RING_BUFFER_SIZE ((uint8_t)128)
 #define RING_BUFFER_TOO_CLOSE ((uint8_t)16)

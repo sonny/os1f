@@ -6,6 +6,8 @@
  */
 
 #include "board.h"
+#include "defs.h"
+#include "task_type.h"
 #include "task.h"
 #include "scheduler.h"
 #include "systimer.h"

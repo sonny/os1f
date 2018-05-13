@@ -8,7 +8,6 @@
 #include "defs.h"
 #include "event_type.h"
 #include "task_type.h"
-#include "task.h"
 #include "error.h"
 #include "assertions.h"
 
@@ -36,20 +35,6 @@ int event_control_add(event_t * event)
 	if (idx == -1) return OSERR_SPACE;
 	event_list[idx] = event;
 
-//	int i;
-//	// ensure event is not in list
-//	for (i = 0; i < MAX_EVENT_COUNT; ++i) {
-//		if (event_list[i] == event) return; // nothing to do
-//	}
-
-	// find spot for event
-//	for (i = 0; i < MAX_EVENT_COUNT; ++i) {
-//		if (event_list[i] == NULL) break; // found a spot
-//	}
-
-	// if we get here, i is the new index
-//	assert(i < MAX_EVENT_COUNT && "Too many events.");
-//	event_list[i] = new;
 	return OS_OK;
 }
 

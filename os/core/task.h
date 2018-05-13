@@ -32,19 +32,5 @@ sw_stack_frame_t task_get_saved_sw_frame(int id);
 void assert_task_valid(task_t *t);
 void assert_all_tasks_valid(void);
 
-// implemented in context_switch (which has no header file)
-extern uint32_t get_task_id(void);
-
-__attribute__ ((always_inline)) static inline
-task_t * list_to_task(list_t * list)
-{
-	return (task_t *) list;
-}
-
-__attribute__ ((always_inline)) static inline
-list_t * task_to_list(task_t * task)
-{
-	return (list_t *) task;
-}
 
 #endif /* __TASK_H__ */

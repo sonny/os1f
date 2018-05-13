@@ -108,13 +108,6 @@ void task_yield(void)
   kernel_context_switch();
 }
 
-
-void task_join(task_t * t)
-{
-	event_wait(&t->join);
-	task_free(t);
-}
-
 static void task_end(void)
 {
 	// XXX : not protected
@@ -140,6 +133,12 @@ void task_free(task_t * t)
 {
 	assert(t->id > 0 && "Cannot free idle or main task.");
 	service_call((svcall_t) task_destroy, (void*)t, true);
+}
+
+void task_join(task_t * t)
+{
+	event_wait(&t->join);
+	task_free(t);
 }
 
 uintptr_t task_get_sp(int id)

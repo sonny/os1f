@@ -14,8 +14,6 @@
 #include <vcp.h>
 #include "vt100.h"
 #include "display.h"
-#include "mutex.h"
-#include "event.h"
 #include "os_printf.h"
 
 // Save Cursor	<ESC>[s
