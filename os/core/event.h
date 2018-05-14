@@ -18,6 +18,8 @@ static void event_notify_irq(void *cxt);
 static inline
 void event_init(event_t * e, const char * name)
 {
+	e->id = -1;
+	e->signal = 0;
 	e->name = name;
 	list_init(&e->waiting);
 	e->signature = EVENT_SIGNATURE;

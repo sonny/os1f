@@ -30,9 +30,10 @@ int event_control_add(event_t * event)
 	assert_protected();
 	assert_event_sig(event);
 
-	if (event_control_index(event) > -1) return OS_OK;
+	if (event->id > -1) return OS_OK;
 	int idx = event_control_index(NULL);
 	if (idx == -1) return OSERR_SPACE;
+	event->id = idx;
 	event_list[idx] = event;
 
 	return OS_OK;
@@ -43,12 +44,9 @@ int event_control_remove(event_t * event)
 	assert_protected();
 	assert_event_sig(event);
 	// find registration spot
-	int i;
-	for (i = 0; i < MAX_EVENT_COUNT; ++i) {
-		if (event_list[i] == event) {
-			event_list[i] = NULL;
-			return OS_OK;
-		}
+	if (event->id > -1) {
+		event_list[event->id] = NULL;
+		event->id = -1;
 	}
 	return OS_OK;
 }
