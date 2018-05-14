@@ -67,8 +67,6 @@ typedef struct
 	uint8_t * sp;
 	int32_t id;
 	task_state_e state;
-	uint32_t flags;
-//	uint32_t sleep_until;
 	uint64_t runtime;
 	uint64_t lasttime;
 	sw_stack_frame_t sw_context;
@@ -117,8 +115,6 @@ extern task_t * get_current_task(void);
         .stack_top = &_name.stack[0] + sizeof(_name.stack),  \
         .id = _id,                                           \
         .state = TASK_ACTIVE,                                \
-	.flags = (TASK_FLAG_STATIC),                         \
-	.sleep_until = 0,                                    \
 	.lasttime = 0, \
 	.runtime = 0, \
         .join = EVENT_STATIC_INIT(_name.task.join),          \

@@ -31,6 +31,8 @@ task_t * get_current_task(void)
 	return current_task;
 }
 
+#define FPU_USED(VAL) (!(VAL & (1 << 4)))
+
 __attribute__ ((naked))
 void PendSV_Handler(void)
 {
@@ -89,7 +91,7 @@ uint32_t load_context(void)
 
 #ifdef ENABLE_FPU
 
-	if (current_task->flags & TASK_FLAG_FPU)
+	if (FPU_USED(current_task->exc_return))
 	{
 		__asm volatile ( "vldmia %0, {s16-s31} " :: "r" (&current_task->sw_fp_context) : );
 	}
@@ -108,13 +110,10 @@ void save_context(int exc_return)
 #ifdef ENABLE_FPU
 
 	// check to see if task used FPU
-	if (!(exc_return & (1 << 4)))
+	if (FPU_USED(exc_return))
 	{
-		current_task->flags |= TASK_FLAG_FPU;
 		__asm volatile ( "vstmia %0, {s16-s31} \n" :: "r" (&current_task->sw_fp_context) : );
 	}
-	else
-		current_task->flags &= ~TASK_FLAG_FPU;
 
 #endif
 }

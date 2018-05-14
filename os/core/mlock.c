@@ -1,4 +1,4 @@
-#include <malloc.h>
+#include "memory.h"
 #include "mutex.h"
 
 static mutex_t malloc_mutex = MUTEX_STATIC_INIT(malloc_mutex);

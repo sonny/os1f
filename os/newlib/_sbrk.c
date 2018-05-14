@@ -21,7 +21,7 @@ _sbrk(int incr);
 extern char _Heap_Begin; // Defined by the linker.
 extern char _Heap_Limit; // Defined by the linker.
 
-static char* current_heap_end;
+static char* current_heap_end = 0;
 
 caddr_t _sbrk(int incr) {
 	char* current_block_address;

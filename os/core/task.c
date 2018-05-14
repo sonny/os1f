@@ -130,8 +130,7 @@ void task_free(task_t * t)
 	assert(t->id > 0 && "Cannot free idle or main task.");
 	service_call((svcall_t) task_remove, (void*)t, true);
 
-	if (!(t->flags & TASK_FLAG_STATIC))
-		free_aligned(t);
+	free_aligned(t);
 }
 
 void task_join(task_t * t)

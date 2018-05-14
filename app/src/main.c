@@ -27,9 +27,6 @@ static volatile uint64_t USECtime = 0;
 static volatile uint32_t MSECtime = 0;
 
 extern void adc_task(void*);
-//extern void memory_thread_test(void);
-//extern uint32_t heap_size_get(void);
-//extern char _Heap_Begin, _Heap_Limit,_estack;
 
 int main(void) {
 	// switch modes and make main a normal user task

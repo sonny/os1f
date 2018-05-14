@@ -4,6 +4,7 @@
 #include "defs.h"
 #include "mutex.h"
 #include "os_printf.h"
+#include "memory.h"
 
 //mutex_t screen_lock = MUTEX_STATIC_INIT(screen_lock);
 static spinlock_t __lcd_lock = SPINLOCK_UNLOCKED;
@@ -46,7 +47,7 @@ int lcd_vprintf_line(int line, const char *fmt, va_list args)
 	//mutex_unlock(&screen_lock);
 	spinlock_unlock(lcd_lock);
 
-	free(buffer);
+	os_free(buffer);
 	return len;
 }
 

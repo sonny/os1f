@@ -9,7 +9,7 @@
 #include "systimer.h"
 #include "event.h"
 #include "assertions.h"
-#include <malloc.h>
+#include "memory.h"
 #include <string.h>
 
 static volatile uint64_t usec_counter = 0;
@@ -104,7 +104,7 @@ systimer_t * systimer_allocate(void)
 void systimer_destroy(systimer_t * timer)
 {
 	systimer_stop(timer);
-	free(timer);
+	os_free(timer);
 }
 
 systimer_t * systimer_create_event_onetime(size_t period, event_t * event)

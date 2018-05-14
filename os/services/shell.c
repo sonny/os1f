@@ -6,7 +6,7 @@
 #include "systimer.h"
 #include <ctype.h>
 #include <string.h>
-#include <malloc.h>
+#include "memory.h"
 #include <errno.h>
 #include "backtrace.h"
 #include "task_control.h"

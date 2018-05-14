@@ -1,9 +1,9 @@
 #include <stdbool.h>
 #include <string.h>
-//#include <math.h>
 #include "defs.h"
 #include "os_printf.h"
 #include "display.h"
+#include "memory.h"
 
 int os_iprintf(const char *fmt, ...) {
 	va_list va;
@@ -21,7 +21,7 @@ int os_viprintf(const char *fmt, va_list va) {
 	memset(buffer, 0, STDIO_BUFFER_SIZE);
 	int len = os_vsniprintf(buffer, STDIO_BUFFER_SIZE, fmt, va);
 	os_puts(buffer, len);
-	free(buffer);
+	os_free(buffer);
 	return len;
 }
 
