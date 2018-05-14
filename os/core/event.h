@@ -45,7 +45,7 @@ void event_wait_irq(void * cxt) {
 	event_t *e = cxt;
 	__disable_irq();
 	if (e->signal == 0) {
-		task_t * current = task_control_get(get_task_id());
+		task_t * current = get_current_task();
 		current->state = TASK_WAIT;
 		list_addAtRear(&e->waiting, task_to_list(current));
 		protected_kernel_context_switch(NULL);

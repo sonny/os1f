@@ -12,9 +12,6 @@
 #include "list.h"
 #include "event_type.h"
 
-// implemented in context_switch (which has no header file)
-extern uint32_t get_task_id(void);
-
 typedef enum {
 	TASK_INACTIVE,
 	TASK_ACTIVE,
@@ -99,6 +96,10 @@ typedef struct
 
 #define list_to_task(list) ((task_t*)(list))
 #define task_to_list(task) (&(task)->node)
+
+// implemented in context_switch (which has no header file)
+extern uint32_t get_current_task_id(void);
+extern task_t * get_current_task(void);
 
 
 #define TASK_STATIC_ALLOCATE(name, size)                \

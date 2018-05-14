@@ -10,6 +10,7 @@
 #include "event.h"
 #include "assertions.h"
 #include <malloc.h>
+#include <string.h>
 
 static volatile uint64_t usec_counter = 0;
 static volatile uint32_t msec_counter = 0;

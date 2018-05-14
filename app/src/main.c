@@ -64,7 +64,7 @@ int main(void) {
 	}
 
 
-	int tid = get_task_id();
+	int tid = get_current_task_id();
 
 	while (1) {
 		uint32_t tick = HAL_GetTick();
@@ -106,7 +106,7 @@ static void display_system_clock(void)
 
 void task_func(void *context) {
 	int k = 0;
-	int tid = get_task_id();
+	int tid = get_current_task_id();
 	struct func_data * fdata = context;
 	while (1) {
 		++k;
@@ -119,7 +119,7 @@ void task_func(void *context) {
 void task_once(void *context) {
 	(void) context;
 	uint32_t tick = HAL_GetTick();
-	int tid = get_task_id();
+	int tid = get_current_task_id();
 
 	lcd_printf_line(9, "[%d] ONCE Task at %d ms", tid, tick);
 }
@@ -127,7 +127,7 @@ void task_once(void *context) {
 static void task_greedy(void *ctx) {
 	(void) ctx;
 	volatile int k = 0;
-	int tid = get_task_id();
+	int tid = get_current_task_id();
 
 	while (1) {
 		++k;
@@ -140,7 +140,7 @@ static void task_greedy(void *ctx) {
 static void task_lcd_led(void *ctx)
 {
 	(void)ctx;
-	int tid = get_task_id();
+	int tid = get_current_task_id();
 
 	while(1) {
 		uint64_t tstart = usec_time();

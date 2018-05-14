@@ -111,9 +111,9 @@ void task_yield(void)
 static void task_end(void)
 {
 	// XXX : not protected
-	extern task_t * current_task;
-	event_notify(&current_task->join);
-	current_task->state = TASK_END;
+	task_t * current = get_current_task();
+	event_notify(&current->join);
+	current->state = TASK_END;
 	task_yield();
 }
 
@@ -225,7 +225,7 @@ void task_main_hoist(void)
 
 void assert_task_valid(task_t *t)
 {
-	extern task_t * current_task;
+	task_t * current = get_current_task();
 
 	// task must have valid signature
 	assert(t->signature == TASK_SIGNATURE && "Invalid task signature.");
@@ -238,13 +238,13 @@ void assert_task_valid(task_t *t)
 	switch(t->state) {
 	case TASK_ACTIVE:
 		// task must be current or in active queue
-		assert((t == current_task || in_active) && "Invalid TASK_ACTIVE");
+		assert((t == current || in_active) && "Invalid TASK_ACTIVE");
 		// task must not be in sleep, or wait queue
 		assert(!(in_sleep || in_wait) && "Invalid TASK_ACTIVE");
 		break;
 	case TASK_WAIT:
 		// task must not be current
-		assert((t != current_task) && "Invalid TASK_WAIT");
+		assert((t != current) && "Invalid TASK_WAIT");
 		// task must not be in active, or sleep queue
 		assert(!(in_active || in_sleep) && "Invalid TASK_WAIT");
 		// task must be in ONE wait queue
@@ -255,7 +255,7 @@ void assert_task_valid(task_t *t)
 		// task must not be in active, sleep, or wait queue
 	case TASK_END:
 		// task must not be current
-		assert((t != current_task) && "Invalid TASK_INACTIVE or TASK_END");
+		assert((t != current) && "Invalid TASK_INACTIVE or TASK_END");
 		// task must not be in active, sleep, or wait queue
 		assert(!(in_active || in_sleep || in_wait) && "Invalid TASK_INACTIVE or TASK_END");
 		break;

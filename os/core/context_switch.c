@@ -21,9 +21,14 @@ static void update_lasttime(void);
 static uint32_t load_context(void);
 static void save_context(int exc_return);
 
-uint32_t get_task_id(void)
+uint32_t get_current_task_id(void)
 {
 	return current_task->id;
+}
+
+task_t * get_current_task(void)
+{
+	return current_task;
 }
 
 __attribute__ ((naked))

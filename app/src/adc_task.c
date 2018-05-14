@@ -24,7 +24,7 @@ void adc_task(__attribute__((unused)) void *p)
 	const float ambient_offset = 16.0F;
 
 	adc_task_init();
-	int tid = get_task_id();
+	int tid = get_current_task_id();
 
 	while (1)
 	{

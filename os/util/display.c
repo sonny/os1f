@@ -31,7 +31,7 @@ void display_line_at(int line, const char* fmt, ...) {
 void task_display_line(const char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
-	__display_line_at(get_task_id(), fmt, args);
+	__display_line_at(get_current_task_id(), fmt, args);
 	va_end(args);
 }
 

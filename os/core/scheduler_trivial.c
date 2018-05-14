@@ -5,17 +5,6 @@
  *      Author: sonny
  */
 
-/*
- * Scheduler Design and Assumptions
- * -- The scheduler provides the task id on _task_add
- * -- Create some sort of iterator
- * -- There is always at least one task (idle task) to run
- * -- Tracks all tasks regardless of state
- * Implementation Dependent
- * -- idle task
- * -- get_task by id
- */
-
 #include "scheduler.h"
 
 #if OS_SCHEDULER == SCHEDULER_TRIVIAL
