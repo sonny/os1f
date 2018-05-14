@@ -12,6 +12,8 @@
 #include "event_type.h"
 #include <stdint.h>
 
+#define MUTEX_SIGNATURE 0xbeaddaeb
+
 typedef struct {
 	volatile spinlock_t lock;
 	uint32_t depth;

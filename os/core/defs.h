@@ -17,10 +17,6 @@
 
 #define CONTROL_C -1
 
-#define TASK_SIGNATURE  0xdeadbeef
-#define MUTEX_SIGNATURE 0xbeaddaeb
-#define EVENT_SIGNATURE 0xfeebfaab
-
 #ifndef MAX_TASK_COUNT
 #define MAX_TASK_COUNT  16
 #endif

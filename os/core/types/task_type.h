@@ -12,6 +12,8 @@
 #include "list.h"
 #include "event_type.h"
 
+#define TASK_SIGNATURE  0xdeadbeef
+
 typedef enum {
 	TASK_INACTIVE,
 	TASK_ACTIVE,
@@ -64,10 +66,9 @@ typedef struct
 	uint8_t * stack_top;
 	uint8_t * sp;
 	int32_t id;
-	//uint32_t state;
 	task_state_e state;
 	uint32_t flags;
-	uint32_t sleep_until;
+//	uint32_t sleep_until;
 	uint64_t runtime;
 	uint64_t lasttime;
 	sw_stack_frame_t sw_context;

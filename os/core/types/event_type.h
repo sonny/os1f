@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include "list.h"
 
+#define EVENT_SIGNATURE 0xfeebfaab
+
 typedef struct {
 	int16_t id;
 	uint16_t signal;
