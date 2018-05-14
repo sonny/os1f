@@ -30,16 +30,12 @@ static list_t * rollovers = &timers[1];
 
 static void systimer_config_timers(void);
 static void systimer_insert(systimer_t *);
-static void systimer_remove(systimer_t * t);
+static void systimer_remove(systimer_t *);
 
 static void systimer_schedule(systimer_t *);
 static uint16_t systimer_current(void);
 static void systimer_schedule_next(void);
 static void systimer_disable_all(void);
-static void systimer_start_protected(void*);
-static void systimer_stop_protected(void*);
-static systimer_t * list_to_timer(list_t *);
-static list_t * timer_to_list(systimer_t *);
 
 #define SYSTIMERM_PERIOD 1000
 #define SYSTIMERS_PERIOD 0x10000
@@ -63,34 +59,37 @@ void systimer_init(void)
 	systimer_config_timers();
 }
 
-void systimer_start(systimer_t * t)
+void systimer_enable(void)
 {
-	service_call(systimer_start_protected, t, false);
+	// Enable both timers
+	SYSTIMERS->CR1 |= TIM_CR1_CEN;
+	SYSTIMERM->CR1 |= TIM_CR1_CEN;
 }
 
 static
-void systimer_start_protected(void * ctx)
+void systimer_start_irq(void * ctx)
 {
 	systimer_t * t = ctx;
-	__disable_irq();
 	systimer_schedule(t);
 	systimer_schedule_next();
-	__enable_irq();
+}
+
+void systimer_start(systimer_t * t)
+{
+	service_call(systimer_start_irq, t, true);
+}
+
+static
+void systimer_stop_irq(void * ctx)
+{
+	systimer_t * t = ctx;
+	systimer_remove(t);
+	systimer_schedule_next();
 }
 
 void systimer_stop(systimer_t * t)
 {
-	service_call(systimer_stop_protected, t, false);
-}
-
-static
-void systimer_stop_protected(void * ctx)
-{
-	systimer_t * t = ctx;
-	__disable_irq();
-	systimer_remove(t);
-	systimer_schedule_next();
-	__enable_irq();
+	service_call(systimer_stop_irq, t, true);
 }
 
 static inline
@@ -304,7 +303,4 @@ static void systimer_config_timers(void)
 	// Configure Slave Mode
 	SYSTIMERS->SMCR = TIM_TS_ITR2 | TIM_SLAVEMODE_EXTERNAL1;
 
-	// Enable both timers
-	SYSTIMERS->CR1 |= TIM_CR1_CEN;
-	SYSTIMERM->CR1 |= TIM_CR1_CEN;
 }

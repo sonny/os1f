@@ -12,6 +12,8 @@
 #include "assertions.h"
 #include "task_control.h"
 #include "task_type.h"
+#include "kernel.h"
+#include "systimer.h"
 
 #if OS_SCHEDULER == SCHEDULER_ROUND_ROBIN
 
@@ -27,7 +29,7 @@ void scheduler_idle(void * ctx)
 
 int scheduler_init(void)
 {
-	task_control_init();
+	systimer_create_exec(5, protected_kernel_context_switch, NULL);
 	return OS_OK;
 }
 

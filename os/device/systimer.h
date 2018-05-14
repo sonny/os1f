@@ -37,6 +37,7 @@ struct systimer_s {
 };
 
 void systimer_init(void);
+void systimer_enable(void);
 void systimer_destroy(systimer_t *);
 
 systimer_t * systimer_create_exec(size_t, timer_callback, void*);

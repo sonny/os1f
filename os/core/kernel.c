@@ -28,12 +28,13 @@ void os_start(void)
 	kernel_FPU_enable();
 #endif /* ENABLE_FP */
 
-	//kernel_task_init();
-	scheduler_init();
-	task_main_hoist();
-	//NOTE: after here we are in user mode
+	task_control_init();
+	task_main_hoist(); // sets the PSP
+	// NOTE: NO service calls before this point
+	// NOTE: after here we are in user mode
 
 	__os_started = true;
+	scheduler_init(); // scheduler uses service calls
 
 	os_services_start();
 }
@@ -51,6 +52,10 @@ void assert_os_started(void)
 
 static void os_services_start(void)
 {
+
+#ifdef SYSTIMER_ENABLE
+	systimer_enable();
+#endif
 
 #ifdef WATCHDOG_ENABLE
 	watchdog_init();

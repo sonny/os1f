@@ -214,7 +214,7 @@ void task_main_hoist(void)
 	// Recover MSP for interrupt handles -- has to happen before mode change
 	__set_MSP(stack_base);
 	__ISB();
-	__set_CONTROL(0x01 << 1 | 0x01 << 0);
+	__set_CONTROL(CONTROL_SPSEL_Msk | CONTROL_nPRIV_Msk);
 	__ISB();
 
 	// need to call start here in order to keep the SP valid

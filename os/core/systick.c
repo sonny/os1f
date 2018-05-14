@@ -51,7 +51,7 @@ void SysTick_Handler(void) {
 	if ((__systick % 1000) == 0)
 		BSP_LED_Toggle(LED1);
 
-	if (os_started())
-		protected_kernel_context_switch(NULL);
+//	if (os_started())
+//		protected_kernel_context_switch(NULL);
 }
 
