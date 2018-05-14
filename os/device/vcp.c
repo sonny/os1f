@@ -95,10 +95,14 @@ void VCP_IRQHandler(void)
 	{
 		// clear TC
 		VCP->ICR |= USART_ICR_TCCF;
-		if (!Ringbuffer.empty(&serial_tx_buffer.rb))
+		if (!Ringbuffer.empty(&serial_tx_buffer.rb)) {
 			VCP->TDR = Ringbuffer.remove(&serial_tx_buffer.rb);
-		else
+		}
+		else {
+			__disable_irq();
 			event_notify_irq(&vcp_tx_complete);
+			__enable_irq();
+		}
 	}
 }
 

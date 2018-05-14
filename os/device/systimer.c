@@ -210,7 +210,9 @@ void systimers_slave_CC1_callback(void)
 			break;
 		case TIMER_EVENT:
 		case TIMER_EVENT_ONCE:
+			__disable_irq();
 			event_notify_irq(t->event);
+			__enable_irq();
 			break;
 		case TIMER_EXEC_IRQ:
 		case TIMER_EXEC_IRQ_ONCE:

@@ -9,14 +9,14 @@ void os_start(void);
 bool os_started(void);
 
 __attribute__ ((always_inline)) static inline
-void protected_kernel_context_switch(void * ctx) {
+void kernel_context_switch_irq(void * ctx) {
 	(void) ctx;
 	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }
 
 __attribute__ ((always_inline)) static inline
 void kernel_context_switch(void) {
-	service_call(protected_kernel_context_switch, NULL, false);
+	service_call(kernel_context_switch_irq, NULL, false);
 }
 
 __attribute__ ((always_inline)) static inline

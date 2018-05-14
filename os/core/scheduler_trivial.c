@@ -20,7 +20,7 @@
 
 int scheduler_init(void)
 {
-	systimer_create_exec(5, protected_kernel_context_switch, NULL);
+	systimer_create_exec(5, kernel_context_switch_irq, NULL);
 	return OS_OK;
 }
 
@@ -38,7 +38,7 @@ int scheduler_unschedule_task(task_t * task)
 
 task_t * scheduler_get_next_ready(void)
 {
-	static int current_id = -1;
+	static int current_id = 0;
 	assert_protected();
 	int prev_id = current_id;
 	// find next active task

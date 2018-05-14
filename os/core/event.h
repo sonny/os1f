@@ -11,6 +11,7 @@
 #include "task_type.h"
 #include "assertions.h"
 #include "scheduler.h"
+#include "task.h"
 
 static void event_wait_irq(void * cxt);
 static void event_notify_irq(void *cxt);
@@ -27,13 +28,13 @@ void event_init(event_t * e, const char * name)
 
 static inline
 void event_notify(event_t *e) {
-	service_call(event_notify_irq, e, false);
+	service_call(event_notify_irq, e, true);
 }
 
 static inline
 void event_wait(event_t *e) {
 	service_call((svcall_t)event_control_add, e, true);
-	service_call(event_wait_irq, e, false);
+	service_call(event_wait_irq, e, true);
 	e->signal = 0;
 }
 
@@ -44,21 +45,20 @@ bool event_task_waiting(event_t *e) {
 
 static inline
 void event_wait_irq(void * cxt) {
+	assert_protected();
 	event_t *e = cxt;
-	__disable_irq();
 	if (e->signal == 0) {
 		task_t * current = get_current_task();
-		current->state = TASK_WAIT;
+		task_state_transition(current, TA_WAIT);
 		list_addAtRear(&e->waiting, task_to_list(current));
-		protected_kernel_context_switch(NULL);
+		kernel_context_switch_irq(NULL);
 	}
-	__enable_irq();
 }
 
 static inline
 void event_notify_irq(void * cxt) {
+	assert_protected();
 	event_t *e = cxt;
-	__disable_irq();
 	e->signal = 1;
 
 	while (!list_empty(&e->waiting))
@@ -66,10 +66,9 @@ void event_notify_irq(void * cxt) {
 		task_t * task = list_to_task(list_removeFront(&e->waiting));
 		assert_task_sig(task);
 		assert(task->state == TASK_WAIT && "Tasks in waiting queue must be waiting.");
-		task->state = TASK_READY;
+		task_state_transition(task, TA_NOTIFY);
 		scheduler_reschedule_task(task);
 	}
-	__enable_irq();
 }
 
 #endif  /* __EVENT_H__ */

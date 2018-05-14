@@ -111,8 +111,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 	if (hadc->Instance == ADC1)
 	{
 		adc_values[val_idx] = HAL_ADC_GetValue(hadc);
+		__disable_irq();
 		event_notify_irq(&adc_event);
-
+		__enable_irq();
 		val_idx = (val_idx + 1) % 2;
 	}
 }

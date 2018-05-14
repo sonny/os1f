@@ -24,6 +24,8 @@ void task_start(int id);
 void task_stop(int id);
 void task_display(task_t * task);
 
+void task_state_transition(task_t *t, task_action_e action);
+
 uintptr_t task_get_sp(int id);
 uintptr_t task_get_saved_pc(int id);
 hw_stack_frame_t task_get_saved_hw_frame(int id);

@@ -22,6 +22,14 @@ typedef enum {
 	TASK_END
 } task_state_e;
 
+typedef enum {
+	TA_START = 1,
+	TA_STOP,
+	TA_CONTEXT_SWITCH,
+	TA_WAIT,
+	TA_NOTIFY,
+	TA_EXIT
+} task_action_e;
 
 typedef struct
 {
@@ -114,7 +122,7 @@ extern task_t * get_current_task(void);
         .sp = &_name.stack[0] + sizeof(_name.stack),         \
         .stack_top = &_name.stack[0] + sizeof(_name.stack),  \
         .id = _id,                                           \
-        .state = TASK_ACTIVE,                                \
+        .state = TASK_READY,                                \
 	.lasttime = 0, \
 	.runtime = 0, \
         .join = EVENT_STATIC_INIT(_name.task.join),          \

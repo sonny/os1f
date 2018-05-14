@@ -78,6 +78,7 @@ task_t * task_create_schedule(void (*func)(void*), int stack_size, void *context
 void task_start(int id)
 {
 	assert_protected();
+	// XXX: add check for valid ID
 	task_t * t = task_control_get(id);
 	if (t && t->state == TASK_READY)
 		scheduler_reschedule_task(t);
@@ -89,7 +90,7 @@ void task_stop(int id)
 	task_t * t = task_control_get(id);
 	if (t) {
 		scheduler_unschedule_task(t);
-		t->state = TASK_INACTIVE;
+		task_state_transition(t, TA_STOP);
 	}
 }
 
@@ -108,13 +109,19 @@ void task_yield(void)
   kernel_context_switch();
 }
 
+static void task_end_irq(void * ctx)
+{
+	assert_protected();
+	task_t * task = ctx;
+	event_notify_irq(&task->join);
+	task_state_transition(task, TA_EXIT);
+	kernel_context_switch_irq(NULL);
+}
+
 static void task_end(void)
 {
-	// XXX : not protected
 	task_t * current = get_current_task();
-	event_notify(&current->join);
-	current->state = TASK_END;
-	task_yield();
+	service_call(task_end_irq, current, true);
 }
 
 static void task_remove(task_t *t)
@@ -203,6 +210,7 @@ void task_main_hoist(void)
 
 	extern task_t * current_task;
 	current_task = &main_task.task;
+	current_task->state = TASK_ACTIVE;
 	task_control_add(&main_task.task);
 	__enable_irq();
 
@@ -221,6 +229,140 @@ void task_main_hoist(void)
 	__asm volatile("main_return_point: \n");
 }
 
+void task_state_transition(task_t *t, task_action_e action)
+{
+	assert_protected();
+	switch(t->state) {
+	case TASK_INACTIVE:
+		switch(action) {
+		case TA_START:
+			t->state = TASK_READY;
+			break;
+		case TA_STOP:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_CONTEXT_SWITCH:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_WAIT:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_NOTIFY:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_EXIT:
+			assert(0 && "Invalid Transition");
+			break;
+		default:
+			assert(0 && "Invalid Transition");
+		}
+
+		break;
+	case TASK_ACTIVE:
+		switch(action) {
+		case TA_START:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_STOP:
+			t->state = TASK_INACTIVE;
+			break;
+		case TA_CONTEXT_SWITCH:
+			t->state = TASK_READY;
+			break;
+		case TA_WAIT:
+			t->state = TASK_WAIT;
+			break;
+		case TA_NOTIFY:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_EXIT:
+			t->state = TASK_END;
+			break;
+		default:
+			assert(0 && "Invalid Transition");
+		}
+
+		break;
+	case TASK_READY:
+		switch(action) {
+		case TA_START:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_STOP:
+			t->state = TASK_INACTIVE;
+			break;
+		case TA_CONTEXT_SWITCH:
+			t->state = TASK_ACTIVE;
+			break;
+		case TA_WAIT:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_NOTIFY:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_EXIT:
+			assert(0 && "Invalid Transition");
+			break;
+		default:
+			assert(0 && "Invalid Transition");
+		}
+
+		break;
+	case TASK_WAIT:
+		switch(action) {
+		case TA_START:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_STOP:
+			t->state = TASK_INACTIVE;
+			break;
+		case TA_CONTEXT_SWITCH:
+			// do nothing
+			break;
+		case TA_WAIT:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_NOTIFY:
+			t->state = TASK_READY;
+			break;
+		case TA_EXIT:
+			assert(0 && "Invalid Transition");
+			break;
+		default:
+			assert(0 && "Invalid Transition");
+		}
+
+		break;
+	case TASK_END:
+		switch(action) {
+		case TA_START:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_STOP:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_CONTEXT_SWITCH:
+			// do nothing
+			break;
+		case TA_WAIT:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_NOTIFY:
+			assert(0 && "Invalid Transition");
+			break;
+		case TA_EXIT:
+			assert(0 && "Invalid Transition");
+			break;
+		default:
+			assert(0 && "Invalid Transition");
+		}
+
+		break;
+	default:
+		assert(0 && "Invalid Transition");
+
+	}
+}
 
 void assert_task_valid(task_t *t)
 {
