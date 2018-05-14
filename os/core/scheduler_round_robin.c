@@ -19,14 +19,6 @@
 
 static list_t ready_list = LIST_STATIC_INIT(ready_list);
 
-void scheduler_idle(void * ctx)
-{
-	(void)ctx;
-	while(1) {
-		__WFI();
-	}
-}
-
 int scheduler_init(void)
 {
 	systimer_create_exec(5, protected_kernel_context_switch, NULL);

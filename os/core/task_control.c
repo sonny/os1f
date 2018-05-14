@@ -17,10 +17,17 @@ static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID);
 
 static task_t *TCB[MAX_TASK_COUNT] = {0};
 
+static void task_control_idle(void * ctx)
+{
+	(void)ctx;
+	while(1) {
+		__WFI();
+	}
+}
+
 void task_control_init(void)
 {
-	extern void scheduler_idle(void * ctx);
-	task_frame_init(&idle_task.task, scheduler_idle, NULL);
+	task_frame_init(&idle_task.task, task_control_idle, NULL);
 }
 
 int task_control_add(task_t * task)

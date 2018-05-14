@@ -20,6 +20,7 @@ bool scheduler_task_ready(task_t * t);
 #define SCHEDULER_TRIVIAL     1
 #define SCHEDULER_ROUND_ROBIN 2
 
-#define OS_SCHEDULER SCHEDULER_ROUND_ROBIN
+//#define OS_SCHEDULER SCHEDULER_ROUND_ROBIN
+#define OS_SCHEDULER SCHEDULER_TRIVIAL
 
 #endif /* OS_CORE_SCHEDULER_H_ */
