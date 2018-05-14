@@ -66,7 +66,7 @@ void event_notify_irq(void * cxt) {
 		task_t * task = list_to_task(list_removeFront(&e->waiting));
 		assert_task_sig(task);
 		assert(task->state == TASK_WAIT && "Tasks in waiting queue must be waiting.");
-		task->state = TASK_ACTIVE;
+		task->state = TASK_READY;
 		scheduler_reschedule_task(task);
 	}
 	__enable_irq();

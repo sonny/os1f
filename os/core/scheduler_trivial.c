@@ -46,15 +46,15 @@ task_t * scheduler_get_next_ready(void)
 	do {
 		current_id = (current_id + 1) % MAX_TASK_COUNT;
 		next = task_control_get(current_id);
-	} while ((next == NULL || next->state != TASK_ACTIVE) && current_id != prev_id);
+	} while ((next == NULL || next->state != TASK_READY) && current_id != prev_id);
 
-	if (!next || next->state != TASK_ACTIVE) next = task_control_get(IDLE_TASK_ID);
+	if (!next || next->state != TASK_READY) next = task_control_get(IDLE_TASK_ID);
 	return next;
 }
 
 bool scheduler_task_ready(task_t *t)
 {
-	return t->state == TASK_ACTIVE;
+	return t->state == TASK_READY;
 }
 
 #endif

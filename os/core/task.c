@@ -62,7 +62,7 @@ static void __task_create_schedule(void *ctx)
 	task_init_t *ti = ctx;
 	ti->task = task_create(ti->stack_size, ti->name);
 	task_frame_init(ti->task, ti->func, ti->context);
-	ti->task->state = TASK_ACTIVE;
+	ti->task->state = TASK_READY;
 	scheduler_reschedule_task(ti->task);
 }
 
@@ -79,7 +79,7 @@ void task_start(int id)
 {
 	assert_protected();
 	task_t * t = task_control_get(id);
-	if (t && t->state == TASK_ACTIVE)
+	if (t && t->state == TASK_READY)
 		scheduler_reschedule_task(t);
 }
 
@@ -229,23 +229,31 @@ void assert_task_valid(task_t *t)
 	// task must have valid signature
 	assert(t->signature == TASK_SIGNATURE && "Invalid task signature.");
 
-	bool in_active = scheduler_task_ready(t);
-	bool in_sleep = false;
+	bool in_active = (t->state == TASK_ACTIVE);
+	bool in_ready = scheduler_task_ready(t);
 	bool in_wait = event_control_task_waiting(t);
 
 	// task state must be one of Inactive, Active, Sleep, Wait, or end
 	switch(t->state) {
 	case TASK_ACTIVE:
 		// task must be current or in active queue
-		assert((t == current || in_active) && "Invalid TASK_ACTIVE");
+		assert((t == current && in_active) && "Invalid TASK_ACTIVE");
 		// task must not be in sleep, or wait queue
-		assert(!(in_sleep || in_wait) && "Invalid TASK_ACTIVE");
+		assert(!(in_ready || in_wait) && "Invalid TASK_ACTIVE");
+		break;
+	case TASK_READY:
+		// task must be in ready
+		assert(in_ready && "Invalid TASK_READY");
+		// task must not be current
+		assert((t != current) && "Invalid TASK_READY");
+		// task must not be in active, or wait
+		assert(!(in_active || in_wait) && "Invalid TASK_READY");
 		break;
 	case TASK_WAIT:
 		// task must not be current
 		assert((t != current) && "Invalid TASK_WAIT");
 		// task must not be in active, or sleep queue
-		assert(!(in_active || in_sleep) && "Invalid TASK_WAIT");
+		assert(!(in_active || in_ready) && "Invalid TASK_WAIT");
 		// task must be in ONE wait queue
 		assert(in_wait == 1 && "Invalid TASK_WAIT");
 		break;
@@ -256,7 +264,7 @@ void assert_task_valid(task_t *t)
 		// task must not be current
 		assert((t != current) && "Invalid TASK_INACTIVE or TASK_END");
 		// task must not be in active, sleep, or wait queue
-		assert(!(in_active || in_sleep || in_wait) && "Invalid TASK_INACTIVE or TASK_END");
+		assert(!(in_active || in_ready || in_wait) && "Invalid TASK_INACTIVE or TASK_END");
 		break;
 	default:
 		assert(0 && "Invalid task state.");

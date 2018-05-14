@@ -28,7 +28,7 @@ int scheduler_init(void)
 int scheduler_reschedule_task(task_t * task)
 {
 	assert_protected();
-	if (task->state != TASK_ACTIVE || task->id < 0) return OSERR_VALUE;
+	if (task->state != TASK_READY || task->id < 0) return OSERR_VALUE;
 	list_addAtRear(&ready_list, task_to_list(task));
 	return OS_OK;
 }

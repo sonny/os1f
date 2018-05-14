@@ -26,7 +26,7 @@ void printlist(list_t *head);
  * @param head : List head
  * @return void
  */
-static inline
+__attribute__((always_inline)) static inline
 void list_init(list_t *head)
 {
 	assert(head && "List Head is a Null Pointer");
@@ -41,7 +41,7 @@ void list_init(list_t *head)
  * @return size of list
  * @note Not Implemented
  */
-static inline
+__attribute__((always_inline)) static inline
 int list_size(const list_t *head)
 {
 	(void) head;
@@ -55,14 +55,14 @@ int list_size(const list_t *head)
  * @param head : List head
  * @return true if list is empty
  */
-static inline
+__attribute__((always_inline)) static inline
 bool list_empty(const list_t const * head)
 {
 	assert(head && "List Head is a Null Pointer");
 	return (head->next == head);
 }
 
-static inline
+__attribute__((always_inline)) static inline
 bool list_element(const list_t const * node)
 {
 	return !list_empty(node);
@@ -79,7 +79,7 @@ bool list_element(const list_t const * node)
  * @Note prev and next can be aliased to each other
  * @return void
  */
-static inline
+__attribute__((always_inline)) static inline
 void list_insert(list_t * restrict new, list_t *prev, list_t *next)
 {
 	assert(new && prev && next && "Invalid list pointers");
@@ -96,7 +96,7 @@ void list_insert(list_t * restrict new, list_t *prev, list_t *next)
  * @param new  : Node to insert
  * @return void
  */
-static inline
+__attribute__((always_inline)) static inline
 void list_addAtFront(list_t * restrict head, list_t * restrict new)
 {
 	assert(head && new && "List Head is a Null Pointer");
@@ -113,7 +113,7 @@ void list_addAtFront(list_t * restrict head, list_t * restrict new)
  * @param new  : Node to insert
  * @return void
  */
-static inline
+__attribute__((always_inline)) static inline
 void list_addAtRear(list_t * restrict head, list_t * restrict new)
 {
 	assert(head && new && "List Head is a Null Pointer");
@@ -131,7 +131,7 @@ void list_addAtRear(list_t * restrict head, list_t * restrict new)
  * @note This function does not require the node to belong to any particular list. It ensures
  *       that it is removed from any that it might belong to.
  */
-static inline
+__attribute__((always_inline)) static inline
 void list_remove(list_t *node)
 {
 	assert(node && "List node is a Null Pointer");
@@ -147,7 +147,8 @@ void list_remove(list_t *node)
  * @param node : Node to remove
  * @return node that was removed
  */
-static inline list_t *list_removeNode(list_t * restrict head,
+__attribute__((always_inline)) static inline
+list_t *list_removeNode(list_t * restrict head,
 		list_t * restrict node)
 {
 	assert(head && node && "List Node is a Null Pointer");
@@ -163,7 +164,8 @@ static inline list_t *list_removeNode(list_t * restrict head,
  * @param head : List head
  * @return first node in list
  */
-static inline list_t* list_removeFront(list_t *head)
+__attribute__((always_inline)) static inline
+list_t* list_removeFront(list_t *head)
 {
 	assert(head && "List Head is a Null Pointer");
 	return list_removeNode(head, head->next);
@@ -175,7 +177,8 @@ static inline list_t* list_removeFront(list_t *head)
  * @param head : List head
  * @return last node in list
  */
-static inline list_t *list_removeRear(list_t *head)
+__attribute__((always_inline)) static inline
+list_t *list_removeRear(list_t *head)
 {
 	assert(head && "List Head is a Null Pointer");
 	return list_removeNode(head, head->prev);
@@ -185,7 +188,7 @@ static inline list_t *list_removeRear(list_t *head)
   for (pos = (head)->next, tmp = pos->next; pos != (head);      \
        pos = tmp, tmp = pos->next)
 
-static inline
+__attribute__((always_inline)) static inline
 bool list_element_of(list_t * node, list_t * list)
 {
 	list_t *pos, *tmp;
@@ -197,9 +200,8 @@ bool list_element_of(list_t * node, list_t * list)
 	return false;
 }
 
-static inline
-void list_insert_condition(list_t *head, list_t *node,
-		bool (*cond)(list_t*, list_t*))
+__attribute__((always_inline)) static inline
+void list_insert_condition(list_t *head, list_t *node, bool (*cond)(list_t*, list_t*))
 {
 	list_t *pos, *tmp;
 	LIST_FOR_EACH_SAFE(pos, tmp, head)
@@ -224,7 +226,7 @@ void list_insert_condition(list_t *head, list_t *node,
  * @param context : Data passed to pred and func
  * @return void
  */
-static inline
+__attribute__((always_inline)) static inline
 void list_each_do_if(list_t *head, void (*func)(list_t*, const void*),
 bool (*pred)(list_t*, const void*), const void * context)
 {
@@ -232,14 +234,12 @@ bool (*pred)(list_t*, const void*), const void * context)
 	for (pos = (head)->next, tmp = pos->next; pos != (head); pos = tmp, tmp =
 			pos->next)
 	{
-
 		// if pred is NULL, then we assume true
 		if (!pred || pred(pos, context))
 		{
 			func(pos, context);
 		}
 	}
-
 }
 
 /**
@@ -250,7 +250,7 @@ bool (*pred)(list_t*, const void*), const void * context)
  * @param context : Data for fnc
  * @return void
  */
-static inline
+__attribute__((always_inline)) static inline
 void list_each_do(list_t *head, void (*func)(list_t*, const void*),
 		const void *context)
 {

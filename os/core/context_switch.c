@@ -44,8 +44,10 @@ void PendSV_Handler(void)
 	update_runtime();
 
 	save_PSP();
+	if (current_task->state == TASK_ACTIVE) current_task->state = TASK_READY;
 	scheduler_reschedule_task(current_task);
 	current_task = scheduler_get_next_ready();
+	current_task->state = TASK_ACTIVE;
 
 	assert_all_tasks_valid();
 
