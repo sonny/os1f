@@ -137,13 +137,25 @@ static void shell_cmd_ps(void) {
 static void shell_cmd_start(void) {
 	char *end;
 	int id = strtol(argv[1], &end, 10);
-	service_call((svcall_t) task_start, (void*) id, true);
+	task_t * task = task_control_get(id);
+	if(task) {
+		service_call((svcall_t) task_start, task, true);
+		os_iprintf("Task id [%d] is ready\r\n", id);
+	}
+	else
+		os_iprintf("Task id [%d] is invalid\r\n", id);
 }
 
 static void shell_cmd_stop(void) {
 	char *end;
 	int id = strtol(argv[1], &end, 10);
-	service_call((svcall_t) task_stop, (void*) id, true);
+	task_t * task = task_control_get(id);
+	if(task) {
+		service_call((svcall_t) task_stop, task, true);
+		os_iprintf("Task id [%d] is inactive\r\n", id);
+	}
+	else
+		os_iprintf("Task id [%d] is invalid\r\n", id);
 }
 
 extern char _end; // Bottom of RAM ???

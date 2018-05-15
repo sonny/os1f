@@ -18,8 +18,8 @@ void task_join(task_t * t);
 void task_schedule(task_t *task);
 void task_delay(uint32_t ms);
 void task_yield(void);
-void task_start(int id);
-void task_stop(int id);
+void task_start(task_t *);
+void task_stop(task_t *);
 void task_display(task_t * task);
 
 void task_state_transition(task_t *t, task_action_e action);

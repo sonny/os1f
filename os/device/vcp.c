@@ -84,6 +84,8 @@ void HAL_UART_MspInit(__attribute__((unused))  UART_HandleTypeDef *huart)
 void VCP_IRQHandler(void)
 {
 	uint32_t isrflags = VCP->ISR;
+	__disable_irq();
+
 	// RX mode
 	if (isrflags & USART_ISR_RXNE)
 	{
@@ -93,17 +95,17 @@ void VCP_IRQHandler(void)
 	// TX complete
 	if (isrflags & USART_ISR_TC)
 	{
+
 		// clear TC
 		VCP->ICR |= USART_ICR_TCCF;
 		if (!Ringbuffer.empty(&serial_tx_buffer.rb)) {
 			VCP->TDR = Ringbuffer.remove(&serial_tx_buffer.rb);
 		}
 		else {
-			__disable_irq();
 			event_notify_irq(&vcp_tx_complete);
-			__enable_irq();
 		}
 	}
+	__enable_irq();
 }
 
 /* int _write(int file, char *ptr, int len) */

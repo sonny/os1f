@@ -33,6 +33,8 @@ int scheduler_reschedule_task(task_t * task)
 int scheduler_unschedule_task(task_t * task)
 {
 	assert_protected();
+	// list from ANY list
+	list_remove(task_to_list(task));
 	return OS_OK;
 }
 

@@ -50,7 +50,6 @@ task_t * task_frame_init(task_t *t, void (*func)(void*), const void *ctx)
   return t;
 }
 
-//static task_t * task_create(int stack_size, const char * name)
 static task_t * task_create(void (*func)(void*), int stack_size, const void *ctx, const char * name)
 {
 	task_t * t = task_alloc(stack_size);
@@ -68,23 +67,20 @@ task_t * task_create_schedule(void (*func)(void*), int stack_size, void *ctx, co
 	return task;
 }
 
-void task_start(int id)
+void task_start(task_t * task)
 {
 	assert_protected();
-	// XXX: add check for valid ID
-	task_t * t = task_control_get(id);
-	if (t && t->state == TASK_READY)
-		scheduler_reschedule_task(t);
+	assert(task && "No task");
+	task_state_transition(task, TA_START);
+	scheduler_reschedule_task(task);
 }
 
-void task_stop(int id)
+void task_stop(task_t * task)
 {
 	assert_protected();
-	task_t * t = task_control_get(id);
-	if (t) {
-		scheduler_unschedule_task(t);
-		task_state_transition(t, TA_STOP);
-	}
+	assert(task && "No task");
+	scheduler_unschedule_task(task);
+	task_state_transition(task, TA_STOP);
 }
 
 void task_delay(uint32_t ms)
@@ -365,11 +361,11 @@ void assert_task_valid(task_t *t)
 		break;
 	case TASK_INACTIVE:
 		// task must not be current
-		// task must not be in active, sleep, or wait queue
+		// task must not be in active, ready, or wait queue
 	case TASK_END:
 		// task must not be current
 		assert((t != current) && "Invalid TASK_INACTIVE or TASK_END");
-		// task must not be in active, sleep, or wait queue
+		// task must not be in active, ready, or wait queue
 		assert(!(in_active || in_ready || in_wait) && "Invalid TASK_INACTIVE or TASK_END");
 		break;
 	default:
