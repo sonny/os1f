@@ -15,7 +15,7 @@
 static void task_end(void);
 static TASK_STATIC_CREATE(main_task, "Main", MAIN_STACK_SIZE, 0);
 
-task_t * task_alloc(int stack_size)
+static task_t * task_alloc(int stack_size)
 {
 	// ensure that eventual sp is 8 byte aligned
 	size_t size = sizeof(task_t) + stack_size + (stack_size % 8);
@@ -29,6 +29,8 @@ task_t * task_alloc(int stack_size)
 static task_t * task_init(task_t *t, const char * name)
 {
 	*(uint32_t*) &t->signature = TASK_SIGNATURE;
+	t->priority = DEFAULT_TASK_PRIORITY;
+	t->state = TASK_INACTIVE;
 	t->name = name;
 	t->exc_return = 0xfffffffd;
 	list_init(&t->node);
@@ -36,18 +38,10 @@ static task_t * task_init(task_t *t, const char * name)
 	return t;
 }
 
-task_t * task_create(int stack_size, const char * name)
-{
-	task_t * t = task_alloc(stack_size);
-	task_init(t, name);
-	task_control_add(t);
-	return t;
-}
-
-task_t * task_frame_init(task_t *t, void (*func)(void*), void *context)
+task_t * task_frame_init(task_t *t, void (*func)(void*), const void *ctx)
 {
   hw_stack_frame_t *frame = (hw_stack_frame_t*)(t->sp - sizeof(hw_stack_frame_t));
-  frame->r0 = (uint32_t)context;
+  frame->r0 = (uint32_t)ctx;
   frame->pc = (uint32_t)func & 0xfffffffe;
   frame->lr = (uint32_t)&task_end;
   frame->xpsr = 0x01000000;   // thumb mode enabled (required);
@@ -56,23 +50,22 @@ task_t * task_frame_init(task_t *t, void (*func)(void*), void *context)
   return t;
 }
 
-static void __task_create_schedule(void *ctx)
+//static task_t * task_create(int stack_size, const char * name)
+static task_t * task_create(void (*func)(void*), int stack_size, const void *ctx, const char * name)
 {
-	assert_protected();
-	task_init_t *ti = ctx;
-	ti->task = task_create(ti->stack_size, ti->name);
-	task_frame_init(ti->task, ti->func, ti->context);
-	ti->task->state = TASK_READY;
-	scheduler_reschedule_task(ti->task);
+	task_t * t = task_alloc(stack_size);
+	task_init(t, name);
+	task_frame_init(t, func, ctx);
+	return t;
 }
 
-task_t * task_create_schedule(void (*func)(void*), int stack_size, void *context, const char * name)
+task_t * task_create_schedule(void (*func)(void*), int stack_size, void *ctx, const char * name)
 {
-	task_init_t ti =
-	{ .func = func, .stack_size = stack_size, .context = context, .name = name,
-			.task = 0 };
-	service_call(__task_create_schedule, &ti, true);
-	return ti.task;
+	task_t * task = task_create(func, stack_size, ctx, name);
+	task->state = TASK_READY;
+	service_call((svcall_t)task_control_add, task, true);
+	service_call((svcall_t)scheduler_reschedule_task, task, true);
+	return task;
 }
 
 void task_start(int id)

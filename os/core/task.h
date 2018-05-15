@@ -10,9 +10,7 @@
 
 void task_main_hoist(void);
 
-task_t * task_alloc(int stack_size);
-task_t * task_create(int stack_size, const char * name);
-task_t * task_frame_init(task_t *t, void (*func)(void*), void *context);
+task_t * task_frame_init(task_t *, void (*)(void*), const void *);
 task_t * task_create_schedule(void (*)(void*), int, void*, const char*);
 
 void task_free(task_t * t);
