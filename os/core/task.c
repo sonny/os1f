@@ -239,30 +239,18 @@ void task_state_transition(task_t *t, task_action_e action)
 			t->state = TASK_READY;
 			break;
 		case TA_STOP:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_CONTEXT_SWITCH:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_WAIT:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_NOTIFY:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_EXIT:
-			assert(0 && "Invalid Transition");
-			break;
 		default:
 			assert(0 && "Invalid Transition");
+			break;
 		}
 
 		break;
 	case TASK_ACTIVE:
 		switch(action) {
-		case TA_START:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_STOP:
 			t->state = TASK_INACTIVE;
 			break;
@@ -278,8 +266,10 @@ void task_state_transition(task_t *t, task_action_e action)
 		case TA_EXIT:
 			t->state = TASK_END;
 			break;
+		case TA_START:
 		default:
 			assert(0 && "Invalid Transition");
+			break;
 		}
 
 		break;
@@ -295,66 +285,47 @@ void task_state_transition(task_t *t, task_action_e action)
 			t->state = TASK_ACTIVE;
 			break;
 		case TA_WAIT:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_NOTIFY:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_EXIT:
-			assert(0 && "Invalid Transition");
-			break;
 		default:
 			assert(0 && "Invalid Transition");
+			break;
 		}
 
 		break;
 	case TASK_WAIT:
 		switch(action) {
-		case TA_START:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_STOP:
 			t->state = TASK_INACTIVE;
 			break;
 		case TA_CONTEXT_SWITCH:
 			// do nothing
 			break;
-		case TA_WAIT:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_NOTIFY:
 			t->state = TASK_READY;
 			break;
+		case TA_START:
+		case TA_WAIT:
 		case TA_EXIT:
-			assert(0 && "Invalid Transition");
-			break;
 		default:
 			assert(0 && "Invalid Transition");
+			break;
 		}
 
 		break;
 	case TASK_END:
 		switch(action) {
-		case TA_START:
-			assert(0 && "Invalid Transition");
-			break;
-		case TA_STOP:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_CONTEXT_SWITCH:
 			// do nothing
 			break;
+		case TA_START:
+		case TA_STOP:
 		case TA_WAIT:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_NOTIFY:
-			assert(0 && "Invalid Transition");
-			break;
 		case TA_EXIT:
-			assert(0 && "Invalid Transition");
-			break;
 		default:
 			assert(0 && "Invalid Transition");
+			break;
 		}
 
 		break;
