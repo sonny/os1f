@@ -60,7 +60,7 @@ int event_control_task_waiting(task_t *t)
 		event_t * e = event_list[i];
 		if (e == NULL) continue;
 		assert_event_sig(e);
-		if (list_element_of(task_to_list(t), &e->waiting)) result++;
+		if (list_contains( &e->waiting, task_to_list(t))) result++;
 	}
 	return result;
 

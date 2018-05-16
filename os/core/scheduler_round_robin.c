@@ -19,9 +19,10 @@
 
 static list_t ready_list = LIST_STATIC_INIT(ready_list);
 
+
 int scheduler_init(void)
 {
-	systimer_create_exec(5, protected_kernel_context_switch, NULL);
+	systimer_create_exec(5, kernel_context_switch_irq, NULL);
 	return OS_OK;
 }
 

@@ -23,6 +23,14 @@ typedef enum {
 } task_state_e;
 
 typedef enum {
+	TASK_PRI_LOWEST = 2,
+	TASK_PRI_LOW = -1,
+	TASK_PRI_MEDIUM = 0,
+	TASK_PRI_HIGH,
+	TASK_PRI_HIGHEST
+} task_priority_e;
+
+typedef enum {
 	TA_START = 1,
 	TA_STOP,
 	TA_CONTEXT_SWITCH,
@@ -74,6 +82,7 @@ typedef struct
 	uint8_t * stack_top;
 	uint8_t * sp;
 	int32_t id;
+	task_priority_e priority;
 	task_state_e state;
 	uint64_t runtime;
 	uint64_t lasttime;
@@ -104,10 +113,13 @@ typedef struct
 #define list_to_task(list) ((task_t*)(list))
 #define task_to_list(task) (&(task)->node)
 
+#ifndef DEFAULT_TASK_PRIORITY
+#define DEFAULT_TASK_PRIORITY TASK_PRI_MEDIUM
+#endif
+
 // implemented in context_switch (which has no header file)
 extern uint32_t get_current_task_id(void);
 extern task_t * get_current_task(void);
-
 
 #define TASK_STATIC_ALLOCATE(name, size)                \
   struct {                                              \
@@ -117,16 +129,17 @@ extern task_t * get_current_task(void);
 
 #define TASK_STATIC_INIT(_name, _name_str, _id) {            \
     { .node = LIST_STATIC_INIT(_name.task.node),             \
-		.signature = TASK_SIGNATURE, \
-        .name = _name_str,                                   \
-        .sp = &_name.stack[0] + sizeof(_name.stack),         \
-        .stack_top = &_name.stack[0] + sizeof(_name.stack),  \
-        .id = _id,                                           \
-        .state = TASK_READY,                                \
-	.lasttime = 0, \
-	.runtime = 0, \
-        .join = EVENT_STATIC_INIT(_name.task.join),          \
-        .exc_return = 0xfffffffd }, {0}                      \
+	  .signature = TASK_SIGNATURE, \
+      .name = _name_str,                                   \
+      .sp = &_name.stack[0] + sizeof(_name.stack),         \
+      .stack_top = &_name.stack[0] + sizeof(_name.stack),  \
+      .id = _id,                                           \
+	  .priority = DEFAULT_TASK_PRIORITY, \
+	  .state = TASK_READY,                                \
+	  .lasttime = 0, \
+	  .runtime = 0, \
+      .join = EVENT_STATIC_INIT(_name.task.join),          \
+      .exc_return = 0xfffffffd }, {0}                      \
   }
 
 #define TASK_STATIC_CREATE(name, name_str, size, id) \

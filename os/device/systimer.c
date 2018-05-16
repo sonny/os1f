@@ -66,12 +66,14 @@ void systimer_enable(void)
 	SYSTIMERM->CR1 |= TIM_CR1_CEN;
 }
 
-static
 void systimer_start_irq(void * ctx)
 {
 	systimer_t * t = ctx;
-	systimer_schedule(t);
-	systimer_schedule_next();
+	// only schedule if timer is not currently on the timer
+	if (t != list_to_timer(list_head(systimers))) {
+		systimer_schedule(t);
+		systimer_schedule_next();
+	}
 }
 
 void systimer_start(systimer_t * t)
@@ -79,7 +81,6 @@ void systimer_start(systimer_t * t)
 	service_call(systimer_start_irq, t, true);
 }
 
-static
 void systimer_stop_irq(void * ctx)
 {
 	systimer_t * t = ctx;
@@ -137,6 +138,11 @@ uint16_t systimer_current(void)
 	return SYSTIMERS->CNT;
 }
 
+bool systimer_is_scheduled(systimer_t *t)
+{
+	return list_element(timer_to_list(t));
+}
+
 static void systimer_schedule(systimer_t *t)
 {
 	assert_protected();
@@ -160,6 +166,7 @@ static void systimer_insert(systimer_t * t)
 	else
 		head = systimers;
 
+	assert(!list_contains(head, timer_to_list(t)) && "Timer already in list.");
 	list_insert_condition(head, timer_to_list(t), systimer_insert_condition);
 }
 

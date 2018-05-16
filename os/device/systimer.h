@@ -39,6 +39,11 @@ struct systimer_s {
 void systimer_init(void);
 void systimer_enable(void);
 void systimer_destroy(systimer_t *);
+void systimer_start_irq(void *);
+void systimer_stop_irq(void *);
+void systimer_start(systimer_t *);
+void systimer_stop(systimer_t *);
+bool systimer_is_scheduled(systimer_t *t);
 
 systimer_t * systimer_create_exec(size_t, timer_callback, void*);
 systimer_t * systimer_create_event_onetime(size_t, event_t *);

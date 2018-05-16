@@ -69,7 +69,7 @@ bool list_element(const list_t const * node)
 }
 
 /**
- * Intert node into list
+ * Insert node into list
  *
  * For inserting a new node when the next and prev are known
  *
@@ -189,7 +189,7 @@ list_t *list_removeRear(list_t *head)
        pos = tmp, tmp = pos->next)
 
 __attribute__((always_inline)) static inline
-bool list_element_of(list_t * node, list_t * list)
+bool list_contains(list_t * list, list_t * node)
 {
 	list_t *pos, *tmp;
 	LIST_FOR_EACH_SAFE(pos, tmp, list)
