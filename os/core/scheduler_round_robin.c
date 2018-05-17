@@ -14,11 +14,11 @@
 #include "task_type.h"
 #include "kernel.h"
 #include "systimer.h"
+#include "list.h"
 
 #if OS_SCHEDULER == SCHEDULER_ROUND_ROBIN
 
 static list_t ready_list = LIST_STATIC_INIT(ready_list);
-
 
 int scheduler_init(void)
 {
@@ -44,15 +44,16 @@ int scheduler_unschedule_task(task_t * task)
 task_t * scheduler_get_next_ready(void)
 {
 	assert_protected();
-	if (list_empty(&ready_list))
-		return task_control_get(IDLE_TASK_ID);
-	else
-		return list_to_task(list_removeFront(&ready_list));
+	task_t * next = list_to_task(list_removeFront(&ready_list));
+	return next;
 }
 
 bool scheduler_task_ready(task_t * t)
 {
-	return list_element_of(task_to_list(t), &ready_list);
+	bool is_idle = (t == task_control_get_idle_task());
+	bool in_list = list_contains(&ready_list, task_to_list(t));
+
+	return (t->state == TASK_READY && (is_idle || in_list));
 }
 
 #endif

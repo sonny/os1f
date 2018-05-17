@@ -70,7 +70,9 @@ void systimer_start_irq(void * ctx)
 {
 	systimer_t * t = ctx;
 	// only schedule if timer is not currently on the timer
-	if (t != list_to_timer(list_head(systimers))) {
+	// and if it is NOT already scheduled (the second condition
+	// includes the first).
+	if (!list_element(timer_to_list(t))) {
 		systimer_schedule(t);
 		systimer_schedule_next();
 	}

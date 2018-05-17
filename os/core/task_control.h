@@ -16,4 +16,6 @@ int task_control_remove(task_t * task);
 task_t * task_control_get(int id);
 void task_control_each(void (*f)(task_t*));
 
+task_t * task_control_get_idle_task(void);
+
 #endif /* OS_TASK_CONTROL_H_ */

@@ -50,7 +50,7 @@ task_t * scheduler_get_next_ready(void)
 		next = task_control_get(current_id);
 	} while ((next == NULL || next->state != TASK_READY) && current_id != prev_id);
 
-	if (!next || next->state != TASK_READY) next = task_control_get(IDLE_TASK_ID);
+	if (next->state != TASK_READY) next = NULL;
 	return next;
 }
 

@@ -61,6 +61,11 @@ task_t * task_control_get(int id)
 	return TCB[id];
 }
 
+task_t * task_control_get_idle_task(void)
+{
+	return &idle_task.task;
+}
+
 void task_control_each(void (*f)(task_t*))
 {
 	for (int i = 0; i < MAX_TASK_COUNT; ++i) {

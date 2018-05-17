@@ -11,6 +11,7 @@
 #include "task.h"
 #include "scheduler.h"
 #include "systimer.h"
+#include "task_control.h"
 
 task_t * current_task = NULL;
 
@@ -45,8 +46,13 @@ void PendSV_Handler(void)
 
 	save_PSP();
 	task_state_transition(current_task, TA_CONTEXT_SWITCH);
-	scheduler_reschedule_task(current_task);
+	if (current_task != task_control_get_idle_task())
+		scheduler_reschedule_task(current_task);
+
 	current_task = scheduler_get_next_ready();
+	if (current_task == NULL)
+		current_task = task_control_get_idle_task();
+
 	task_state_transition(current_task, TA_CONTEXT_SWITCH);
 
 	assert_all_tasks_valid();

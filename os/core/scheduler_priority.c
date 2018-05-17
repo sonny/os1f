@@ -23,21 +23,16 @@ static systimer_t scheduler_timer = {
 		.type = TIMER_EXEC_IRQ
 };
 
-static volatile bool scheduler_started = false;
-
 int scheduler_init(void)
 {
-	//scheduler_timer = systimer_create_exec(5, kernel_context_switch_irq, NULL);
-	//systimer_stop(scheduler_timer);
-	scheduler_started = true;
 	return OS_OK;
 }
 
 static bool scheduler_insert_condition(list_t * node, list_t * new)
 {
 	// true if if the priority of the new node is higher
-	task_t * node_task = list_to_task(node);
-	task_t * ins_task = list_to_task(new);
+	const task_t * node_task = list_to_task(node);
+	const task_t * ins_task = list_to_task(new);
 	return ( ins_task->priority > node_task->priority );
 }
 
@@ -49,13 +44,12 @@ int scheduler_reschedule_task(task_t * task)
 	list_insert_condition(&ready_list, task_to_list(task), scheduler_insert_condition);
 
 	task_t * current = get_current_task();
-	if (scheduler_started && task != current) {
+	if (task != current) {
 	// if new task has higher priority than current, switch immediately
 		if (task->priority > current->priority)
 			kernel_context_switch_irq(NULL);
 	// if new task has the same priority than current, start the timer
-		else if (task->priority == current->priority &&
-				 !systimer_is_scheduled(&scheduler_timer))
+		else if (task->priority == current->priority)
 			systimer_start_irq(&scheduler_timer);
 	// if new task has lower priority than current, just insert it
 	// else do nothing
@@ -74,21 +68,16 @@ task_t * scheduler_get_next_ready(void)
 {
 	assert_protected();
 
-	if (scheduler_started)
-		systimer_stop_irq(&scheduler_timer);
+	systimer_stop_irq(&scheduler_timer);
 
-	if (list_empty(&ready_list))
-		return task_control_get(IDLE_TASK_ID);
-	else {
-		task_t * task = list_to_task(list_removeFront(&ready_list));
-		// if task priority is the same as the next one in the list
-		// go ahead and set the timer
-		if (scheduler_started && !list_empty(&ready_list) &&
-			list_to_task(list_head(&ready_list))->priority == task->priority ) {
-			systimer_start_irq(&scheduler_timer);
-		}
-		return task;
+	task_t * task = list_to_task(list_removeFront(&ready_list));
+	// if task priority is the same as the next one in the list
+	// go ahead and set the timer
+	if (task && !list_empty(&ready_list) &&
+		list_to_task(list_head(&ready_list))->priority == task->priority ) {
+		systimer_start_irq(&scheduler_timer);
 	}
+	return task;
 }
 
 bool scheduler_task_ready(task_t * t)

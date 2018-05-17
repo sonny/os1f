@@ -20,6 +20,7 @@ void os_start(void)
 
 #ifdef SYSTIMER_ENABLE
 	systimer_init();
+	systimer_enable();
 #endif
 
 	HAL_NVIC_SetPriority(PendSV_IRQn, 15, 0);
@@ -52,10 +53,6 @@ void assert_os_started(void)
 
 static void os_services_start(void)
 {
-
-#ifdef SYSTIMER_ENABLE
-	systimer_enable();
-#endif
 
 #ifdef WATCHDOG_ENABLE
 	watchdog_init();
