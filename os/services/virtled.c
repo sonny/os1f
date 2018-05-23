@@ -113,7 +113,7 @@ static void virtled_draw(int i)
 		txtcolor = virtleds[i].color;
 	}
 
-	if (spinlock_try_lock(lcd_lock))
+	if (mutex_lock_try(lcd_mutex))
 	{
 		BSP_LCD_SetTextColor(ledcolor);
 		BSP_LCD_FillRect(xpos, ypos, w, h);
@@ -121,7 +121,7 @@ static void virtled_draw(int i)
 		BSP_LCD_SetBackColor(ledcolor);
 		BSP_LCD_DisplayChar(cxpos, cypos, c);
 		BSP_LCD_SetBackColor(bgcolor);
-		spinlock_unlock(lcd_lock);
+		mutex_unlock(lcd_mutex);
 	}
 
 }

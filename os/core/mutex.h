@@ -20,11 +20,12 @@ void mutex_init(mutex_t* m) {
 static inline
 void mutex_lock(mutex_t *m) {
 	int tid = get_current_task_id();
+	uint32_t lock_id = (tid << 2) | 0xffff;
 
-	if (spinlock_locked_as(&m->lock, tid)) {
+	if (spinlock_locked_as(&m->lock, lock_id)) {
 		m->depth++;
 	} else {
-		while (!spinlock_try_lock_value(&m->lock, tid)) {
+		while (!spinlock_try_lock_value(&m->lock, lock_id)) {
 			event_wait(&m->tasks);
 		}
 	}
@@ -33,14 +34,19 @@ void mutex_lock(mutex_t *m) {
 }
 
 static inline
-int mutex_lock_try(mutex_t *m) {
-	int tid = get_current_task_id();
+bool mutex_lock_try(mutex_t *m) {
+	uint32_t lock_id = 0xffffffff;
 
-	if (spinlock_locked_as(&m->lock, tid)) {
+	if (__get_IPSR() == 0) { // not in ISR
+		int tid = get_current_task_id();
+		lock_id = (tid << 2) | 0xffff;
+	}
+
+	if (spinlock_locked_as(&m->lock, lock_id)) {
 		m->depth++;
-		return 1;
+		return true;
 	} else
-		return spinlock_try_lock_value(&m->lock, tid);
+		return spinlock_try_lock_value(&m->lock, lock_id);
 
 }
 

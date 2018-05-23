@@ -6,9 +6,8 @@
 #include "os_printf.h"
 #include "memory.h"
 
-//mutex_t screen_lock = MUTEX_STATIC_INIT(screen_lock);
-static spinlock_t __lcd_lock = SPINLOCK_UNLOCKED;
-spinlock_t * const lcd_lock = &__lcd_lock;
+static mutex_t __lcd_mutex = MUTEX_STATIC_INIT(__lcd_mutex);
+mutex_t * lcd_mutex = &__lcd_mutex;
 
 void lcdInit(void) {
 	/* LCD Initialization */
@@ -39,13 +38,11 @@ int lcd_vprintf_line(int line, const char *fmt, va_list args)
 	uint8_t * buffer = malloc(STDIO_BUFFER_SIZE);
 	int len = os_vsniprintf((char*)buffer, STDIO_BUFFER_SIZE, fmt, args);
 
-	//mutex_lock(&screen_lock);
-	spinlock_lock(lcd_lock);
+	mutex_lock(lcd_mutex);
 	BSP_LCD_SetTextColor(LCD_TEXT_COLOR);
 	BSP_LCD_ClearStringLine(line);
 	BSP_LCD_DisplayStringAtLine(line, buffer);
-	//mutex_unlock(&screen_lock);
-	spinlock_unlock(lcd_lock);
+	mutex_unlock(lcd_mutex);
 
 	os_free(buffer);
 	return len;
@@ -55,11 +52,9 @@ int lcd_vprintf_at(int xpos, int ypos, const char *fmt, va_list args) {
 	uint8_t * buffer = malloc(STDIO_BUFFER_SIZE);
 	int len = os_vsniprintf((char*)buffer, STDIO_BUFFER_SIZE, fmt, args);
 
-	//mutex_lock(&screen_lock);
-	spinlock_lock(lcd_lock);
+	mutex_lock(lcd_mutex);
 	BSP_LCD_DisplayStringAt(xpos, ypos, buffer, LEFT_MODE);
-	//mutex_unlock(&screen_lock);
-	spinlock_unlock(lcd_lock);
+	mutex_unlock(lcd_mutex);
 
 	free(buffer);
 	return len;
