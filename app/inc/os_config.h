@@ -11,8 +11,8 @@
 //#define DISPLAY_LCD
 #define DISPLAY_SERIAL
 
-//#define VCP_BAUD 1000000
-#define VCP_BAUD 38400
+#define VCP_BAUD 460800
+//#define VCP_BAUD 38400
 
 /* enable/disable services */
 #define WATCHDOG_ENABLE

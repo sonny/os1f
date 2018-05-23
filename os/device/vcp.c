@@ -1,10 +1,4 @@
-#include "board.h"
-#include "event.h"
-#include "mutex.h"
-#include "os_printf.h"
-#include "ring_buffer.h"
-#include <ctype.h>
-#include "vcp.h"
+#include "os.h"
 
 static UART_HandleTypeDef VCPHandle;
 static event_t vcp_tx_complete = EVENT_STATIC_INIT(vcp_tx_complete);
