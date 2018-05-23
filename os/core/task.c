@@ -13,7 +13,7 @@
 
 
 static void task_end(void);
-static TASK_STATIC_CREATE(main_task, "Main", MAIN_STACK_SIZE, 0);
+static TASK_STATIC_CREATE(main_task, "Main", MAIN_STACK_SIZE, 0, DEFAULT_TASK_PRIORITY);
 
 static task_t * task_alloc(int stack_size)
 {
@@ -26,10 +26,10 @@ static task_t * task_alloc(int stack_size)
 	return t;
 }
 
-static task_t * task_init(task_t *t, const char * name)
+static task_t * task_init(task_t *t, const char * name, task_priority_e priority)
 {
 	*(uint32_t*) &t->signature = TASK_SIGNATURE;
-	t->priority = DEFAULT_TASK_PRIORITY;
+	t->priority = priority;
 	t->state = TASK_INACTIVE;
 	t->name = name;
 	t->exc_return = 0xfffffffd;
@@ -50,17 +50,32 @@ task_t * task_frame_init(task_t *t, void (*func)(void*), const void *ctx)
   return t;
 }
 
-static task_t * task_create(void (*func)(void*), int stack_size, const void *ctx, const char * name)
+static task_t * task_create(void (*func)(void*),
+		                    int stack_size,
+							const void *ctx,
+							const char * name,
+							task_priority_e priority)
 {
 	task_t * t = task_alloc(stack_size);
-	task_init(t, name);
+	task_init(t, name, priority);
 	task_frame_init(t, func, ctx);
 	return t;
 }
 
-task_t * task_create_schedule(void (*func)(void*), int stack_size, void *ctx, const char * name)
+task_t * task_new_default(task_call func, void *ctx, const char * name)
 {
-	task_t * task = task_create(func, stack_size, ctx, name);
+	task_t * task = task_new(func, DEFAULT_STACK_SIZE, ctx, name, DEFAULT_TASK_PRIORITY);
+	return task;
+}
+
+
+task_t * task_new(task_call func,
+		          int stack_size,
+				  void *ctx,
+				  const char * name,
+				  task_priority_e priority)
+{
+	task_t * task = task_create(func, stack_size, ctx, name, priority);
 	task->state = TASK_READY;
 	service_call((svcall_t)task_control_add, task, true);
 	service_call((svcall_t)scheduler_reschedule_task, task, true);

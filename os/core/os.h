@@ -43,6 +43,7 @@
 /* diag header files */
 #include "assertions.h"
 #include "Trace.h"
+#include "backtrace.h"
 
 /* util header files */
 #include "os_printf.h"
@@ -59,6 +60,8 @@
 #ifdef WATCHDOG_ENABLE
 #include "watchdog.h"
 #endif /* WATCHDOG_ENABLE */
+
+#include "board.h"
 
 /* HAL header files */
 #ifdef __GNUC__

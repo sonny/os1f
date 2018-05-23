@@ -32,12 +32,13 @@ int main(void) {
 	// switch modes and make main a normal user task
 	os_start();
 
-	task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*) &fdata[2], fdata[2].name);
-	task_create_schedule(task_func, DEFAULT_STACK_SIZE, (void*) &fdata[3], fdata[3].name);
-	/* //  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 0"); */
-	/* //  task_create_schedule(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 1"); */
+	task_new_default(task_func, &fdata[2], fdata[2].name);
+	task_new_default(task_func, &fdata[3], fdata[3].name);
 
-	task_create_schedule(task_lcd_led, DEFAULT_STACK_SIZE, (void*) NULL, "LED LCD");
+	task_new(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 0", TASK_PRI_LOW);
+	task_new(task_greedy, DEFAULT_STACK_SIZE, NULL, "Greedy 1", TASK_PRI_LOW);
+
+	task_new_default(task_lcd_led, NULL, "LED LCD");
 
 	systimer_create_exec(1000, (timer_callback)virtled_toggle, (void*)VLED0);
 	systimer_create_exec(500, (timer_callback)virtled_toggle, (void*)VLED1);
@@ -47,19 +48,18 @@ int main(void) {
 	systimer_create_exec(32, (timer_callback)virtled_toggle, (void*)VLED5);
 
 
-	task_create_schedule(adc_task, 512, NULL, "ADC");
+	task_new(adc_task, 512, NULL, "ADC", DEFAULT_TASK_PRIORITY);
         
 	display_system_clock();
 	if (RCC->CSR & RCC_CSR_IWDGRSTF) {
 		// Watchdog reset occurred
-		lcd_printf_line(10, "Watchdog reset occurred.");
+		lcd_printf_line(16, "Watchdog reset occurred.");
 		__HAL_RCC_CLEAR_RESET_FLAGS();
 	}
 	else {
 		// Watchdog reset did not occur
-		lcd_printf_line(10, "Watchdog reset DID NOT occur.");
+		lcd_printf_line(16, "Watchdog reset DID NOT occur.");
 	}
-
 
 	int tid = get_current_task_id();
 
@@ -75,7 +75,7 @@ int main(void) {
 		lcd_printf_line(tid, "[%d] Main Task Runtime - %d:%d:%d:%d", tid, rt_hours, rt_mins, rt_secs, rt_msecs);
 		//lcd_printf_line(1, "Counters [%d] [%d] [%d] [%d]", counters[0], counters[1], counters[2], counters[3]);
 
-		task_t * tonce = task_create_schedule(task_once, DEFAULT_STACK_SIZE, NULL, "Once");
+		task_t * tonce = task_new_default(task_once, NULL, "Once");
 		task_join(tonce);
 
 		task_delay(500);
@@ -124,12 +124,13 @@ void task_once(void *context) {
 static void task_greedy(void *ctx) {
 	(void) ctx;
 	volatile int k = 0;
+	const int greedy_div = 10000000;
 	int tid = get_current_task_id();
 
 	while (1) {
 		++k;
-		if ((k % 10000000) == 0) {
-			lcd_printf_line(tid, "[%d] Simple Greedy counter [%d]", tid, k);
+		if ((k % greedy_div) == 0) {
+			lcd_printf_line(tid, "[%d] Simple Greedy counter [%d]", tid, k/greedy_div);
 		}
 	}
 }

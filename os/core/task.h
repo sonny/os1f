@@ -11,7 +11,8 @@
 void task_main_hoist(void);
 
 task_t * task_frame_init(task_t *, void (*)(void*), const void *);
-task_t * task_create_schedule(void (*)(void*), int, void*, const char*);
+task_t * task_new_default(task_call, void *, const char *);
+task_t * task_new(task_call, int, void *, const char *, task_priority_e);
 
 void task_free(task_t * t);
 void task_join(task_t * t);

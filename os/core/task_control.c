@@ -13,7 +13,7 @@
 #include "scheduler.h"
 #include "task.h"
 
-static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID);
+static TASK_STATIC_CREATE(idle_task, "Idle", IDLE_STACK_SIZE, IDLE_TASK_ID, TASK_PRI_IDLE);
 
 static task_t *TCB[MAX_TASK_COUNT] = {0};
 

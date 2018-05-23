@@ -14,6 +14,8 @@
 
 #define TASK_SIGNATURE  0xdeadbeef
 
+typedef void (*task_call)(void*);
+
 typedef enum {
 	TASK_INACTIVE,
 	TASK_ACTIVE,
@@ -23,6 +25,7 @@ typedef enum {
 } task_state_e;
 
 typedef enum {
+	TASK_PRI_IDLE,
 	TASK_PRI_LOWEST = 2,
 	TASK_PRI_LOW = -1,
 	TASK_PRI_MEDIUM = 0,
@@ -127,14 +130,14 @@ extern task_t * get_current_task(void);
     uint8_t stack[size] __attribute((aligned(8)));      \
   } name
 
-#define TASK_STATIC_INIT(_name, _name_str, _id) {            \
+#define TASK_STATIC_INIT(_name, _name_str, _id, _pri) {            \
     { .node = LIST_STATIC_INIT(_name.task.node),             \
 	  .signature = TASK_SIGNATURE, \
       .name = _name_str,                                   \
       .sp = &_name.stack[0] + sizeof(_name.stack),         \
       .stack_top = &_name.stack[0] + sizeof(_name.stack),  \
       .id = _id,                                           \
-	  .priority = DEFAULT_TASK_PRIORITY, \
+	  .priority = _pri, \
 	  .state = TASK_READY,                                \
 	  .lasttime = 0, \
 	  .runtime = 0, \
@@ -142,7 +145,7 @@ extern task_t * get_current_task(void);
       .exc_return = 0xfffffffd }, {0}                      \
   }
 
-#define TASK_STATIC_CREATE(name, name_str, size, id) \
-  TASK_STATIC_ALLOCATE(name, size) = TASK_STATIC_INIT(name, name_str, id)
+#define TASK_STATIC_CREATE(name, name_str, size, id, pri) \
+  TASK_STATIC_ALLOCATE(name, size) = TASK_STATIC_INIT(name, name_str, id, pri)
 
 #endif /* OS_CORE_TYPES_TASK_TYPE_H_ */
