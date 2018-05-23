@@ -1,15 +1,5 @@
-#include "defs.h"
-#include "task.h"
-#include "os_printf.h"
-#include "display.h"
-#include "service.h"
-#include "systimer.h"
-#include <ctype.h>
-#include <string.h>
-#include "memory.h"
 #include <errno.h>
-#include "backtrace.h"
-#include "task_control.h"
+#include "os.h"
 
 typedef void (*cmd_t)(void);
 
@@ -55,7 +45,9 @@ static shell_cmd_t commands[] = {
 static int command_count = sizeof(commands) / sizeof(shell_cmd_t);
 
 void shell_init(void) {
-	task_create_schedule(shell_task, SHELL_STACK_SIZE, NULL, "Shell");
+	task_t * task = task_new(shell_task, SHELL_STACK_SIZE, NULL, "Shell", TASK_PRI_HIGH);
+	lcd_printf_line(task->id, "Shell - /dev/ttyACM0 %d 8 N 1", VCP_BAUD);
+
 }
 
 static void shell_task(void * cxt) {
@@ -65,13 +57,17 @@ static void shell_task(void * cxt) {
 		os_iprintf("\r\nshell> ");
 		int len = os_gets(shell_buffer, SHELL_IO_SIZE);
 		if (len < 0) {
-			if (len == CONTROL_C)
+			//if (len == CONTROL_C)
 				continue;
 		}
+		uint64_t cmd_start = usec_time();
 		shell_buffer[len] = '\0';
 		shell_parse_cmd(len);
 
 		shell_process_cmd();
+
+		uint32_t usec = usec_time() - cmd_start;
+		os_iprintf("CMD processing time: %dus.\r\n", usec);
 	}
 }
 
